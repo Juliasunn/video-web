@@ -1,0 +1,42 @@
+# Download and unpack sources
+wget -O opencv.zip https://github.com/opencv/opencv/archive/4.x.zip
+unzip opencv.zip
+# Create build directory
+mkdir -p build && cd build
+# Configure
+cmake  ../opencv-4.x
+--   Video I/O:
+--     DC1394:                      NO
+--     FFMPEG:                      YES
+--       avcodec:                   YES (58.54.100)
+--       avformat:                  YES (58.29.100)
+--       avutil:                    YES (56.31.100)
+--       swscale:                   YES (5.5.100)
+--       avresample:                NO
+--     GStreamer:                   NO
+--     v4l/v4l2:                    YES (linux/videodev2.h)
+
+# Build
+cmake --build .
+
+After successful build you will find libraries in the build/lib directory and executables (test, samples, apps) in the build/bin directory
+CMake package files will be located in the build root: OpenCVConfig*.cmake OpenCVModules.cmake
+
+#Include to CMake project:
+#Потреовалось добавить в переменную CMAKE_PREFIX_PATH путь, где лежал файл OpenCVConfig.cmake 
+list(APPEND CMAKE_PREFIX_PATH "/home/julia/opencv_library/build")
+
+find_package(OpenCV REQUIRED) #The command searches for a file called <PackageName>Config.cmake or <lowercasePackageName>-config.cmake 
+include_directories(${OpenCV_INCLUDE_DIRS})
+
+target_link_libraries(<project> ${OpenCV_LIBS})
+
+Для работы с видео нужно установить в систему нужные кодеки из ffmpeg:
+sudo apt install pkg-config     
+sudo apt install ffmpeg libavformat-dev libavcodec-dev libswscale-dev 
+sudo apt install ffmpeg
+
+"OpenCV looks for ffmpeg by checking its .pc files (used for pkg-config).
+If you installed ffmpeg using package manager (e.g. apt on Ubuntu)
+and did not install pkg-config, try 'sudo apt install pkg-config'
+and reinstall ffmepg 'sudo apt install ffmpeg'."

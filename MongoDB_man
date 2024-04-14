@@ -1,0 +1,28 @@
+_Download the latest version of the mongocxx driver_
+
+curl -OL https://github.com/mongodb/mongo-cxx-driver/releases/download/r3.10.0/mongo-cxx-driver-r3.10.0.tar.gz
+tar -xzf mongo-cxx-driver-r3.10.0.tar.gz
+cd mongo-cxx-driver-r3.10.0/build
+
+_Configure the driver_
+
+cmake ..                                \
+>     -DCMAKE_BUILD_TYPE=Release          \
+>     -DMONGOCXX_OVERRIDE_DEFAULT_INSTALL_PREFIX=OFF \
+>     -DCMAKE_CXX_STANDARD=17 \
+>     -DENABLE_BSONCXX_POLY_USE_IMPLS=ON \
+>     -DBSONCXX_POLY_USE_IMPLS=ON
+
+
+Скачать Commutity Edition mongodb server
+
+sudo dpkg -i mongodb-org-server_7.0.6_amd64.deb
+
+sudo systemctl start mongod
+
+(Optional) Скачать mongodb-shell
+
+sudo dpkg -i mongodb-mongosh_2.1.5_amd64.deb
+
+mongosh
+

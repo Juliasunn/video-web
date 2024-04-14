@@ -1,0 +1,71 @@
+<html class="h-100">
+  <head>
+    <title>Page title</title>
+    <link rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css"
+      integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4"
+      crossorigin="anonymous">
+      <style>
+        header {
+          background-color: lightblue;
+          height: 50px;
+        }
+        main {
+          background-color: lightgray;
+        }
+        footer {
+          height: 50px;
+        }
+      </style>
+  </head>
+  <body class="h-100 d-flex flex-column">
+  
+    <header>
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <div class="container-fluid">
+                    <a class="navbar-brand text-warning" href="#">Videos34</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" href="#genral" id="genral">Genral</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" href="#user" id="user"> My videos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#upload" id="upload">Upload video</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" href="#account" id="account">Account</a>
+                            </li>
+                        </ul>
+
+                    </div>
+                </div>
+            </nav>
+    </header>
+    
+    
+    
+    <main class="flex-fill" id="pageContent">
+    <iframe id="iframe" class="w-100 h-100 "> </iframe>
+
+    </main>
+    
+    
+    <footer>
+	<nav class="navbar navbar-expand-lg navbar-dark bg-dark h-100">
+		<div class="container-fluid m-0 p-0">
+			<h5 class="text-white me-auto ms-auto">Code<span class="text-warning">Logic</span></h5>
+		</div>
+	</nav>
+    </footer>
+    
+    <script src="container.js"></script>    
+  </body>
+</html>
