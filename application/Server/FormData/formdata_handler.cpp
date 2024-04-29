@@ -186,7 +186,8 @@ void formdata_handler::readHandler(std::shared_ptr<http_session> session,
             boost::bind(&formdata_handler::readHandler, this, session, _1));
     } else {
         handle_form_complete();
-        session->write(form_response());            
+        session->write(form_response());
+        session->finish();             
     }
 }
 

@@ -9,7 +9,7 @@
 #include <FormData/formdata_handler.h>
 #include <net_defs.h>
 
-#include "diskStorage.h"
+#include "DiskStorage/diskStorage.h"
 
 
 namespace ns_video {

@@ -83,6 +83,8 @@ private:
         read();
     }
 
+    void finishPriv();
+
     beast::tcp_stream socket_stream_;
     boost::asio::io_context::strand socket_io_;
     boost::recursive_mutex mutex_;

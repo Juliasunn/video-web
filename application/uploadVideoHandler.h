@@ -11,12 +11,9 @@ public:
         return std::make_unique<UploadVideoHandler>(m_previewCreator, m_mpegStorage);
     } 
 
-    UploadVideoHandler(std::shared_ptr<VideoProcessor> processor, std::shared_ptr<DiskStorage> mpegStorage);
+    UploadVideoHandler(std::shared_ptr<VideoProcessor> processor, DiskStoragePtr mpegStorage);
     
     virtual ~UploadVideoHandler() = default; 
-
-
-    void process_request(std::shared_ptr<http_session> session ) override;
 protected:
 
     virtual void handle_file(const char *data,
@@ -26,5 +23,5 @@ protected:
     virtual void handle_form_complete() override;  
 private:
     std::shared_ptr<VideoProcessor> m_previewCreator;
-    std::shared_ptr<DiskStorage> m_mpegStorage;
+    DiskStoragePtr m_mpegStorage;
 };

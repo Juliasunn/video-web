@@ -9,7 +9,7 @@
 #include <FormData/formdata_handler.h>
 #include <net_defs.h>
 
-#include "diskStorage.h"
+#include "DiskStorage/diskStorage.h"
 
 
 namespace ns_user {
@@ -25,9 +25,10 @@ public:
 
     std::string getName() const;
     std::string getAbout() const;
-    Url getAvatarImgUrl() const;
+    disk_storage::Url getAvatarImgUrl() const;
 
     std::string getMail() const;
+    std::string getPhone() const;
     std::string getPassword() const;    
 
     void setUuid(const boost::uuids::uuid &);
@@ -35,9 +36,10 @@ public:
 
     void setName(const std::string &);
     void setAbout(const std::string &);
-    void setAvatarImgUrl(const Url &);;
+    void setAvatarImgUrl(const disk_storage::Url &);;
 
     void setMail(const std::string &);
+    void setPhone(const std::string &);
     void setPassword(const std::string &);
 
 private:
@@ -49,6 +51,7 @@ private:
     std::string m_avatarImgUrl;
 
     std::string m_mail;
+    std::string m_phone;
     std::string m_password;
 
 
@@ -69,9 +72,9 @@ void tag_invoke(boost::json::value_from_tag, boost::json::value &jv, User const 
 
 class FormUserBuilder {
     User m_user;
-    const Url defaultAvatarUrl = "/img/no_avatar.jpg"; 
+    const disk_storage::Url defaultAvatarUrl = "/avatar/basic.jpg"; 
 public:
-    void build(multipart::FormData &form, std::shared_ptr<DiskStorage> mpegStorage);
+    void build(multipart::FormData &form);
     User release();
 };
 

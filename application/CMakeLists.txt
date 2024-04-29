@@ -47,6 +47,8 @@ include_directories(AuthorizationService/jwt-cpp)
 add_executable(HttpLiveStreaming main.cpp
     video.cpp
     video.h
+    user.cpp
+    user.h
     mediaProcessor.cpp
     mediaProcessor.h
     documentStorage.cpp
@@ -60,15 +62,20 @@ add_executable(HttpLiveStreaming main.cpp
     pageHandler.cpp  
     pageHandler.h      
     
-    diskStorage.cpp 
-    diskStorage.h
+    DiskStorage/diskStorage.cpp 
+    DiskStorage/diskStorage.h
+    DiskStorage/error.h
 
     AuthorizationService/utils.h
     AuthorizationService/authorizationProvider.cpp
     AuthorizationService/authorizationProvider.h
-    authorizationHandler.cpp
-    authorizationHandler.h 
-    
+    AuthorizationService/cookie.cpp
+    AuthorizationService/cookie.h
+    loginHandler.cpp
+    loginHandler.h 
+    registrationHandler.cpp
+    registrationHandler.h 
+
     authorizationDecorator.cpp
     authorizationDecorator.h         
 )

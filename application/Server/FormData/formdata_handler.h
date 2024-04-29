@@ -50,11 +50,12 @@ protected:
 
     virtual void handle_element_complete(multipart::FormDataElement &form_element);
 
-    virtual void handle_form_complete();     
+    virtual void handle_form_complete();
+
+    virtual http::response<http::empty_body> form_response() const;     
 
 private:
 
-    http::response<http::empty_body> form_response() const;
     void readHandler( std::shared_ptr<http_session> session, shared_buffer readBuff);
 
 protected:

@@ -23,19 +23,8 @@ void saveToDb(const ns_video::Video &videoObj) {
 }
 
 UploadVideoHandler::UploadVideoHandler(std::shared_ptr<VideoProcessor> processor,
-  std::shared_ptr<DiskStorage> mpegStorage) :
+  DiskStoragePtr mpegStorage) :
   m_previewCreator(processor), m_mpegStorage(mpegStorage) {}
-
-void UploadVideoHandler::process_request(std::shared_ptr<http_session> session ) {
-    
-  //  if (!AuthorizationProvider<JWTToken>::instance()->getPolicy("UploadVideoAction", 
-  //        m_request.base().count(http::field::cookie))) {
-   //     result.status(http::status::forbidden);
-  //  }
-  //  else {
-        formdata_handler::process_request(session );
-   // }
-}
 
 void UploadVideoHandler::handle_form_complete() {
     std::cout << "[DEBUG] Form complete with " << m_form.size() << " elements." << std::endl;
@@ -44,7 +33,7 @@ void UploadVideoHandler::handle_form_complete() {
     builder.build(m_form);
     Video videoObj = builder.release();
 
-    Url previewImgUrl = m_previewCreator->process(videoObj.getVideoUrl(), m_mpegStorage);
+    disk_storage::Url previewImgUrl = m_previewCreator->process(videoObj.getVideoUrl(), m_mpegStorage);
     videoObj.setPreviewImgUrl(previewImgUrl);
 
     std::cout << "[DEBUG]: UUID = " << videoObj.getUuid() << std::endl;
@@ -58,7 +47,8 @@ void UploadVideoHandler::handle_file(const char *data,
     FormDataElement &form_element) const { 
     //Generate unique filename
     if (!form_element.storeFilePath) {
-        form_element.storeFilePath = m_mpegStorage->createFileWithExtension(form_element.fileName.value());
+        auto srcExtension = std::filesystem::path(form_element.fileName.value()).extension();
+        form_element.storeFilePath = m_mpegStorage->createFile(srcExtension);
     }
     auto fileUrl = form_element.storeFilePath.value();
     

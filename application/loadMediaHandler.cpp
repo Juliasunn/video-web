@@ -11,7 +11,7 @@
 #include <http_session.h>
 
 #include "documentStorage.h"
-#include "diskStorage.h"
+#include "DiskStorage/diskStorage.h"
 
 using namespace ns_server;
 
@@ -23,7 +23,7 @@ const std::string m_rangesName = "bytes";
 }
 
 
-bool MediaRequestHandler::setPayload(http::response<http::string_body> &res, const Url &fileUrl) {
+bool MediaRequestHandler::setPayload(http::response<http::string_body> &res, const disk_storage::Url &fileUrl) {
     if (!m_request.base().count(http::field::range)) {
         std::cout << "Error, no range header " << std::endl;
         res.result(http::status::bad_request);

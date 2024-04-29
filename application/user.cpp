@@ -2,7 +2,7 @@
 
 #include <filesystem>
 
-#include <boost/json/src.hpp>
+//#include <boost/json/src.hpp>
 #include <boost/uuid/uuid_io.hpp>         // streaming operators etc.
 #include <boost/lexical_cast.hpp>
 
@@ -15,6 +15,7 @@ using namespace boost::json;
 using namespace boost::uuids;
 
 
+namespace {
 template<class T>
 void extract(const object &obj, T &t, string_view key)
 {
@@ -26,6 +27,7 @@ void extract<uuid>(const object &obj, uuid &t, string_view key)
 {
     auto uuidStr = value_to<std::string>( obj.at( key ) );
     t =  boost::lexical_cast<uuid>(uuidStr);
+}
 }
 
 
@@ -48,6 +50,7 @@ void ns_user::tag_invoke(value_from_tag, value &jv, const User &userObj)
            {"about", userObj.getAbout()},
            {"avatarImgUrl", userObj.getAvatarImgUrl()},
            {"mail", userObj.getMail()},
+           {"phone", userObj.getPhone()},
            {"password", userObj.getPassword()}
          };
 }
@@ -64,13 +67,18 @@ std::string User::getAbout() const {
     return m_about;
 }
 
-Url User::getAvatarImgUrl() const {
+disk_storage::Url User::getAvatarImgUrl() const {
     return m_avatarImgUrl;
 }
 
 std::string User::getMail() const {
     return m_mail;
 }
+
+std::string User::getPhone() const {
+    return m_phone;
+}
+
 std::string User::getPassword() const {
     return m_password;
 }   
@@ -87,12 +95,16 @@ void User::setAbout(const std::string &about) {
     m_about = about;
 
 }
-void User::setAvatarImgUrl(const Url &avatarImgUrl) {
+void User::setAvatarImgUrl(const disk_storage::Url &avatarImgUrl) {
     m_avatarImgUrl = avatarImgUrl;
 }
 
 void User::setMail(const std::string &mail) {
     m_mail = mail;
+}
+
+void User::setPhone(const std::string &phone) {
+    m_phone = phone;
 }
 
 void User::setPassword(const std::string &pswrd) {
@@ -110,25 +122,36 @@ uuid generateUuid() {
 
 }
 
-void FormUserBuilder::build(multipart::FormData &form, std::shared_ptr<DiskStorage> mpegFileStorage) {
+void FormUserBuilder::build(multipart::FormData &form) {
     m_user.setUuid(generateUuid());
 
-    auto nameForm = form["name"].text;
-    auto pswForm = form["password"].text;
-    auto aboutForm = form["about"].text;
-
-    auto avatarFormFile = form["avatar"].storeFilePath;
-    auto mailForm = form["mail"].text;
+    auto nameForm = form["inputLogin"].text;
+    std::cout << nameForm.value() << std::endl;
+    auto phoneForm = form["inputPhone"].text;
+    std::cout << phoneForm.value() << std::endl;
+    auto mailForm = form["inputMail"].text;
+    std::cout << mailForm.value() << std::endl;
+    auto pswForm = form["inputPassword"].text;
+    std::cout << pswForm.value() << std::endl;
+    auto aboutForm = form["inputAbout"].text;
+    std::cout << aboutForm.value() << std::endl;
+    auto avatarFileUrl = form["inputFile"].storeFilePath;
+   // std::cout << avatarFileUrl.value() << std::endl;
 
     m_user.setName(nameForm.value());
     m_user.setPassword(pswForm.value());
-    m_user.setAbout(aboutForm.value());  
-    m_user.setMail(mailForm.value());      
-    Url avatarUrl = defaultAvatarUrl;
-    if (avatarFormFile) {
-         avatarUrl = mpegFileStorage->getUrl(avatarFormFile.value());
+    m_user.setAbout(aboutForm.value());
+    m_user.setPhone(phoneForm.value());  
+    m_user.setMail(mailForm.value());
+
+ //  std::cout << nameForm.value() << " " << phoneForm.value() << " " <<  mailForm.value() << " " << aboutForm.value() << " " <<  pswForm.value()
+  //   << " " << avatarFileUrl.value() << std::endl;
+    
+    if (avatarFileUrl) {
+         m_user.setAvatarImgUrl(avatarFileUrl.value());
+    } else {
+        m_user.setAvatarImgUrl(defaultAvatarUrl);
     }
-    m_user.setAvatarImgUrl(avatarUrl);
 }
 
 User FormUserBuilder::release() {

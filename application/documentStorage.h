@@ -24,6 +24,9 @@ public:
     std::vector<boost::json::value> getVideo() const;
     std::optional<boost::json::value> getVideo(const boost::uuids::uuid &uuid) const;
 
+    std::optional<boost::json::value> getUser(const boost::uuids::uuid &uuid) const;
+    std::string addUser(const boost::json::value &user);
+
   //  std::optional<boost::json::value> getUser(const boost::uuids::uuid &uuid) const; 
  
    // std::optional<boost::json::value> getSubject(const boost::uuids::uuid &uuid) const;

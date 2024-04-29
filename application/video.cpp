@@ -14,7 +14,7 @@ using namespace ns_video;
 using namespace boost::json;
 using namespace boost::uuids;
 
-
+namespace {
 template<class T>
 void extract(const object &obj, T &t, string_view key)
 {
@@ -26,6 +26,7 @@ void extract<uuid>(const object &obj, uuid &t, string_view key)
 {
     auto uuidStr = value_to<std::string>( obj.at( key ) );
     t =  boost::lexical_cast<uuid>(uuidStr);
+}
 }
 
 Video ns_video::tag_invoke(value_to_tag<Video>, const value &jv) {

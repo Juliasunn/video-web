@@ -1,16 +1,15 @@
 #include "authorizationDecorator.h"
 
-#include <regex>
 #include <fstream>
 
 #include <boost/json.hpp>
-#include <boost/uuid/uuid_io.hpp>         // streaming operators etc.
 #include <boost/lexical_cast.hpp>
-#include <boost/format.hpp>
 
 #include <http_session.h>
 
 #include "documentStorage.h"
+#include "AuthorizationService/authorizationProvider.h"
+#include "AuthorizationService/cookie.h"
 
 using namespace ns_server;
 
@@ -89,19 +88,16 @@ void BaseAuthorizationDecorator::process_request(std::shared_ptr<http_session> s
     } else {
       //  auto cookie = m_request.base()[http::field::cookie];
        // std::cout << "Cookie: "<< cookie  << std::endl;
-        Cookie requestCookie; 
-        requestCookie.parse(m_request.base()[http::field::cookie].data());
+        Cookie requestCookie(CookieParser::parse(m_request.base()[http::field::cookie].data())); 
 
-        auto tokenAttr = requestCookie["token"];
-        subjectClaims = tokenAttr ? IProvider->getClaims(tokenAttr.value) : IProvider->getClaims();      
+        if (requestCookie.name() == "token") {
+            subjectClaims = IProvider->getClaims(requestCookie.value());
+        } else {
+            subjectClaims = IProvider->getClaims();
+        }    
     }
     if (!AuthorizationProvider::instance()->checkPermission(subjectClaims, m_checkPermission)) {
         m_notAuthorizedStrategy->process_request(session, m_request);
-        //http::response<http::empty_body> res;
-        //res.version(m_request.version());
-        //res.keep_alive(m_request.keep_alive());
-        //res.result(http::status::forbidden);
-        //session->write(std::move(res)); 
     }
     else {
         m_handler->request(m_request);

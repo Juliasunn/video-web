@@ -1,4 +1,4 @@
-#include "authorizationProvider.h"
+
 
 
 #include <stdio.h>
@@ -8,9 +8,14 @@
 #include <unordered_set>
 #include <unordered_map>
 
-#include "jwt-cpp/traits/boost-json/traits.h"
+#include <jwt-cpp/jwt.h>
+#include <jwt-cpp/traits/boost-json/traits.h>
+#include <jwt-cpp/traits/boost-json/defaults.h>
 
-//#include <boost/json/src.hpp>
+#include <FormData/formdata_handler.h>
+#include "cookie.h"
+
+#include "authorizationProvider.h"
 
 IdentityProvider *IdentityProvider::m_instance = nullptr;
 AuthorizationProvider *AuthorizationProvider::m_instance = nullptr;
@@ -35,7 +40,7 @@ Identity IdentityProvider::getIdentity(const std::string &login, const std::stri
 };
 
 Claims IdentityProvider::getClaims(Identity identity) const {
-    std::cout << "[DEBUG] IdentityProvider::getClaims" << identity << std::endl;
+    std::cout << "[DEBUG] IdentityProvider::getClaims |" << identity << std::endl;
     auto decoded_token = jwt::decode(identity);
     auto verifier = jwt::verify()
     .with_issuer("auth0")

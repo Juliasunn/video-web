@@ -9,20 +9,20 @@
 
 #include <net_defs.h>
 
-#include "diskStorage.h"
+#include "DiskStorage/diskStorage.h"
 
 namespace ns_server {
   //Each handler belongs to single session
 class MediaRequestHandler : public HttpRequestHandler {
 
 public:
-    MediaRequestHandler(std::shared_ptr<DiskStorage> documentStorage): m_diskStorage(documentStorage) {};
+    MediaRequestHandler(DiskStoragePtr documentStorage): m_diskStorage(documentStorage) {};
     virtual ~MediaRequestHandler() = default;
     virtual std::unique_ptr<BaseHttpRequestHandler> clone() override;
     virtual void process_request(std::shared_ptr<http_session> session) override;
 private:
-    bool setPayload(http::response<http::string_body> &res, const Url &fileUrl);
-    std::shared_ptr<DiskStorage> m_diskStorage; 
+    bool setPayload(http::response<http::string_body> &res, const disk_storage::Url &fileUrl);
+    DiskStoragePtr m_diskStorage; 
 };
 
 }

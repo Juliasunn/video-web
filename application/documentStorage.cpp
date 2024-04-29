@@ -16,33 +16,35 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-//void opendDB() {
-    // Create an instance.
-    //mongocxx::instance inst{};
-    mongocxx::options::client client_options;
-   // auto api = mongocxx::options::server_api{ mongocxx::options::server_api::version::k_version_1 };
-   // client_options.server_api_opts(api);      
-//}
+
+namespace {
+
+std::string addToCollection(mongocxx::collection &collection, const boost::json::value &obj) {
+ // boost::json -> string
+ auto serialized = boost::json::serialize(obj);
+
+  auto insertOneResult = collection.insert_one(bsoncxx::from_json(serialized));
+  if (insertOneResult) {
+    auto oid = insertOneResult.value().inserted_id().get_oid();
+    return oid.value.to_string();
+  }
+  return {};
+}
+
+}
 
 MongoStorage::MongoStorage() : m_client(mongocxx::uri("mongodb://localhost:27017")) {
   //If the database you request does not exist, MongoDB creates it when you first store data.
   m_db = m_client["webvideodb"];
  // m_db["video"].delete_many(bsoncxx::builder::basic::make_document(
   //  bsoncxx::builder::basic::kvp("description", "Architecture of twiter\r")));
-  //deleteAll();
+  deleteAll();
 }
 
 std::string MongoStorage::addVideo(const boost::json::value &video) {
   //If the collection you request does not exist, MongoDB creates it when you first store data.
   auto videoCollection = m_db["video"];
-  auto videoSerialized = boost::json::serialize(video);
-
-  auto insert_one_result = videoCollection.insert_one(bsoncxx::from_json(videoSerialized));
-  if (insert_one_result) {
-    auto oid = insert_one_result.value().inserted_id().get_oid();
-    return oid.value.to_string();
-  }
-  return {};
+  return addToCollection(videoCollection, video);
 }
 
 std::vector<boost::json::value> MongoStorage::getVideo() const {
@@ -74,6 +76,25 @@ std::optional<boost::json::value> MongoStorage::getVideo(const boost::uuids::uui
   return boost::json::parse(jsonStr);
 }
 
+std::string MongoStorage::addUser(const boost::json::value &user) {
+  //If the collection you request does not exist, MongoDB creates it when you first store data.
+  auto userCollection = m_db["user"];
+  return addToCollection(userCollection, user);
+}
+
+std::optional<boost::json::value> MongoStorage::getUser(const boost::uuids::uuid &uuid) const {
+  using namespace bsoncxx::builder::basic;
+  auto userCollection = m_db["user"];
+  //auto filter = kvp("uuid", boost::lexical_cast<std::string>(uuid));
+  auto filtered = userCollection.find_one(make_document(kvp("uuid", boost::uuids::to_string(uuid))));
+
+  if (!filtered) {
+        return std::nullopt;
+  }
+  std::string jsonStr = bsoncxx::to_json(*filtered);
+  return boost::json::parse(jsonStr);
+}
+
 
 std::optional<boost::uuids::uuid> MongoStorage::getSubject(const boost::json::value &providedData) const {
   using namespace bsoncxx::builder::basic;
@@ -92,20 +113,15 @@ std::optional<boost::uuids::uuid> MongoStorage::getSubject(const boost::json::va
 
 std::string MongoStorage::addSubject(const boost::json::value &subjectClaims) const {
   auto subCollection = m_db["subject"];
-  auto claimsSerialized = boost::json::serialize(subjectClaims);
-
-  auto insert_one_result = subCollection.insert_one(bsoncxx::from_json(claimsSerialized));
-  if (insert_one_result) {
-    auto oid = insert_one_result.value().inserted_id().get_oid();
-    return oid.value.to_string();
-  }
-  return {};  
+  return addToCollection(subCollection, subjectClaims);  
 }
 
 void MongoStorage::deleteAll() {
   using namespace bsoncxx::builder::basic;
-  auto videoCollection = m_db["video"];
-  videoCollection.delete_many({});
+ // auto videoCollection = m_db["video"];
+  //videoCollection.delete_many({});
+  auto collection = m_db["user"];
+  collection.delete_many({});
 }
 
 

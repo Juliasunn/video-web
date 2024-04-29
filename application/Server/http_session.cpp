@@ -32,7 +32,7 @@ std::shared_ptr<http_session> http_session::get_shared()
 
 http_session::~http_session()
 {
-    finish();
+   finishPriv();
    std::cout << "[tcp_session] destructor called id: " << boost::this_thread::get_id() << std::endl;
 }
 
@@ -41,21 +41,11 @@ void http_session::start()
     read();
 }
 
+/* Real finish should be called after read/writes operations posted before this call */
 void http_session::finish()
 {
-    boost::lock_guard<boost::recursive_mutex> locker(mutex_);
-    
-    /* only one thread should close socket */
-    if (socket().is_open()) {
-        try{
-            socket().shutdown(tcp::socket::shutdown_send);
-        } catch (...) {
-
-        }
-    }
-    //Cancel all asynchronous operations associated with the socket
-    //and close it. 
-    socket_stream_.close();
+    socket_io_.post(boost::bind(&http_session::finishPriv,
+        get_shared()));    
 }
 
 void http_session::read()
@@ -137,4 +127,20 @@ void http_session::on_read_handler(const boost::system::error_code& ec,
     request_extra_buff_.clear();
     handlers_[req_ep]->set_path_props(req_ep);
     handlers_[req_ep]->process_request(get_shared());
+}
+
+void http_session::finishPriv() {
+    std::cout << "[Session] Finish priv called."<< std::endl;
+    boost::lock_guard<boost::recursive_mutex> locker(mutex_);
+    
+    /* only one thread should close socket */
+    if (!socket().is_open()) {
+        return;
+    }
+    try {
+        socket().shutdown(tcp::socket::shutdown_send);
+        //Cancel all asynchronous operations associated with the socket
+        //and close it. 
+    } catch (...) { }
+    socket_stream_.close();        
 }

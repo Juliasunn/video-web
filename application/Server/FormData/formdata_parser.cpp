@@ -21,13 +21,13 @@ size_t find_body_len(char *data, ssize_t from, ssize_t to) {
         auto sym = data[p];
         if (sym == '-') {
             continue;
-        }
-        else if (sym == '\n' &&  p-1 >= from && data[p-1] == '\r' ){
-            p -= 1;
+        } else if (sym == '\n' ){
+            if (p-1 >= from && data[p-1] == '\r') {
+                p -= 1;
+            }
             break;
-        }
-        else {
-            throw std::runtime_error(std::string("Cant find body end: unknown symbol at: ") + std::to_string(p));
+        } else {
+            throw std::runtime_error("Cant find body end: unknown symbol");
         }
     }
     return p - from + 1;

@@ -1,18 +1,57 @@
 #include "pageHandler.h"
 
+#include <unordered_map>
+
 #include <http_session.h>
 
 using namespace ns_server;
 
+namespace {
+
+enum ContentTypes {
+    Html,
+    Js,
+    Css
+};
+
+static const std::unordered_map<std::string, ContentTypes> externalExtMapping {
+
+    {"", ContentTypes::Html},
+    {".html", ContentTypes::Html},
+    {".js", ContentTypes::Js},
+    {".css", ContentTypes::Css}
+};
+
+static const std::unordered_map<ContentTypes, std::filesystem::path> internalExtMapping {
+    {ContentTypes::Html, ".html"},
+    {ContentTypes::Js, ".js"},
+    {ContentTypes::Css, ".css"}
+};
+
+static const std::unordered_map<ContentTypes, std::string> typesMapping {
+    {ContentTypes::Html,  "text/html"},
+    {ContentTypes::Js, "application/javascript"},
+    {ContentTypes::Css, "text/css"}
+};
+
+}
+
+PageHandler::PageHandler(const std::filesystem::path &rootDirectory) : m_rootDirectory(rootDirectory){ }
+
 std::unique_ptr<BaseHttpRequestHandler> PageHandler::clone() {
-    return std::make_unique<PageHandler>();
+    return std::make_unique<PageHandler>(m_rootDirectory);
 }
 
 void PageHandler::process_request(std::shared_ptr<http_session> session ) {
-    std::string path = "/home/julia/videoserver/web";
-          //  path.append("/");
-    path.append(m_request.target().data(), m_request.target().size());
-           // path.append(".png");
+    std::cout << "Html root directory path: " << m_rootDirectory << std::endl;
+
+    auto contentExtension = std::filesystem::path(m_path_props.path).extension();
+    auto contentType = externalExtMapping.at(contentExtension);
+
+    auto target = std::filesystem::path(m_path_props.path).replace_extension(internalExtMapping.at(contentType)).filename();
+    
+
+    auto path = m_rootDirectory / target;
     std::cout << "Page file path: " << path << std::endl;
 
     beast::error_code ec;
@@ -20,11 +59,11 @@ void PageHandler::process_request(std::shared_ptr<http_session> session ) {
     body.open(path.c_str(), beast::file_mode::scan, ec);
                 // Handle the case where the file doesn't exist
     if(ec == beast::errc::no_such_file_or_directory) {
-        std::cout << "File not found" << std::endl;
+        throw std::runtime_error("File not found");
     }
     // Handle an unknown error
-    else if (ec){
-        std::cout << "Uncknown error" << std::endl;
+    if (ec) {
+        throw std::runtime_error("Uncknown error");
     }
     auto const size = body.size();
 
@@ -35,11 +74,12 @@ void PageHandler::process_request(std::shared_ptr<http_session> session ) {
     std::make_tuple(http::status::ok, m_request.version())};
 
     res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-    res.set(http::field::content_type, "text/html");
+    res.set(http::field::content_type, typesMapping.at(contentType));
     res.content_length(size);
-    res.keep_alive(m_request.keep_alive()); 
+    res.keep_alive(false); 
 
-    session->write(std::move(res));                              
+    session->write(std::move(res));
+    session->finish();                              
 }        
 
 
