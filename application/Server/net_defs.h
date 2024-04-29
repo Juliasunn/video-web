@@ -38,6 +38,7 @@ namespace ns_server {
     typedef std::unordered_map<struct Endpoint, std::shared_ptr<BaseRequestHandler>> request_handlers;
 
 
+
 struct Endpoint {
     std::string method;
     std::string path;
@@ -56,6 +57,8 @@ struct Endpoint {
     Endpoint &operator -- ();
     operator bool () const;
 };
+
+std::map<std::string, std::string> getQueryPrams(const Endpoint &endpoint);
 
     class BaseHttpRequestHandler {
     public:

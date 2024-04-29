@@ -41,6 +41,40 @@ Endpoint &Endpoint::operator -- () {
     return *this;
 }
 
+std::map<std::string, std::string> ns_server::getQueryPrams(const Endpoint &endpoint) {
+    auto queryString = endpoint.path.substr(endpoint.path.find('?') + 1 );
+    std::cout << "queryString = " << queryString << std::endl;
+
+    std::map<std::string, std::string> params;
+    size_t from = 0, to = std::min(queryString.find('&'), queryString.size());
+    while (true) {
+        auto eq_pos = queryString.find('=', from);
+
+        if (eq_pos == std::string::npos) {
+            break;
+        }
+        auto key = queryString.substr(from, eq_pos);
+        auto value = queryString.substr(eq_pos + 1, to);
+        std::cout << "key = " << key << " value = "<< value << std::endl;
+        params[key] = value;
+
+        if (to == queryString.size()) {
+            break;
+        }
+        else {
+            from = to+1,
+            to = std::min(queryString.find('&', from), queryString.size());
+        }
+    }
+
+    for (auto to = queryString.find('&'); to != std::string::npos; from = to+1, to = queryString.find('&', from)) {
+        auto key = queryString.substr(from, queryString.find('=', from));
+        auto value = queryString.substr(queryString.find('=', from)+1, to);
+        std::cout << "key = " << key << " value = "<< value << std::endl;
+    }
+    return params;
+}
+
 
 void UncknownRequestHandler::process_request(std::shared_ptr<http_session> session ){
     http::response<http::empty_body> response;

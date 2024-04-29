@@ -46,9 +46,10 @@ void RegistrationHandler::handle_file(const char *data,
         form_element.storeFilePath = m_avatarStorage->createFile(srcExtension);
     }
     auto fileUrl = form_element.storeFilePath.value();
-    
-    if (!m_avatarStorage->writeToFile(fileUrl, data, len)) {
-        throw std::runtime_error("Cant write to file: "+ fileUrl +".");
+    try {
+        auto bytesWritten = m_avatarStorage->writeToFile(fileUrl, data, len);
+    } catch (const std::exception &e) {
+        std::cout << e.what() << std::endl;
     }
 }
 
@@ -60,6 +61,4 @@ http::response<http::empty_body> RegistrationHandler::form_response() const {
     res.set("Access-Control-Allow-Origin", "*");
     std::cout << "[DEBUG] Registration response: " << res << std::endl; 
     return res;  
-} 
-
-
+}
