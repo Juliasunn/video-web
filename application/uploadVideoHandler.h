@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <net_defs.h>
+#include <endpoint.h>
 #include <FormData/formdata_handler.h>
 
 #include "mediaProcessor.h"

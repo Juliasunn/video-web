@@ -3,9 +3,11 @@
 #include <sstream>
 #include <algorithm>
 
-#include <boost/asio.hpp>
 #include <boost/beast/http/message.hpp>
 #include <boost/optional/optional_io.hpp>
+#include <boost/thread.hpp> //this_thread::id
+#include <boost/asio.hpp> //boost::asio::async_read
+
 
 using namespace ns_server;
 
@@ -14,8 +16,7 @@ http_session::http_session(tcp::socket &socket,
     const HttpRequestHandlers &endpoint_handlers) :
     socket_stream_(std::move(socket)), socket_io_(context) 
 {
-    handlers_[Endpoint{"GET", "_"}] = 
-        std::make_unique<UncknownRequestHandler>();
+
     
     for (const auto &[endpoint, handler_ptr] : endpoint_handlers) {
         if (handlers_.count(endpoint)) {

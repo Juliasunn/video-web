@@ -66,11 +66,9 @@ add_executable(HttpLiveStreaming main.cpp
     DiskStorage/diskStorage.h
     DiskStorage/error.h
 
-    AuthorizationService/utils.h
     AuthorizationService/authorizationProvider.cpp
     AuthorizationService/authorizationProvider.h
-    AuthorizationService/cookie.cpp
-    AuthorizationService/cookie.h
+    notFoundHandler.h
     loginHandler.cpp
     loginHandler.h 
     registrationHandler.cpp

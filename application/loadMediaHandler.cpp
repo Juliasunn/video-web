@@ -8,7 +8,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 
-#include <http_session.h>
+#include <http/http_session.h>
 
 #include "documentStorage.h"
 #include "DiskStorage/diskStorage.h"

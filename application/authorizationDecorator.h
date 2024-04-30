@@ -2,7 +2,8 @@
 #include <string>
 #include <memory>
 
-#include <net_defs.h>
+#include <endpoint.h>
+#include <http/http_handlers.h>
 
 namespace ns_server {
 
@@ -36,7 +37,7 @@ private:
 };
 
 
-class BaseAuthorizationDecorator : public HttpRequestHandler {
+class BaseAuthorizationDecorator : public BaseHttpRequestHandler {
 public:
 
     BaseAuthorizationDecorator(const std::string &checkPermission,

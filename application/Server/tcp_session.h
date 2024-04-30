@@ -1,22 +1,28 @@
-#ifndef TCP_SESSION_H
-#define TCP_SESSION_H
+#pragma once
 
+#include <boost/asio/io_context_strand.hpp>
+#include <boost/thread/recursive_mutex.hpp>
+
+#include "base_session.h"
 #include "Buffers/buffers.h"
-#include "net_defs.h"
+#include "endpoint.h"
+
+using tcp = boost::asio::ip::tcp;
+
+namespace ns_server {
+ 
+typedef std::string ResponseType;
+     
+class BaseRequestHandler {      
+public:
+    virtual ~BaseRequestHandler() = default;   
+    virtual ResponseType processRequest(const std::string &requestBody) = 0;
+};
+
+typedef std::unordered_map<Endpoint, std::shared_ptr<BaseRequestHandler>> request_handlers;
+}
 
 struct shared_buffer;
-
-class base_session : public std::enable_shared_from_this<base_session> {
-public:
-
-    virtual ~base_session() {};
-
-    virtual void start() = 0;
-    virtual void finish() = 0;
-
-    virtual bool is_alive() const = 0; 
-    virtual tcp::socket &socket()=0;
-};
 
 class tcp_session : public base_session
 {
@@ -45,8 +51,6 @@ protected:
     void write_priv(std::string &message);
     void read_priv();
 
-
-
     boost::asio::io_context::strand socket_io_;
     boost::recursive_mutex mutex_;
 
@@ -65,4 +69,3 @@ private:
     ns_server::request_handlers endpoint_handlers_;                            
 };
 
-#endif // TCP_SESSION_H

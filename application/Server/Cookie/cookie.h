@@ -22,7 +22,7 @@ inline const  std::string HTTP_ONLY_FLAG = "HttpOnly";
 static const std::set< std::string > flags = {SECURE_FLAG, HTTP_ONLY_FLAG};
 }
 
- struct CookieAttr {
+struct CookieAttr {
     std::string name;
     std::string value;
 
@@ -68,6 +68,5 @@ public:
     static Cookie parse(const std::string_view &str);
 private:
     static void parseAttr(std::string str, Cookie &cookie);
-
     static Cookie parseCookie(std::string str);
 };

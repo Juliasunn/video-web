@@ -17,23 +17,34 @@ find_package(Boost COMPONENTS thread system REQUIRED)
 include_directories( ${Boost_INCLUDE_DIR} )
 
 add_library(Server STATIC
-   net_defs.cpp
-   tcp_server_multithread.cpp
-   http_server_multithread.cpp  
-   tcp_session.cpp
-   http_session.cpp
+
    FormData/formdata_parser.cpp
    FormData/formdata_parser.h
    FormData/formdata_handler.cpp
    FormData/formdata_handler.h
+
    Buffers/buffers.cpp
    Buffers/buffers.h
 
-   net_defs.h
+   endpoint.cpp
+   endpoint.h
+
+   Cookie/utils.h
+   Cookie/cookie.cpp
+   Cookie/cookie.h
+
+   http/http_handlers.h
+   http/http_server_multithread.h
+   http/http_server_multithread.cpp 
+   http/http_session.h
+   http/http_session.cpp
+
    tcp_server_multithread.h
-   http_server_multithread.h   
    tcp_session.h
-   http_session.h   
+   tcp_server_multithread.cpp 
+   tcp_session.cpp
+
+   base_session.h
 )
 target_link_libraries(Server ${Boost_LIBRARIES})
 target_compile_features(Server PRIVATE cxx_std_17)

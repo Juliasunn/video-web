@@ -57,18 +57,18 @@ include Server/CMakeFiles/Server.dir/progress.make
 # Include the compile flags for this target's objects.
 include Server/CMakeFiles/Server.dir/flags.make
 
-Server/CMakeFiles/Server.dir/net_defs.cpp.o: Server/CMakeFiles/Server.dir/flags.make
-Server/CMakeFiles/Server.dir/net_defs.cpp.o: Server/net_defs.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/julia/Documents/Github/HLS/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object Server/CMakeFiles/Server.dir/net_defs.cpp.o"
-	cd /home/julia/Documents/Github/HLS/Server && /usr/bin/ccache /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Server.dir/net_defs.cpp.o -c /home/julia/Documents/Github/HLS/Server/net_defs.cpp
+Server/CMakeFiles/Server.dir/endpoint.cpp.o: Server/CMakeFiles/Server.dir/flags.make
+Server/CMakeFiles/Server.dir/endpoint.cpp.o: Server/endpoint.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/julia/Documents/Github/HLS/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object Server/CMakeFiles/Server.dir/endpoint.cpp.o"
+	cd /home/julia/Documents/Github/HLS/Server && /usr/bin/ccache /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Server.dir/endpoint.cpp.o -c /home/julia/Documents/Github/HLS/Server/endpoint.cpp
 
-Server/CMakeFiles/Server.dir/net_defs.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Server.dir/net_defs.cpp.i"
-	cd /home/julia/Documents/Github/HLS/Server && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/julia/Documents/Github/HLS/Server/net_defs.cpp > CMakeFiles/Server.dir/net_defs.cpp.i
+Server/CMakeFiles/Server.dir/endpoint.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Server.dir/endpoint.cpp.i"
+	cd /home/julia/Documents/Github/HLS/Server && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/julia/Documents/Github/HLS/Server/endpoint.cpp > CMakeFiles/Server.dir/endpoint.cpp.i
 
-Server/CMakeFiles/Server.dir/net_defs.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Server.dir/net_defs.cpp.s"
-	cd /home/julia/Documents/Github/HLS/Server && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/julia/Documents/Github/HLS/Server/net_defs.cpp -o CMakeFiles/Server.dir/net_defs.cpp.s
+Server/CMakeFiles/Server.dir/endpoint.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Server.dir/endpoint.cpp.s"
+	cd /home/julia/Documents/Github/HLS/Server && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/julia/Documents/Github/HLS/Server/endpoint.cpp -o CMakeFiles/Server.dir/endpoint.cpp.s
 
 Server/CMakeFiles/Server.dir/tcp_server_multithread.cpp.o: Server/CMakeFiles/Server.dir/flags.make
 Server/CMakeFiles/Server.dir/tcp_server_multithread.cpp.o: Server/tcp_server_multithread.cpp
@@ -124,7 +124,7 @@ Server/CMakeFiles/Server.dir/http_session.cpp.s: cmake_force
 
 # Object files for target Server
 Server_OBJECTS = \
-"CMakeFiles/Server.dir/net_defs.cpp.o" \
+"CMakeFiles/Server.dir/endpoint.cpp.o" \
 "CMakeFiles/Server.dir/tcp_server_multithread.cpp.o" \
 "CMakeFiles/Server.dir/http_server_multithread.cpp.o" \
 "CMakeFiles/Server.dir/tcp_session.cpp.o" \
@@ -133,7 +133,7 @@ Server_OBJECTS = \
 # External object files for target Server
 Server_EXTERNAL_OBJECTS =
 
-Server/libServer.a: Server/CMakeFiles/Server.dir/net_defs.cpp.o
+Server/libServer.a: Server/CMakeFiles/Server.dir/endpoint.cpp.o
 Server/libServer.a: Server/CMakeFiles/Server.dir/tcp_server_multithread.cpp.o
 Server/libServer.a: Server/CMakeFiles/Server.dir/http_server_multithread.cpp.o
 Server/libServer.a: Server/CMakeFiles/Server.dir/tcp_session.cpp.o

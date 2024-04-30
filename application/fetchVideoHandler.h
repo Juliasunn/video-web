@@ -5,12 +5,13 @@
 #include <boost/uuid/uuid.hpp>            // uuid class
 #include <boost/uuid/uuid_generators.hpp> // generators
 
-#include <net_defs.h>
+#include <endpoint.h>
+#include <http/http_handlers.h>
 
 
 namespace ns_server {
 
-class FetchVideosHandler : public HttpRequestHandler {
+class FetchVideosHandler : public BaseHttpRequestHandler {
 
 public:
 

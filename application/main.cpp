@@ -1,5 +1,5 @@
-#include <http_server_multithread.h>
-#include <net_defs.h>
+#include <http/http_server_multithread.h>
+#include <endpoint.h>
 #include <FormData/formdata_handler.h>
 
 #include <optional>
@@ -8,6 +8,7 @@
 #include "video.h"
 #include "mediaProcessor.h"
 
+#include "notFoundHandler.h"
 #include "documentStorage.h"
 #include "uploadVideoHandler.h"
 #include "fetchVideoHandler.h"
@@ -22,9 +23,12 @@
 #define JPG_DIR "/home/julia/videoserver/preview"
 #define AVATAR_DIR "/home/julia/videoserver/avatar"
 
+
 void initEndpoints(std::shared_ptr<http_server_multithread> &server) {
     using namespace ns_server;
     using namespace disk_storage;
+
+    server-> add_endpoint_handler("GET", "_", std::make_unique<UncknownRequestHandler>());
     // Load .mp4
     auto mpegFileStorage = std::make_shared<DiskStorage>( "/mpeg", MPEG_DIR);
     server-> add_endpoint_handler("GET", "/mpeg_", std::make_unique<MediaRequestHandler>(mpegFileStorage));

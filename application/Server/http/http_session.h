@@ -1,7 +1,11 @@
 #pragma once
-#include "tcp_session.h"
 
 #include <boost/beast/http.hpp>
+#include <boost/bind.hpp>
+#include <boost/asio/io_context_strand.hpp>
+
+#include "../base_session.h"
+#include "http_handlers.h"
 
 class http_session : public base_session
 {
@@ -77,9 +81,7 @@ private:
             std::cout << "Error writing to socket - " << ec.message() << std::endl;
             return;
         }
-        std::cout << "Writen: " << bytes_transferred << " bytes"
-            << " id:" << boost::this_thread::get_id() 
-            << std::endl;
+        std::cout << "Writen: " << bytes_transferred << " bytes."  << std::endl;
         read();
     }
 

@@ -11,11 +11,11 @@
 #include <boost/uuid/uuid.hpp>            // uuid class
 #include <boost/uuid/uuid_generators.hpp> // generators
 
-#include <http_session.h>
+#include <http/http_session.h>
 
 #include "documentStorage.h"
 #include "AuthorizationService/authorizationProvider.h"
-#include "AuthorizationService/cookie.h"
+#include <Cookie/cookie.h>
 
 using namespace ns_server;
 using namespace multipart;

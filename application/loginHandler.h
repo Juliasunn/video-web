@@ -2,7 +2,7 @@
 #include <string>
 #include <memory>
 
-#include <net_defs.h>
+#include <endpoint.h>
 #include <FormData/formdata_handler.h>
 
 namespace ns_server {

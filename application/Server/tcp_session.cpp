@@ -1,7 +1,9 @@
 #include "tcp_session.h"
+
 #include <boost/utility/string_view.hpp>
 #include <string_view>
 #include <boost/asio.hpp>
+#include <boost/thread.hpp>
 
 using namespace ns_server;
 

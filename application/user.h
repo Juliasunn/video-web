@@ -5,9 +5,9 @@
 #include <boost/uuid/uuid.hpp>            // uuid class
 #include <boost/uuid/uuid_generators.hpp> // generators
 
-#include <http_server_multithread.h>
+#include <http/http_server_multithread.h>
 #include <FormData/formdata_handler.h>
-#include <net_defs.h>
+#include <endpoint.h>
 
 #include "DiskStorage/diskStorage.h"
 

@@ -201,32 +201,32 @@ http_session.cpp.s:
 	cd /home/julia/Documents/Github/HLS && $(MAKE) -f Server/CMakeFiles/Server.dir/build.make Server/CMakeFiles/Server.dir/http_session.cpp.s
 .PHONY : http_session.cpp.s
 
-net_defs.o: net_defs.cpp.o
+net_defs.o: endpoint.cpp.o
 
 .PHONY : net_defs.o
 
 # target to build an object file
-net_defs.cpp.o:
-	cd /home/julia/Documents/Github/HLS && $(MAKE) -f Server/CMakeFiles/Server.dir/build.make Server/CMakeFiles/Server.dir/net_defs.cpp.o
-.PHONY : net_defs.cpp.o
+endpoint.cpp.o:
+	cd /home/julia/Documents/Github/HLS && $(MAKE) -f Server/CMakeFiles/Server.dir/build.make Server/CMakeFiles/Server.dir/endpoint.cpp.o
+.PHONY : endpoint.cpp.o
 
-net_defs.i: net_defs.cpp.i
+net_defs.i: endpoint.cpp.i
 
 .PHONY : net_defs.i
 
 # target to preprocess a source file
-net_defs.cpp.i:
-	cd /home/julia/Documents/Github/HLS && $(MAKE) -f Server/CMakeFiles/Server.dir/build.make Server/CMakeFiles/Server.dir/net_defs.cpp.i
-.PHONY : net_defs.cpp.i
+endpoint.cpp.i:
+	cd /home/julia/Documents/Github/HLS && $(MAKE) -f Server/CMakeFiles/Server.dir/build.make Server/CMakeFiles/Server.dir/endpoint.cpp.i
+.PHONY : endpoint.cpp.i
 
-net_defs.s: net_defs.cpp.s
+net_defs.s: endpoint.cpp.s
 
 .PHONY : net_defs.s
 
 # target to generate assembly for a file
-net_defs.cpp.s:
-	cd /home/julia/Documents/Github/HLS && $(MAKE) -f Server/CMakeFiles/Server.dir/build.make Server/CMakeFiles/Server.dir/net_defs.cpp.s
-.PHONY : net_defs.cpp.s
+endpoint.cpp.s:
+	cd /home/julia/Documents/Github/HLS && $(MAKE) -f Server/CMakeFiles/Server.dir/build.make Server/CMakeFiles/Server.dir/endpoint.cpp.s
+.PHONY : endpoint.cpp.s
 
 tcp_server_multithread.o: tcp_server_multithread.cpp.o
 

@@ -7,13 +7,14 @@
 #include <boost/uuid/uuid.hpp>            // uuid class
 #include <boost/uuid/uuid_generators.hpp> // generators
 
-#include <net_defs.h>
+#include <endpoint.h>
+#include <http/http_handlers.h>
 
 #include "DiskStorage/diskStorage.h"
 
 namespace ns_server {
   //Each handler belongs to single session
-class MediaRequestHandler : public HttpRequestHandler {
+class MediaRequestHandler : public BaseHttpRequestHandler {
 
 public:
     MediaRequestHandler(DiskStoragePtr documentStorage): m_diskStorage(documentStorage) {};

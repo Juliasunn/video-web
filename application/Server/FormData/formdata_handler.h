@@ -5,9 +5,10 @@
 #include <variant>
 #include <set>
 #include <unordered_map>
- #include <filesystem>
+#include <filesystem>
 
-#include "../net_defs.h"
+#include "../endpoint.h"
+#include "../http/http_handlers.h"
 #include "formdata_parser.h"
 
 namespace multipart {
@@ -16,7 +17,7 @@ using FormData = std::unordered_map<FormElementName, FormDataElement>;
 }; // multipart
 
 
-class formdata_handler : public ns_server::HttpRequestHandler 
+class formdata_handler : public ns_server::BaseHttpRequestHandler 
 {
 public:
     virtual std::unique_ptr<BaseHttpRequestHandler> clone() override {

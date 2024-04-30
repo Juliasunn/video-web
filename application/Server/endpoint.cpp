@@ -1,5 +1,4 @@
-#include "net_defs.h"
-#include "http_session.h"
+#include "endpoint.h"
 
 using namespace ns_server;
 
@@ -41,7 +40,7 @@ Endpoint &Endpoint::operator -- () {
     return *this;
 }
 
-std::map<std::string, std::string> ns_server::getQueryPrams(const Endpoint &endpoint) {
+QueryParams ns_server::getQueryPrams(const Endpoint &endpoint) {
     auto queryString = endpoint.path.substr(endpoint.path.find('?') + 1 );
     std::cout << "queryString = " << queryString << std::endl;
 
@@ -74,16 +73,3 @@ std::map<std::string, std::string> ns_server::getQueryPrams(const Endpoint &endp
     }
     return params;
 }
-
-
-void UncknownRequestHandler::process_request(std::shared_ptr<http_session> session ){
-    http::response<http::empty_body> response;
-
-    response.result(http::status::bad_request);
-    response.version(m_request.version());
-    response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-    response.keep_alive(false); 
-
-    session->write(std::move(response));                      
-} 
-

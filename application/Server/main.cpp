@@ -1,7 +1,7 @@
 #include <iostream>
 #include "tcp_server_multithread.h"
 #include "http_server_multithread.h"
-#include "net_defs.h"
+#include "endpoint.h"
 //#include "http_session.h"
 
 namespace ns_server {
@@ -58,8 +58,8 @@ namespace ns_server {
 
 int main(int, char**){
 
-    std::shared_ptr<ns_server::BaseHttpRequestHandler> fileHandler = 
-        std::static_pointer_cast<ns_server::BaseHttpRequestHandler>(std::make_shared<ns_server::MyFileRequestHandler>());
+    std::shared_ptr<ns_server::> fileHandler = 
+        std::static_pointer_cast<ns_server::>(std::make_shared<ns_server::MyFileRequestHandler>());
 
     std::cout << "Hello, from MsgBrocker_Server!\n";
     auto server = http_server_multithread::getInstance();

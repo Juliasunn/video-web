@@ -1,10 +1,10 @@
-#ifndef TCP_SERVER_MULTITHREAD_H
-#define TCP_SERVER_MULTITHREAD_H
+#pragma once
+
 #include <boost/thread.hpp>
 #include <boost/asio/io_context_strand.hpp>
 
+#include "endpoint.h"
 #include "tcp_session.h"
-
 
 void thread_fn(boost::asio::io_context &context);
 
@@ -53,4 +53,3 @@ private:
 
 };
 
-#endif // TCP_SERVER_MULTITHREAD_H

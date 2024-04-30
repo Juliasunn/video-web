@@ -6,7 +6,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_CHECK_CXX
   "/home/julia/Documents/Github/HLS/Server/http_server_multithread.cpp" "/home/julia/Documents/Github/HLS/Server/CMakeFiles/Server.dir/http_server_multithread.cpp.o"
   "/home/julia/Documents/Github/HLS/Server/http_session.cpp" "/home/julia/Documents/Github/HLS/Server/CMakeFiles/Server.dir/http_session.cpp.o"
-  "/home/julia/Documents/Github/HLS/Server/net_defs.cpp" "/home/julia/Documents/Github/HLS/Server/CMakeFiles/Server.dir/net_defs.cpp.o"
+  "/home/julia/Documents/Github/HLS/Server/endpoint.cpp" "/home/julia/Documents/Github/HLS/Server/CMakeFiles/Server.dir/endpoint.cpp.o"
   "/home/julia/Documents/Github/HLS/Server/tcp_server_multithread.cpp" "/home/julia/Documents/Github/HLS/Server/CMakeFiles/Server.dir/tcp_server_multithread.cpp.o"
   "/home/julia/Documents/Github/HLS/Server/tcp_session.cpp" "/home/julia/Documents/Github/HLS/Server/CMakeFiles/Server.dir/tcp_session.cpp.o"
   )

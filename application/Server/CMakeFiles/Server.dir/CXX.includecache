@@ -22,7 +22,7 @@ tcp_session.h
 boost/beast/http.hpp
 -
 
-/home/julia/Documents/Github/HLS/Server/net_defs.h
+/home/julia/Documents/Github/HLS/Server/endpoint.h
 boost/asio/ip/tcp.hpp
 -
 boost/beast.hpp
@@ -61,6 +61,6 @@ boost/asio/io_context_strand.hpp
 -
 
 /home/julia/Documents/Github/HLS/Server/tcp_session.h
-net_defs.h
-/home/julia/Documents/Github/HLS/Server/net_defs.h
+endpoint.h
+/home/julia/Documents/Github/HLS/Server/endpoint.h
 

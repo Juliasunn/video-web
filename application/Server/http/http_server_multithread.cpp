@@ -3,7 +3,7 @@
 using tcp = boost::asio::ip::tcp;
 
 
-void http_server_multithread::add_endpoint_handler(const ns_server::Endpoint &ep, HttpRequestHandler &&handler)
+void http_server_multithread::add_endpoint_handler(const ns_server::Endpoint &ep, RequestHandlerPtr &&handler)
 {      
         if (is_running) {
             std::cout << "[Server] - Can't add handler to running server.";
@@ -15,7 +15,7 @@ void http_server_multithread::add_endpoint_handler(const ns_server::Endpoint &ep
 
 void http_server_multithread::add_endpoint_handler(const std::string &method,
                                                   const std::string &path,
-                                                  HttpRequestHandler &&handler)
+                                                  RequestHandlerPtr &&handler)
 {
     ns_server::Endpoint ep{method, path};
     add_endpoint_handler(ep, std::move(handler));

@@ -6,7 +6,7 @@
 #include <boost/uuid/uuid_io.hpp>         // streaming operators etc.
 #include <boost/lexical_cast.hpp>
 
-#include <http_session.h>
+#include <http/http_session.h>
 
 #include "documentStorage.h"
 

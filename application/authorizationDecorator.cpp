@@ -5,11 +5,11 @@
 #include <boost/json.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <http_session.h>
+#include <http/http_session.h>
 
 #include "documentStorage.h"
 #include "AuthorizationService/authorizationProvider.h"
-#include "AuthorizationService/cookie.h"
+#include <Cookie/cookie.h>
 
 using namespace ns_server;
 

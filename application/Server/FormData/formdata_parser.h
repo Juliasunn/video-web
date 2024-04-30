@@ -4,7 +4,7 @@
 #include <variant>
 #include <optional>
 
-#include "net_defs.h"
+#include "endpoint.h"
 #include "Buffers/buffers.h"
 
 namespace multipart {
