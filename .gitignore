@@ -1,6 +1,7 @@
 Makefile
-*.cmake
-CMakeFiles/
+**/*.cmake
+/**/CMakeFiles/
 *.a
 *.so
 *.vscode
+build
