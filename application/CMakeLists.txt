@@ -72,7 +72,7 @@ add_executable(HttpLiveStreaming main.cpp
     loginHandler.cpp
     loginHandler.h 
     registrationHandler.cpp
-    registrationHandler.h 
+    registrationHandler.h
 
     authorizationDecorator.cpp
     authorizationDecorator.h         
