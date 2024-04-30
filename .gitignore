@@ -1,3 +1,10 @@
+# If .gitignore doesn’t work for some file, then it’s likely that it's already tracked by Git.
+# If the file is not listed in the “Untracked files” section,
+# then it is already tracked by Git and it will ignore the rule from the .gitignore file.
+# In order to actually ignore the file, 
+# you have to untrack it and remove it from the repository. You can do that by using 
+# git rm --cached <имя файла>
+
 Makefile
 *.cmake
 /**/CMakeFiles/
