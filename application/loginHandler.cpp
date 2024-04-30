@@ -24,17 +24,10 @@ std::unique_ptr<BaseHttpRequestHandler> LoginHandler::clone() {
     return std::make_unique<LoginHandler>();
 }
 
-void LoginHandler::process_request(std::shared_ptr<http_session> session) {
-    formdata_handler::process_request(session );
-
-    //session->write(std::move(res)); 
-   // session->finish();                                  
-}
 
 http::response<http::empty_body> LoginHandler::form_response() const {
     http::response<http::empty_body> res;
     Cookie requestCookie({"token", IdentityProvider::instance()->getIdentity("Emily", "12345678")});
-   // requestCookie["MAX_AGE"] = "120";
     requestCookie["Path"] = "/";
     res.set(http::field::set_cookie, requestCookie.serialize());
   //  std::cout << "Not authorized yet. Set cookie: " << requestCookie.serialize() << std::endl;

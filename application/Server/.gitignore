@@ -3,3 +3,4 @@ Makefile
 CMakeFiles/
 *.a
 *.so
+*.vscode
