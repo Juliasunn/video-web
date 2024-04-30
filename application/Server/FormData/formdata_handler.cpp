@@ -13,7 +13,7 @@
 #include <sstream>
 #include <algorithm>
 
-#include "../http/http_session.h"
+#include "http/http_session.h"
 
 
 namespace {

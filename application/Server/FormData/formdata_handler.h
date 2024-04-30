@@ -7,8 +7,8 @@
 #include <unordered_map>
 #include <filesystem>
 
-#include "../endpoint.h"
-#include "../http/http_handlers.h"
+#include "endpoint.h"
+#include "http/http_handlers.h"
 #include "formdata_parser.h"
 
 namespace multipart {

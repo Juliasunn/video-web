@@ -4,7 +4,7 @@
 #include <boost/bind.hpp>
 #include <boost/asio/io_context_strand.hpp>
 
-#include "../base_session.h"
+#include "base_session.h"
 #include "http_handlers.h"
 
 class http_session : public base_session

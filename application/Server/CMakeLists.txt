@@ -46,6 +46,7 @@ add_library(Server STATIC
 
    base_session.h
 )
+target_include_directories(HttpLiveStreaming PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(Server ${Boost_LIBRARIES})
 target_compile_features(Server PRIVATE cxx_std_17)
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
