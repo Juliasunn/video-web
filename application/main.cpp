@@ -8,15 +8,15 @@
 #include "video.h"
 #include "mediaProcessor.h"
 
-#include "notFoundHandler.h"
-#include "documentStorage.h"
-#include "uploadVideoHandler.h"
-#include "fetchVideoHandler.h"
-#include "loadMediaHandler.h"
-#include "loginHandler.h"
-#include "registrationHandler.h"
-#include "pageHandler.h"
+#include "handlers/fetchVideoHandler.h"
+#include "handlers/loadMediaHandler.h"
+#include "handlers/loginHandler.h"
+#include "handlers/registrationHandler.h"
+#include "handlers/pageHandler.h"
+#include "handlers/notFoundHandler.h"
+#include "handlers/uploadVideoHandler.h"
 
+#include "documentStorage.h"
 #include "authorizationDecorator.h"
 
 #define MPEG_DIR "/home/julia/videoserver/video"

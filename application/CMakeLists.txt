@@ -53,30 +53,33 @@ add_executable(HttpLiveStreaming main.cpp
     mediaProcessor.h
     documentStorage.cpp
     documentStorage.h
-    uploadVideoHandler.cpp
-    uploadVideoHandler.h
-    fetchVideoHandler.cpp
-    fetchVideoHandler.h
-    loadMediaHandler.cpp  
-    loadMediaHandler.h
-    pageHandler.cpp  
-    pageHandler.h      
-    
+
+    handlers/uploadVideoHandler.cpp
+    handlers/uploadVideoHandler.h
+    handlers/fetchVideoHandler.cpp
+    handlers/fetchVideoHandler.h
+    handlers/loadMediaHandler.cpp  
+    handlers/loadMediaHandler.h
+    handlers/pageHandler.cpp  
+    handlers/pageHandler.h      
+    handlers/notFoundHandler.h
+    handlers/loginHandler.cpp
+    handlers/loginHandler.h 
+    handlers/registrationHandler.cpp
+    handlers/registrationHandler.h
+
     DiskStorage/diskStorage.cpp 
     DiskStorage/diskStorage.h
     DiskStorage/error.h
 
     AuthorizationService/authorizationProvider.cpp
     AuthorizationService/authorizationProvider.h
-    notFoundHandler.h
-    loginHandler.cpp
-    loginHandler.h 
-    registrationHandler.cpp
-    registrationHandler.h
 
     authorizationDecorator.cpp
     authorizationDecorator.h         
 )
+
+target_include_directories(HttpLiveStreaming PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory(Server)
 add_subdirectory(AuthorizationService/jwt-cpp)
