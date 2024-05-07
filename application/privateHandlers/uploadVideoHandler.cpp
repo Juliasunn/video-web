@@ -7,9 +7,9 @@
 
 #include <boost/uuid/uuid_io.hpp>
 
-#include "documentStorage.h"
+#include "DocumentStorage/documentStorage.h"
 #include "mediaProcessor.h"
-#include "video.h"
+#include "resource/video.h"
 
 using namespace ns_video;
 using namespace multipart;
@@ -26,17 +26,19 @@ UploadVideoHandler::UploadVideoHandler(std::shared_ptr<VideoProcessor> processor
   DiskStoragePtr mpegStorage) :
   m_previewCreator(processor), m_mpegStorage(mpegStorage) {}
 
+std::unique_ptr<ns_server::BaseHttpRequestHandler> UploadVideoHandler::clone(){
+    return std::make_unique<UploadVideoHandler>(m_previewCreator, m_mpegStorage);
+}
+
 void UploadVideoHandler::handle_form_complete() {
     std::cout << "[DEBUG] Form complete with " << m_form.size() << " elements." << std::endl;
 
-    FormVideoBuilder builder;
-    builder.build(m_form);
-    Video videoObj = builder.release();
+    Video videoObj = FormVideoBuilder().build(m_form);
 
-    disk_storage::Url previewImgUrl = m_previewCreator->process(videoObj.getVideoUrl(), m_mpegStorage);
-    videoObj.setPreviewImgUrl(previewImgUrl);
+    disk_storage::Url previewImgUrl = m_previewCreator->process(videoObj.videoUrl, m_mpegStorage);
+    videoObj.previewImgUrl = previewImgUrl;
 
-    std::cout << "[DEBUG]: UUID = " << videoObj.getUuid() << std::endl;
+    std::cout << "[DEBUG]: UUID = " << videoObj.uuid << std::endl;
 
     saveToDb(videoObj); 
 }

@@ -3,17 +3,18 @@
 #include <endpoint.h>
 #include <FormData/formdata_handler.h>
 
+#include <AuthorizationService/authorizationProvider.h>
+
 #include "mediaProcessor.h"
 
-class UploadVideoHandler : public formdata_handler {
+class UploadVideoHandler : public formdata_handler  {
 public:
-    virtual std::unique_ptr<BaseHttpRequestHandler> clone() override {
-        return std::make_unique<UploadVideoHandler>(m_previewCreator, m_mpegStorage);
-    } 
+    std::unique_ptr<ns_server::BaseHttpRequestHandler> clone() override;
 
     UploadVideoHandler(std::shared_ptr<VideoProcessor> processor, DiskStoragePtr mpegStorage);
     
-    virtual ~UploadVideoHandler() = default; 
+    virtual ~UploadVideoHandler() = default;
+    void setClaims(const Claims &claims) {m_claims = claims;}
 protected:
 
     virtual void handle_file(const char *data,
@@ -24,4 +25,6 @@ protected:
 private:
     std::shared_ptr<VideoProcessor> m_previewCreator;
     DiskStoragePtr m_mpegStorage;
+
+    Claims m_claims;
 };

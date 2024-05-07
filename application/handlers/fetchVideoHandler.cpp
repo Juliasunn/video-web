@@ -7,7 +7,7 @@
 #include <http/http_session.h>
 #include <endpoint.h>
 
-#include "documentStorage.h"
+#include "DocumentStorage/documentStorage.h"
 
 using namespace ns_server;
 

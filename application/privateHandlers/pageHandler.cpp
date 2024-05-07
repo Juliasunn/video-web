@@ -45,10 +45,12 @@ std::unique_ptr<BaseHttpRequestHandler> PageHandler::clone() {
 void PageHandler::process_request(std::shared_ptr<http_session> session ) {
     std::cout << "Html root directory path: " << m_rootDirectory << std::endl;
 
-    auto contentExtension = std::filesystem::path(m_path_props.path).extension();
+    auto requestedPage = m_path_props.path_vars.at(0);
+
+    auto contentExtension = std::filesystem::path(requestedPage).extension();
     auto contentType = externalExtMapping.at(contentExtension);
 
-    auto target = std::filesystem::path(m_path_props.path).replace_extension(internalExtMapping.at(contentType)).filename();
+    auto target = std::filesystem::path(requestedPage).replace_extension(internalExtMapping.at(contentType)).filename();
     
 
     auto path = m_rootDirectory / target;

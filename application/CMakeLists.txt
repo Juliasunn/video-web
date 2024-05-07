@@ -45,28 +45,39 @@ include_directories(Server)
 include_directories(AuthorizationService/jwt-cpp)
 
 add_executable(HttpLiveStreaming main.cpp
-    video.cpp
-    video.h
-    user.cpp
-    user.h
+    resource/utils.h
+    resource/video.cpp
+    resource/video.h
+    resource/user.cpp
+    resource/user.h
+    resource/subject.cpp
+    resource/subject.h
+
     mediaProcessor.cpp
     mediaProcessor.h
-    documentStorage.cpp
-    documentStorage.h
 
-    handlers/uploadVideoHandler.cpp
-    handlers/uploadVideoHandler.h
+    DocumentStorage/clientOperation.h
+    DocumentStorage/documentStorage.cpp
+    DocumentStorage/documentStorage.h
+
     handlers/fetchVideoHandler.cpp
     handlers/fetchVideoHandler.h
     handlers/loadMediaHandler.cpp  
     handlers/loadMediaHandler.h
-    handlers/pageHandler.cpp  
-    handlers/pageHandler.h      
+    handlers/fetchUserHandler.cpp
+    handlers/fetchUserHandler.h   
     handlers/notFoundHandler.h
     handlers/loginHandler.cpp
     handlers/loginHandler.h 
     handlers/registrationHandler.cpp
     handlers/registrationHandler.h
+
+    privateHandlers/uploadVideoHandler.cpp
+    privateHandlers/uploadVideoHandler.h
+    privateHandlers/profileHandler.cpp
+    privateHandlers/profileHandler.h
+    privateHandlers/pageHandler.cpp  
+    privateHandlers/pageHandler.h  
 
     DiskStorage/diskStorage.cpp 
     DiskStorage/diskStorage.h

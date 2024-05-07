@@ -13,7 +13,7 @@
 
 #include <http/http_session.h>
 
-#include "documentStorage.h"
+#include "DocumentStorage/documentStorage.h"
 #include "AuthorizationService/authorizationProvider.h"
 #include <Cookie/cookie.h>
 
@@ -27,7 +27,8 @@ std::unique_ptr<BaseHttpRequestHandler> LoginHandler::clone() {
 
 http::response<http::empty_body> LoginHandler::form_response() const {
     http::response<http::empty_body> res;
-    Cookie requestCookie({"token", IdentityProvider::instance()->getIdentity("Emily", "12345678")});
+    //Cookie requestCookie({"token", IdentityProvider::instance()->getIdentity("Emily", "12345678")});
+    Cookie requestCookie({"token", IdentityProvider::instance()->getIdentity(m_authData)});
     requestCookie["Path"] = "/";
     res.set(http::field::set_cookie, requestCookie.serialize());
   //  std::cout << "Not authorized yet. Set cookie: " << requestCookie.serialize() << std::endl;
@@ -41,6 +42,7 @@ http::response<http::empty_body> LoginHandler::form_response() const {
 } 
 
 void LoginHandler::handle_form_complete() {
+    m_authData = {};
     std::cout << "[DEBUG] Form complete with " << m_form.size() << " elements." << std::endl;
 
     auto phoneData = m_form["inputPhone"].text;
@@ -49,15 +51,18 @@ void LoginHandler::handle_form_complete() {
     auto passwordData = m_form["inputPassword"].text;
 
     if (phoneData) {
+      m_authData["phone"] = phoneData.value();
       std::cout << "phone: " << phoneData.value() << std::endl;
     }
     if (mailData) {
+      m_authData["mail"] = mailData.value();
       std::cout << "mail: " << mailData.value() << std::endl;
     }
     if (loginData) {
+      m_authData["login"] = loginData.value();
       std::cout << "login: " << loginData.value() << std::endl;
     }
     if (passwordData) {
-      std::cout << "password: " << passwordData.value() << std::endl;
+      m_authData["password"] = passwordData.value();
     }
 }

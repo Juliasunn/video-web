@@ -5,6 +5,11 @@
 #include <endpoint.h>
 #include <http/http_handlers.h>
 
+#include <privateHandlers/profileHandler.h>
+#include <privateHandlers/pageHandler.h>
+#include <privateHandlers/uploadVideoHandler.h>
+#include <AuthorizationService/authorizationProvider.h>
+
 namespace ns_server {
 
 class BaseNotAuthorizedStrategy {
@@ -40,30 +45,30 @@ private:
 class BaseAuthorizationDecorator : public BaseHttpRequestHandler {
 public:
 
-    BaseAuthorizationDecorator(const std::string &checkPermission,
-        std::shared_ptr<BaseNotAuthorizedStrategy> notAuthorizedStrategy,
-        std::unique_ptr<BaseHttpRequestHandler> &handler);
+  //  BaseAuthorizationDecorator(const std::string &checkPermission,
+  //      std::shared_ptr<BaseNotAuthorizedStrategy> notAuthorizedStrategy,
+  //      std::unique_ptr<BaseHttpRequestHandler> &handler);
 
-    BaseAuthorizationDecorator(const std::string &checkPermission,
-        std::shared_ptr<BaseNotAuthorizedStrategy> notAuthorizedStrategy,
-        std::unique_ptr<BaseHttpRequestHandler> &&handler);
+    ~BaseAuthorizationDecorator() override = default;
 
-    virtual ~BaseAuthorizationDecorator() = default;
+    std::unique_ptr<BaseHttpRequestHandler> clone() override = 0;
 
-    virtual std::unique_ptr<BaseHttpRequestHandler> clone() override;
+    void process_request(std::shared_ptr<http_session> session) override;
 
-    virtual void process_request(std::shared_ptr<http_session> session) override;
-
-    virtual void extra_bytes(const boost::asio::mutable_buffer &extraBytes) override;
+    void extra_bytes(const boost::asio::mutable_buffer &extraBytes) override;
         
-    virtual void set_path_props(const Endpoint &path_props) override;
+    void set_path_props(const Endpoint &path_props) override;
+
+    virtual void passClaims(const Claims &claims)  = 0;
+
+    virtual BaseHttpRequestHandler &handler() = 0; 
 
 protected:
-  //  BaseAuthorizationDecorator() = default;
+    BaseAuthorizationDecorator(const std::string &checkPermission,
+        std::shared_ptr<BaseNotAuthorizedStrategy> notAuthorizedStrategy);
 
-protected:
+
     std::string m_checkPermission;
-    std::unique_ptr<BaseHttpRequestHandler> m_handler;
     std::shared_ptr<BaseNotAuthorizedStrategy> m_notAuthorizedStrategy;
 };
 
@@ -72,16 +77,33 @@ template <typename Handler>
 class AuthorizationDecorator : public BaseAuthorizationDecorator {
 
 public:
-
     template <typename ... Args>
     AuthorizationDecorator(const std::string &checkPermission,
          std::shared_ptr<BaseNotAuthorizedStrategy> notAuthorizedStrategy,
-        Args ... args) : BaseAuthorizationDecorator(checkPermission, notAuthorizedStrategy, std::make_unique<Handler>(args...)) {
-        //  m_checkPermission = checkPermission;
-        //  m_handler = std::make_unique<Handler>(args...);
+        Args ... args) : BaseAuthorizationDecorator(checkPermission, notAuthorizedStrategy), 
+        m_handler(std::make_unique<Handler>(std::forward<Args>(args)...))   {}
+
+    ~AuthorizationDecorator() override = default;
+
+    void passClaims(const Claims &claims) override {
+        m_handler->setClaims(claims);
+    }
+
+    BaseHttpRequestHandler &handler() override {
+        return *m_handler;
+    }
+
+    std::unique_ptr<BaseHttpRequestHandler> clone() override {
+        /* call copy constructor */
+       // auto newHandler = std::make_unique<Handler>(*m_handler);
+        auto newDecorator = std::make_unique<AuthorizationDecorator<Handler>>(m_checkPermission, 
+            m_notAuthorizedStrategy, *m_handler);
+        return newDecorator;
     }    
 
-    virtual ~AuthorizationDecorator() = default;
+private:
+    std::unique_ptr<Handler> m_handler;
+    
 };
 
 }

@@ -7,17 +7,22 @@
 
 #include <boost/uuid/uuid_io.hpp>
 
-#include "documentStorage.h"
-#include "user.h"
+#include "DocumentStorage/documentStorage.h"
+#include "resource/user.h"
+#include "resource/subject.h"
 
-using namespace ns_user;
+//using namespace ns_user;
 using namespace ns_server;
 using namespace multipart;
 
 namespace {
 
-void saveToDb(const User &userObj) {
-  MongoStorage::instance().addUser(boost::json::value_from(userObj));
+void saveToDb(const ns_user::User &user, const ns_subject::Subject &subject)
+{
+    auto transaction = MongoStorage::instance().prepareTransaction();
+    MongoStorage::instance().prepareAddSubject(boost::json::value_from(subject), *transaction);
+    MongoStorage::instance().prepareAddUser(boost::json::value_from(user), *transaction);
+    transaction->executeTransaction();
 }
 
 }
@@ -27,13 +32,12 @@ RegistrationHandler::RegistrationHandler(DiskStoragePtr avatarStorage) : m_avata
 void RegistrationHandler::handle_form_complete() {
     std::cout << "[DEBUG] Form complete with " << m_form.size() << " elements." << std::endl;
 
-    auto builder = FormUserBuilder();
-    builder.build(m_form);
-    User userObj = builder.release();
+    auto user = ns_user::FormUserBuilder().build(m_form);
+    auto subject = ns_subject::FormSubjectBuilder().build(m_form, user.uuid);
 
-    std::cout << "[DEBUG]: UUID = " << userObj.getUuid() << std::endl;
+    std::cout << "[DEBUG]: UUID = " << user.uuid << std::endl;
 
-    saveToDb(userObj); 
+    saveToDb(user, subject); 
 }
 
 //обработка файла-аватара

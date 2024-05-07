@@ -55,7 +55,8 @@ using Claims = boost::json::object;
 class IdentityProvider {
 public:
     static IdentityProvider *instance();
-    Identity getIdentity(const std::string &login, const std::string &password) const;
+    Identity getIdentity(const boost::json::object &authData) const;
+    //Identity getIdentity(const std::string &login, const std::string &password) const;
     Claims getClaims(Identity identity) const;
     Claims getClaims() const;
 

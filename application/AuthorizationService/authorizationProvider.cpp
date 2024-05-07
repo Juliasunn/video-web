@@ -1,5 +1,4 @@
-
-
+#include "authorizationProvider.h"
 
 #include <stdio.h>
 #include <iostream>
@@ -15,7 +14,7 @@
 #include <FormData/formdata_handler.h>
 #include <Cookie/cookie.h>
 
-#include "authorizationProvider.h"
+#include <DocumentStorage/documentStorage.h>
 
 IdentityProvider *IdentityProvider::m_instance = nullptr;
 AuthorizationProvider *AuthorizationProvider::m_instance = nullptr;
@@ -28,11 +27,20 @@ IdentityProvider * IdentityProvider::instance() {
 }
 
 
-Identity IdentityProvider::getIdentity(const std::string &login, const std::string &password) const {
+Identity IdentityProvider::getIdentity(const boost::json::object &authData) const {
+    if (!authData.contains("password")) {
+        throw std::runtime_error("Missing required authorization field");
+    }
+    if (authData.size() < 2) {
+        throw std::runtime_error("Not enough data provided for authorization");        
+    }
+    auto subject = MongoStorage::instance().getSubject(authData);
+
     auto token = jwt::create()
     .set_type("JWS")
     .set_issuer("auth0")
     .set_payload_claim("role", jwt::claim(std::string("AuthorizedUser")))
+    .set_payload_claim("id", jwt::claim(std::string("rYhdhfUddmsud")))
     .sign(jwt::algorithm::hs256{"secret"});
     return token;
       //  return "ArTGGHGSHhjdhd.djjkfdddfJKydfjdd.dpofodIUSU.ndddjf";

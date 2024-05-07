@@ -10,7 +10,7 @@
 
 #include <http/http_session.h>
 
-#include "documentStorage.h"
+#include "DocumentStorage/documentStorage.h"
 #include "DiskStorage/diskStorage.h"
 
 using namespace ns_server;

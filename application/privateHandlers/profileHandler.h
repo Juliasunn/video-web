@@ -7,22 +7,19 @@
 
 #include <endpoint.h>
 #include <http/http_handlers.h>
+#include <AuthorizationService/authorizationProvider.h>
 
 namespace ns_server {
 
-class FetchVideosHandler : public BaseHttpRequestHandler {
-
+class ProfileHandler : public BaseHttpRequestHandler {
 public:
-    ~FetchVideosHandler() override = default;
-
-    std::unique_ptr<BaseHttpRequestHandler> clone() override {
-        return std::make_unique<FetchVideosHandler>();
-    }
+    ~ProfileHandler() override = default;
+    std::unique_ptr<BaseHttpRequestHandler> clone() override;
     void process_request(std::shared_ptr<http_session> session ) override;
-    
+
+    void setClaims(const Claims &claims) {m_claims = claims;}
 private:
-    http::response<http::string_body> prepareCommonResponse() const;
- 
+    Claims m_claims;
 };
 
 }

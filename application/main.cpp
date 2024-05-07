@@ -5,18 +5,20 @@
 #include <optional>
 #include <iostream>
 
-#include "video.h"
 #include "mediaProcessor.h"
 
 #include "handlers/fetchVideoHandler.h"
 #include "handlers/loadMediaHandler.h"
 #include "handlers/loginHandler.h"
 #include "handlers/registrationHandler.h"
-#include "handlers/pageHandler.h"
 #include "handlers/notFoundHandler.h"
-#include "handlers/uploadVideoHandler.h"
+#include "handlers/fetchUserHandler.h"
 
-#include "documentStorage.h"
+#include "privateHandlers/uploadVideoHandler.h"
+#include "privateHandlers/profileHandler.h"
+#include "privateHandlers/pageHandler.h"
+
+#include "DocumentStorage/documentStorage.h"
 #include "authorizationDecorator.h"
 
 #define MPEG_DIR "/home/julia/videoserver/video"
@@ -45,7 +47,7 @@ void initEndpoints(std::shared_ptr<http_server_multithread> &server) {
     auto UploadWithAuth = std::make_unique<AuthorizationDecorator<UploadVideoHandler>>("ManageVideo", 
         std::make_shared<ForbiddenResponseStatusStrategy>(),
         previewCreator, mpegFileStorage);
-    server-> add_endpoint_handler("POST", "/upload", std::move(UploadWithAuth));
+    server-> add_endpoint_handler("POST", "/api/upload", std::move(UploadWithAuth));
 
     
     // Load video content (json) endpoint
@@ -54,15 +56,16 @@ void initEndpoints(std::shared_ptr<http_server_multithread> &server) {
     // video/watch?v={}
     server-> add_endpoint_handler("GET", "/video_", std::make_unique<FetchVideosHandler>());
     server-> add_endpoint_handler("POST", "/api/login", std::make_unique<LoginHandler>());
-
+    //https://www.youtube.com/api/users/lu12cTlJQ00
+    server-> add_endpoint_handler("GET", "/api/users_", std::make_unique<FetchUserHandler>());
 
     server-> add_endpoint_handler("POST", "/api/registration", 
         std::make_unique<RegistrationHandler>(avatarFileStorage));
 
 
-    auto profilePageHandler = std::make_unique<AuthorizationDecorator<PageHandler>>("ManageAccount", 
+    auto privatePagesHandler = std::make_unique<AuthorizationDecorator<PageHandler>>("ManageAccount", 
         std::make_shared<RedirectToLoginStrategy>("/home/julia/videoserver/web/login.html"), "/home/julia/videoserver/web/private");
-    server-> add_endpoint_handler("GET", "/private/profile", std::move(profilePageHandler));
+    server-> add_endpoint_handler("GET", "/private_", std::move(privatePagesHandler));
 
     
     //server-> add_endpoint_handler("GET", "/profile.html", std::make_unique<ns_server::PageHandler>());

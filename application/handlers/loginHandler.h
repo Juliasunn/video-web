@@ -2,6 +2,8 @@
 #include <string>
 #include <memory>
 
+#include <boost/json.hpp>
+
 #include <endpoint.h>
 #include <FormData/formdata_handler.h>
 
@@ -25,6 +27,7 @@ protected:
 private:
 
     void setCookie(http::response<http::string_body> &res);
+    boost::json::object m_authData;
 };
 
 }
