@@ -130,7 +130,7 @@ void formdata_parser::parse_header(char *data, size_t  parse_from, size_t parse_
         value = line.substr(type_token.size());
     }
     else {
-        throw std::runtime_error("Uncknown token in line: " + std::string(line.data()));
+        throw std::runtime_error("Uncknown token in line: " + std::string(line));
     }
     if (!on_field_impl_) throw std::runtime_error("on_field_impl_ must be provided");
     on_field_impl_(field, value, formElement_);

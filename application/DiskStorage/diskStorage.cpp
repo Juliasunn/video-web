@@ -121,8 +121,9 @@ size_t DiskStorage::writeToFile(const Url &url, const char *data, size_t len) {
     if (!fileStream.is_open()) {
         throw FileAccessException(absolutePath);
     }
+    auto countBefore = fileStream.tellp();
     fileStream.write(data, len);
-    auto bytesWritten = fileStream.gcount();
+    auto bytesWritten = fileStream.tellp() - countBefore;
     fileStream.close();
     return  bytesWritten; 
 }

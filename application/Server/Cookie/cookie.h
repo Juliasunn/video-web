@@ -3,6 +3,7 @@
 #include <set>
 #include <unordered_map>
 #include <vector>
+#include <boost/utility/string_view.hpp>
 
 namespace cookieParams {
 
@@ -65,7 +66,8 @@ private:
 
 class CookieParser {
 public:
-    static Cookie parse(const std::string_view &str);
+    static Cookie parse(const std::string_view strview);
+    static Cookie parse(const boost::string_view strview);
 private:
     static void parseAttr(std::string str, Cookie &cookie);
     static Cookie parseCookie(std::string str);

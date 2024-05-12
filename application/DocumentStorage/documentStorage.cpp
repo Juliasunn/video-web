@@ -49,12 +49,7 @@ MongoStorage &MongoStorage::instance() {
 }
 
 MongoStorage::MongoStorage() : m_pool(mongocxx::uri("mongodb://localhost:27017")), m_dbname("webvideodb") {
-  //If the database you request does not exist, MongoDB creates it when you first store data.
- // m_db = m_client["webvideodb"];
-  //m_session = m_client.start_session();
- // m_db["video"].delete_many(bsoncxx::builder::basic::make_document(
-  //  bsoncxx::builder::basic::kvp("description", "Architecture of twiter\r")));
-  deleteAll();
+  //deleteAll();
   std::cout << "[MongoStorage] constructor!" << std::endl;
 }
 
@@ -113,12 +108,13 @@ std::optional<boost::json::value> MongoStorage::getUser(const boost::json::value
   return boost::json::parse(jsonStr);
 }
 
-std::optional<boost::uuids::uuid> MongoStorage::getSubject(const boost::json::value &providedData)
+std::optional<boost::json::object> MongoStorage::getSubject(const boost::json::value &providedData)
 {
+  std::cout << "[Get subject] " << boost::json::serialize(providedData) << std::endl;
   auto doc = bsoncxx::from_json(boost::json::serialize(providedData));
 
   auto operation = [doc](mongocxx::client &client) mutable  {
-    return client["webvideodb"]["subjectr"].find_one(std::move(doc));
+    return client["webvideodb"]["subject"].find_one(std::move(doc));
   };
   auto filtered = scopeExecute(ClientOperation{ operation }, m_pool);
 
@@ -127,7 +123,8 @@ std::optional<boost::uuids::uuid> MongoStorage::getSubject(const boost::json::va
   }
   std::string jsonStr = bsoncxx::to_json(*filtered);
   auto sub = boost::json::parse(jsonStr).as_object();
-  return boost::lexical_cast<boost::uuids::uuid>(boost::json::value_to<std::string>(sub["uuid"]));
+  return sub;
+  //return boost::lexical_cast<boost::uuids::uuid>(boost::json::value_to<std::string>(sub["uuid"]));
 }
 
 void MongoStorage::addSubject(const boost::json::value &subjectClaims) {
@@ -135,11 +132,9 @@ void MongoStorage::addSubject(const boost::json::value &subjectClaims) {
 }
 
 void MongoStorage::deleteAll() { 
- // auto clientEntry = m_pool.acquire()
- // auto videoCollection = m_db["video"];
-  //videoCollection.delete_many({});
- // auto collection = (*clientEntry)[m_dbname]["user"];
- // collection.delete_many({});
+  auto clientEntry = m_pool.acquire();
+  auto collection = (*clientEntry)[m_dbname]["user"];
+  collection.delete_many({});
 }
 
 TransactionHandlePtr MongoStorage::prepareTransaction() { return std::make_unique<TransactionHandle>(m_pool); }

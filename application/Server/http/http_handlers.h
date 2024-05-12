@@ -24,7 +24,11 @@ public:
     virtual std::unique_ptr<BaseHttpRequestHandler> clone() = 0;
     virtual void process_request(std::shared_ptr<http_session> session )= 0;
 
-    virtual void request(http::request<http::string_body> &request) { m_request = std::move(request); }
+    virtual void request(http::request<http::string_body> &request) { 
+        std::cout << "[Request]" << std::endl << "[" << request << "]" << std::endl;
+        std::cout << "[Cookie]" << std::endl << "[" << request.base()[http::field::cookie] << "]" << std::endl;
+        m_request = std::move(request); 
+    }
     virtual void extra_bytes(const boost::asio::mutable_buffer &extraBytes) {}
     virtual void set_path_props(const Endpoint &path_props) { m_path_props = path_props; }
 

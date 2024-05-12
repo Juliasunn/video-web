@@ -85,6 +85,7 @@ add_executable(HttpLiveStreaming main.cpp
 
     AuthorizationService/authorizationProvider.cpp
     AuthorizationService/authorizationProvider.h
+    AuthorizationService/authorizationErrors.h
 
     authorizationDecorator.cpp
     authorizationDecorator.h         

@@ -17,7 +17,7 @@ public:
     std::unique_ptr<BaseHttpRequestHandler> clone() override;
     void process_request(std::shared_ptr<http_session> session ) override;
 
-    void setClaims(const Claims &claims) {m_claims = claims;}
+    void setClaims(const Claims &claims);
 private:
     Claims m_claims;
 };

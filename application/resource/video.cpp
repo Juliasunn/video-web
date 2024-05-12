@@ -37,7 +37,7 @@ static std::string removeExtension(const std::string &fileName){
 }
 
 Video FormVideoBuilder::build(multipart::FormData &form) {
-    auto videoFormEl = form["videofile"];
+    auto videoFormEl = form["inputFile"];
     if ( !(videoFormEl.fileName && videoFormEl.storeFilePath) )  {
             throw std::runtime_error("Incomplete file form element.");
     }

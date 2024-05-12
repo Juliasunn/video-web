@@ -13,8 +13,11 @@
 
 #include <FormData/formdata_handler.h>
 #include <Cookie/cookie.h>
-
 #include <DocumentStorage/documentStorage.h>
+
+#include "authorizationErrors.h"
+
+using namespace authorization_error;
 
 IdentityProvider *IdentityProvider::m_instance = nullptr;
 AuthorizationProvider *AuthorizationProvider::m_instance = nullptr;
@@ -29,22 +32,26 @@ IdentityProvider * IdentityProvider::instance() {
 
 Identity IdentityProvider::getIdentity(const boost::json::object &authData) const {
     if (!authData.contains("password")) {
-        throw std::runtime_error("Missing required authorization field");
+        throw MissingRequiredFieldException("password");
     }
     if (authData.size() < 2) {
-        throw std::runtime_error("Not enough data provided for authorization");        
+        throw IncompleteAuthorizationDataException();        
     }
     auto subject = MongoStorage::instance().getSubject(authData);
-
+    if (!subject) {
+        throw IncorrectAuthorizationDataException();
+    }
+    if (!subject.value().count("uuid")) {
+        throw InternalAuthorizationException("Invalid subject (missing UUID).");
+    }
+    auto uuidStr = boost::json::value_to<std::string>( subject.value()["uuid"] );
     auto token = jwt::create()
     .set_type("JWS")
     .set_issuer("auth0")
     .set_payload_claim("role", jwt::claim(std::string("AuthorizedUser")))
-    .set_payload_claim("id", jwt::claim(std::string("rYhdhfUddmsud")))
+    .set_payload_claim("uuid", jwt::claim(uuidStr))
     .sign(jwt::algorithm::hs256{"secret"});
     return token;
-      //  return "ArTGGHGSHhjdhd.djjkfdddfJKydfjdd.dpofodIUSU.ndddjf";
-
 };
 
 Claims IdentityProvider::getClaims(Identity identity) const {
@@ -57,6 +64,7 @@ Claims IdentityProvider::getClaims(Identity identity) const {
 
    // boost::json::object claimsObj = decoded_token.to_json().as_object();
     boost::json::object claimsObj = decoded_token.get_payload_json();
+    std::cout << boost::json::serialize(claimsObj) << std::endl;
     //claimsObj["role"] = decoded_token.get_payload_claim("role");
     return claimsObj;
 } 

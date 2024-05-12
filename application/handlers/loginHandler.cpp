@@ -16,22 +16,36 @@
 #include "DocumentStorage/documentStorage.h"
 #include "AuthorizationService/authorizationProvider.h"
 #include <Cookie/cookie.h>
+#include <Cookie/utils.h>
 
 using namespace ns_server;
 using namespace multipart;
+
+
+namespace {
+
+bool isEmpty(const std::optional<std::string> &field ) {
+  if (!field) {
+    return true;
+  }
+  auto it = std::find_if(field.value().begin(), field.value().end(), [](unsigned char ch) {
+        return !string_utils::is_trimable_char(ch);
+  });
+  return it == field.value().end();
+}
+
+}
 
 std::unique_ptr<BaseHttpRequestHandler> LoginHandler::clone() {
     return std::make_unique<LoginHandler>();
 }
 
-
 http::response<http::empty_body> LoginHandler::form_response() const {
     http::response<http::empty_body> res;
-    //Cookie requestCookie({"token", IdentityProvider::instance()->getIdentity("Emily", "12345678")});
     Cookie requestCookie({"token", IdentityProvider::instance()->getIdentity(m_authData)});
     requestCookie["Path"] = "/";
     res.set(http::field::set_cookie, requestCookie.serialize());
-  //  std::cout << "Not authorized yet. Set cookie: " << requestCookie.serialize() << std::endl;
+  // Set cookie: " << requestCookie.serialize() << std::endl;
  
     res.version(m_request.version());
     res.keep_alive(m_request.keep_alive());
@@ -50,19 +64,20 @@ void LoginHandler::handle_form_complete() {
     auto loginData = m_form["inputLogin"].text;
     auto passwordData = m_form["inputPassword"].text;
 
-    if (phoneData) {
+    if (!isEmpty(phoneData)) {
       m_authData["phone"] = phoneData.value();
       std::cout << "phone: " << phoneData.value() << std::endl;
     }
-    if (mailData) {
+    if (!isEmpty(mailData)) {
       m_authData["mail"] = mailData.value();
       std::cout << "mail: " << mailData.value() << std::endl;
     }
-    if (loginData) {
+    if (!isEmpty(loginData)) {
       m_authData["login"] = loginData.value();
       std::cout << "login: " << loginData.value() << std::endl;
     }
-    if (passwordData) {
+    if (!isEmpty(passwordData)) {
       m_authData["password"] = passwordData.value();
+      std::cout << "password: " << passwordData.value() << std::endl;
     }
 }

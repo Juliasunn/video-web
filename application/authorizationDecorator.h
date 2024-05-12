@@ -45,10 +45,6 @@ private:
 class BaseAuthorizationDecorator : public BaseHttpRequestHandler {
 public:
 
-  //  BaseAuthorizationDecorator(const std::string &checkPermission,
-  //      std::shared_ptr<BaseNotAuthorizedStrategy> notAuthorizedStrategy,
-  //      std::unique_ptr<BaseHttpRequestHandler> &handler);
-
     ~BaseAuthorizationDecorator() override = default;
 
     std::unique_ptr<BaseHttpRequestHandler> clone() override = 0;

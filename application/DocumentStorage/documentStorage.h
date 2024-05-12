@@ -35,7 +35,7 @@ public:
 
     std::optional<boost::json::value> getUser(const boost::json::value &uniqueFilter);
     void addUser(const boost::json::value &user);
-    std::optional<boost::uuids::uuid> getSubject(const boost::json::value &authData);
+    std::optional<boost::json::object> getSubject(const boost::json::value &authData);
     void addSubject(const boost::json::value &fullAuthData);
 
     TransactionHandlePtr prepareTransaction();

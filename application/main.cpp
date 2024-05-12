@@ -54,7 +54,7 @@ void initEndpoints(std::shared_ptr<http_server_multithread> &server) {
 
     // /video/feed
     // video/watch?v={}
-    server-> add_endpoint_handler("GET", "/video_", std::make_unique<FetchVideosHandler>());
+    server-> add_endpoint_handler("GET", "/api/video_", std::make_unique<FetchVideosHandler>());
     server-> add_endpoint_handler("POST", "/api/login", std::make_unique<LoginHandler>());
     //https://www.youtube.com/api/users/lu12cTlJQ00
     server-> add_endpoint_handler("GET", "/api/users_", std::make_unique<FetchUserHandler>());
@@ -66,6 +66,10 @@ void initEndpoints(std::shared_ptr<http_server_multithread> &server) {
     auto privatePagesHandler = std::make_unique<AuthorizationDecorator<PageHandler>>("ManageAccount", 
         std::make_shared<RedirectToLoginStrategy>("/home/julia/videoserver/web/login.html"), "/home/julia/videoserver/web/private");
     server-> add_endpoint_handler("GET", "/private_", std::move(privatePagesHandler));
+    
+    auto profileHandler = std::make_unique<AuthorizationDecorator<ProfileHandler>>("ManageAccount", 
+     std::make_shared<RedirectToLoginStrategy>("/home/julia/videoserver/web/login.html") );
+    server-> add_endpoint_handler("GET", "/api/profile", std::move(profileHandler));
 
     
     //server-> add_endpoint_handler("GET", "/profile.html", std::make_unique<ns_server::PageHandler>());

@@ -18,22 +18,23 @@ void tcp_server_multithread::run()
     }
     is_running = true;
     accept();                                                                                     
-
+/*
     boost::thread_group workers;
-    /* thread constructor expexts  && (rvalue reference) type of arguments, use std::ref wrapper to pass lvalue to
-    thread function */
-   /* Note: variables passed with std::ref wrapper into thread constructor need to outlive thread execution !*/
+     thread constructor expexts  && (rvalue reference) type of arguments, use std::ref wrapper to pass lvalue to
+    thread function 
+    Note: variables passed with std::ref wrapper into thread constructor need to outlive thread execution !
 
-    /* Replaced with staight call of context.run() function on each created thread
-    so all threads can execute handlers */
+     Replaced with staight call of context.run() function on each created thread
+    so all threads can execute handlers 
 
-    for (int i = 0; i < boost::thread::hardware_concurrency()/* number of cpu's*/; i++)  {
+    for (int i = 0; i < boost::thread::hardware_concurrency(); i++)  {
         workers.create_thread(
                     boost::bind(thread_fn, std::ref(context))
                     );
     }
     
     workers.join_all();
+*/
     context.run();
 }
 

@@ -55,23 +55,9 @@ void RedirectToLoginStrategy::process_request(std::shared_ptr<http_session> sess
     session->write(std::move(res)); 
 }
 
-//BaseAuthorizationDecorator::BaseAuthorizationDecorator(const std::string &checkPermission,
-//    std::shared_ptr<BaseNotAuthorizedStrategy> notAuthorizedStrategy,
-//    std::unique_ptr<BaseHttpRequestHandler> &handler) :
-//    m_checkPermission(checkPermission), m_notAuthorizedStrategy(notAuthorizedStrategy), m_handler(handler->clonePrivate()) {}
-
 BaseAuthorizationDecorator::BaseAuthorizationDecorator(const std::string &checkPermission,
     std::shared_ptr<BaseNotAuthorizedStrategy> notAuthorizedStrategy) :
     m_checkPermission(checkPermission), m_notAuthorizedStrategy(notAuthorizedStrategy) {}
-
-//std::unique_ptr<BaseHttpRequestHandler> BaseAuthorizationDecorator::clone() {
-    /*Clone decorator with new handler*/
-//    auto decoratorClone = std::make_unique<BaseAuthorizationDecorator>(m_checkPermission,
- //        m_notAuthorizedStrategy, m_handler->clone());
-    /* Set cloned handler a decorator - cloned decorator */
- //   decoratorClone->handlersDecorator() = decoratorClone;
- ///   return decoratorClone;
-//}
 
 void BaseAuthorizationDecorator::extra_bytes(const boost::asio::mutable_buffer &extraBytes) {
     handler().extra_bytes(extraBytes);
@@ -86,20 +72,16 @@ void BaseAuthorizationDecorator::process_request(std::shared_ptr<http_session> s
     Claims subjectClaims; 
 
     if (!m_request.base().count(http::field::cookie)) {
-        subjectClaims = IProvider->getClaims();
-         //m_claims = IProvider->getClaims();
-        
+        subjectClaims = IProvider->getClaims();       
     } else {
       //  auto cookie = m_request.base()[http::field::cookie];
        // std::cout << "Cookie: "<< cookie  << std::endl;
-        Cookie requestCookie(CookieParser::parse(m_request.base()[http::field::cookie].data())); 
+        Cookie requestCookie(CookieParser::parse(m_request.base()[http::field::cookie])); 
 
         if (requestCookie.name() == "token") {
            subjectClaims = IProvider->getClaims(requestCookie.value());
-           //m_claims = IProvider->getClaims(requestCookie.value());
         } else {
            subjectClaims = IProvider->getClaims();
-           //m_claims = IProvider->getClaims();
         }    
     }
     if (!AuthorizationProvider::instance()->checkPermission(subjectClaims, m_checkPermission)) {

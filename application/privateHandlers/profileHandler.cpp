@@ -13,9 +13,9 @@ using namespace ns_server;
 
 namespace {
 
-void fetchUser(const boost::uuids::uuid &uuid, http::response<http::string_body> &response) {
+void fetchUser(const std::string &uuid, http::response<http::string_body> &response) {
    // auto uuidSerialized = boost::lexical_cast<std::string>(uuid);
-    boost::json::object filter( {{"uuid", boost::lexical_cast<std::string>(uuid) }} );
+    boost::json::object filter{ {"uuid", uuid} } ;
     auto user = MongoStorage::instance().getUser(filter);
     auto subject = MongoStorage::instance().getSubject(filter);
 
@@ -24,7 +24,7 @@ void fetchUser(const boost::uuids::uuid &uuid, http::response<http::string_body>
     } else {
         boost::json::object profile( { {"user",  user.value()}, {"subject", subject.value()} });
 
-        response.body() = boost::json::serialize(user.value());
+        response.body() = boost::json::serialize(profile);
         response.set(http::field::content_type, "application/json");
         response.prepare_payload();
         response.result(http::status::ok);
@@ -53,10 +53,17 @@ std::unique_ptr<BaseHttpRequestHandler> ProfileHandler::clone(){
 void ProfileHandler::process_request(std::shared_ptr<http_session> session ) {
     auto response = prepareCommonResponse(m_request);
     //No path variables
-    auto uuid = boost::lexical_cast<boost::uuids::uuid>(m_claims["uuid"]);
-
+    if (!m_claims.count("uuid")) {
+        throw std::runtime_error("Missing uuid claim.");        
+    }
+    auto uuidSerialized = boost::json::value_to<std::string>(m_claims["uuid"]);
 
     //https://www.youtube.com/api/profile
-    fetchUser(uuid, response);
+    fetchUser(uuidSerialized, response);
     session->write(std::move(response));
+}
+
+void ProfileHandler::setClaims(const Claims &claims) {
+    std::cout << "[ProfileHandler] setClaims" << std::endl;
+    m_claims = claims;
 }
