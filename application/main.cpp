@@ -17,6 +17,7 @@
 #include "privateHandlers/uploadVideoHandler.h"
 #include "privateHandlers/profileHandler.h"
 #include "privateHandlers/pageHandler.h"
+#include "privateHandlers/editProfileHandler.h"
 
 #include "DocumentStorage/documentStorage.h"
 #include "authorizationDecorator.h"
@@ -33,7 +34,7 @@ void initEndpoints(std::shared_ptr<http_server_multithread> &server) {
     server-> add_endpoint_handler("GET", "_", std::make_unique<UncknownRequestHandler>());
     // Load .mp4
     auto mpegFileStorage = std::make_shared<DiskStorage>( "/mpeg", MPEG_DIR);
-    server-> add_endpoint_handler("GET", "/mpeg_", std::make_unique<MediaRequestHandler>(mpegFileStorage));
+    server-> add_endpoint_handler("GET", "/api/media/mpeg_", std::make_unique<MediaRequestHandler>(mpegFileStorage));
     
     // Upload content endpoint
 
@@ -55,9 +56,10 @@ void initEndpoints(std::shared_ptr<http_server_multithread> &server) {
     // /video/feed
     // video/watch?v={}
     server-> add_endpoint_handler("GET", "/api/video_", std::make_unique<FetchVideosHandler>());
+    //https://www.youtube.com/api/channel/lu12cTlJQ00
+    server-> add_endpoint_handler("GET", "/api/channel_", std::make_unique<FetchUserHandler>());
     server-> add_endpoint_handler("POST", "/api/login", std::make_unique<LoginHandler>());
-    //https://www.youtube.com/api/users/lu12cTlJQ00
-    server-> add_endpoint_handler("GET", "/api/users_", std::make_unique<FetchUserHandler>());
+
 
     server-> add_endpoint_handler("POST", "/api/registration", 
         std::make_unique<RegistrationHandler>(avatarFileStorage));
@@ -71,7 +73,9 @@ void initEndpoints(std::shared_ptr<http_server_multithread> &server) {
      std::make_shared<RedirectToLoginStrategy>("/home/julia/videoserver/web/login.html") );
     server-> add_endpoint_handler("GET", "/api/profile", std::move(profileHandler));
 
-    
+     auto editProfileHandler = std::make_unique<AuthorizationDecorator<EditProfileHandler>>("ManageAccount", 
+     std::make_shared<RedirectToLoginStrategy>("/home/julia/videoserver/web/login.html"), avatarFileStorage );
+    server-> add_endpoint_handler("POST", "/api/profile", std::move(editProfileHandler));   
     //server-> add_endpoint_handler("GET", "/profile.html", std::make_unique<ns_server::PageHandler>());
 }
 

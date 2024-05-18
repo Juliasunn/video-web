@@ -32,6 +32,7 @@ class FormUserBuilder {
 public:
     User build(multipart::FormData &form);
     User build(multipart::FormData &form, const boost::uuids::uuid &uuid);
+    boost::json::object buildUpdate(multipart::FormData &form, const User &updatingUser);
 };
 
 }

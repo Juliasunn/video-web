@@ -29,7 +29,6 @@ IdentityProvider * IdentityProvider::instance() {
         return m_instance;
 }
 
-
 Identity IdentityProvider::getIdentity(const boost::json::object &authData) const {
     if (!authData.contains("password")) {
         throw MissingRequiredFieldException("password");
@@ -37,14 +36,15 @@ Identity IdentityProvider::getIdentity(const boost::json::object &authData) cons
     if (authData.size() < 2) {
         throw IncompleteAuthorizationDataException();        
     }
-    auto subject = MongoStorage::instance().getSubject(authData);
-    if (!subject) {
+    auto dbSubject = MongoStorage::instance().getSubject(authData);
+    if (!dbSubject) {
         throw IncorrectAuthorizationDataException();
     }
-    if (!subject.value().count("uuid")) {
+    auto subject = dbSubject.value().as_object();
+    if (!subject.count("uuid")) {
         throw InternalAuthorizationException("Invalid subject (missing UUID).");
     }
-    auto uuidStr = boost::json::value_to<std::string>( subject.value()["uuid"] );
+    auto uuidStr = boost::json::value_to<std::string>( subject["uuid"] );
     auto token = jwt::create()
     .set_type("JWS")
     .set_issuer("auth0")

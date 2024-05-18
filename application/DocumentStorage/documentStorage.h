@@ -35,13 +35,16 @@ public:
 
     std::optional<boost::json::value> getUser(const boost::json::value &uniqueFilter);
     void addUser(const boost::json::value &user);
-    std::optional<boost::json::object> getSubject(const boost::json::value &authData);
+    std::optional<boost::json::value> getSubject(const boost::json::value &authData);
     void addSubject(const boost::json::value &fullAuthData);
 
     TransactionHandlePtr prepareTransaction();
     void prepareAddVideo(const boost::json::value &video, TransactionHandle &transaction) const;
     void prepareAddUser(const boost::json::value &user, TransactionHandle &transaction) const;
     void prepareAddSubject(const boost::json::value &fullAuthData, TransactionHandle &transaction) const;
+
+    void prepareUpdateUser(const boost::json::object &userUpdate, const boost::json::object &filter, TransactionHandle &transaction) const;
+    void prepareUpdateSubject(const boost::json::object &subjectUpdate, const boost::json::object &filter, TransactionHandle &transaction) const;
 
 private:
     void deleteAll();

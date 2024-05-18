@@ -12,13 +12,12 @@ namespace string_utils {
 
 using namespace std;
 
-inline vector<string> split(const string_view strview, const string& delim)
+inline vector<std::string> split(const std::string_view strview, const std::string& delim)
 {
-    std::cout << "Initial string: |" << strview << "| "<<std::endl;
-    vector<string> result;
+    vector<std::string> result;
     size_t start = 0;
 
-    for (size_t found = strview.find(delim); found != string::npos; found = strview.find(delim, start))
+    for (size_t found = strview.find(delim); found != std::string::npos; found = strview.find(delim, start))
     {
         result.emplace_back(strview.begin() + start, strview.begin() + found);
         start = found + delim.size();

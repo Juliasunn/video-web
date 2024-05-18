@@ -4,6 +4,7 @@
 #include <boost/json.hpp>
 #include <boost/uuid/uuid.hpp>            // uuid class
 #include <boost/uuid/uuid_generators.hpp> // generators
+#include <boost/lexical_cast.hpp>
 
 using namespace boost::json;
 using namespace boost::uuids;

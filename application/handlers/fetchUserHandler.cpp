@@ -1,5 +1,7 @@
 #include "fetchUserHandler.h"
 
+#include <iostream> 
+
 #include <boost/json.hpp>
 #include <boost/uuid/uuid_io.hpp>         // streaming operators etc.
 #include <boost/lexical_cast.hpp>
@@ -13,8 +15,9 @@ using namespace ns_server;
 
 namespace {
 
-void fetchUser(const std::string &loginPathVar, http::response<http::string_body> &response) {
-    auto user = MongoStorage::instance().getUser(boost::json::value{"login", loginPathVar});
+void fetchUser(const std::string &uuidPathVar, http::response<http::string_body> &response) {
+    boost::json::object filter{ {"uuid", uuidPathVar} } ;
+    auto user = MongoStorage::instance().getUser(filter);
 
     if (!user) {   
         response.result(http::status::not_found);
@@ -49,9 +52,11 @@ void FetchUserHandler::process_request(std::shared_ptr<http_session> session ) {
     if (m_path_props.path_vars.empty()) {
         response.result(http::status::bad_request);
     } else {
-        auto loginPathVar = m_path_props.path_vars[0];
-       //https://www.youtube.com/api/users/LucyLiew
-        fetchUser(loginPathVar, response);  
+        auto uuidPathVar = m_path_props.path_vars[0];
+       //https://www.youtube.com/api/channel/hEGDgrrreWdddf
+        fetchUser(uuidPathVar, response);  
     }
+    std::cout << "Response: " << response << std::endl;
     session->write(std::move(response));
+    session->finish();
 }

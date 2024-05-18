@@ -7,6 +7,7 @@
 
 #include <DocumentStorage/documentStorage.h>
 #include "utils.h"
+#include "common/formUtils.h"
 
 using namespace ns_user;
 
@@ -44,4 +45,18 @@ User FormUserBuilder::build(multipart::FormData &form, const boost::uuids::uuid 
         return User{uuid, name, about, defaultAvatarUrl};
     }
     return User{uuid, name, about, avatarFileUrl.value()};
+}
+
+boost::json::object FormUserBuilder::buildUpdate(multipart::FormData &form, const User &updatingUser) {
+    boost::json::object update;
+    if (editFormFilter(updatingUser.name, form["inputName"])) {
+        update["name"] = form["inputName"].text.value();
+    }
+    if (editFormFilter(updatingUser.about, form["inputAbout"])) {
+        update["about"] = form["inputAbout"].text.value();
+    }
+    if (form["inputFile"].storeFilePath) {
+        update["avatarImgUrl"] = form["inputFile"].storeFilePath.value();
+    }
+    return update;    
 }

@@ -41,6 +41,20 @@ auto prepareInsertOne(const std::string &db, const std::string &collection, cons
   return ClientOperation{ operation };    
 }
 
+auto prepareUpdateOne(const std::string &db, const std::string &collection, const boost::json::object &update,
+   const boost::json::object &filter ) 
+{
+  auto updateDoc = bsoncxx::from_json(boost::json::serialize(update));
+  auto updateExpression = bsoncxx::builder::stream::document{} << "$set" << updateDoc << bsoncxx::builder::stream::finalize;
+  std::cout << bsoncxx::to_json(updateExpression) << std::endl;
+  auto filterDoc = bsoncxx::from_json(boost::json::serialize(filter));
+
+  auto operation = [db, collection, filterDoc, updateExpression](mongocxx::client &client) mutable  {
+    return client[db][collection].update_one(std::move(filterDoc), std::move(updateExpression));
+  };
+  return ClientOperation{ operation };    
+}
+
 }
 
 MongoStorage &MongoStorage::instance() {
@@ -96,6 +110,8 @@ void MongoStorage::addUser(const boost::json::value &user) {
 
 std::optional<boost::json::value> MongoStorage::getUser(const boost::json::value &uniqueFilter) 
 {
+  std::cout << "[MongoStorage::getUser]" << uniqueFilter << std::endl;
+
   auto doc = bsoncxx::from_json(boost::json::serialize(uniqueFilter));
   auto operation = [doc](mongocxx::client &client) mutable  {
     return client["webvideodb"]["user"].find_one(std::move(doc));
@@ -108,7 +124,7 @@ std::optional<boost::json::value> MongoStorage::getUser(const boost::json::value
   return boost::json::parse(jsonStr);
 }
 
-std::optional<boost::json::object> MongoStorage::getSubject(const boost::json::value &providedData)
+std::optional<boost::json::value> MongoStorage::getSubject(const boost::json::value &providedData)
 {
   std::cout << "[Get subject] " << boost::json::serialize(providedData) << std::endl;
   auto doc = bsoncxx::from_json(boost::json::serialize(providedData));
@@ -122,8 +138,7 @@ std::optional<boost::json::object> MongoStorage::getSubject(const boost::json::v
         return std::nullopt;
   }
   std::string jsonStr = bsoncxx::to_json(*filtered);
-  auto sub = boost::json::parse(jsonStr).as_object();
-  return sub;
+  return boost::json::parse(jsonStr);
   //return boost::lexical_cast<boost::uuids::uuid>(boost::json::value_to<std::string>(sub["uuid"]));
 }
 
@@ -133,7 +148,8 @@ void MongoStorage::addSubject(const boost::json::value &subjectClaims) {
 
 void MongoStorage::deleteAll() { 
   auto clientEntry = m_pool.acquire();
-  auto collection = (*clientEntry)[m_dbname]["user"];
+ // auto collection = (*clientEntry)[m_dbname]["user"];
+ auto collection = (*clientEntry)[m_dbname]["video"];
   collection.delete_many({});
 }
 
@@ -149,4 +165,16 @@ void MongoStorage::prepareAddUser(const boost::json::value &user, TransactionHan
 
 void MongoStorage::prepareAddSubject(const boost::json::value &fullAuthData, TransactionHandle &transaction) const {
   transaction.addOperation(prepareInsertOne("webvideodb", "subject", fullAuthData));
+}
+
+void MongoStorage::prepareUpdateUser(const boost::json::object &userUpdate, 
+    const boost::json::object &filter, TransactionHandle &transaction) const 
+{
+  transaction.addOperation(prepareUpdateOne("webvideodb", "user", userUpdate, filter));
+}
+
+void MongoStorage::prepareUpdateSubject(const boost::json::object &subjectUpdate,
+     const boost::json::object &filter, TransactionHandle &transaction) const
+{
+  transaction.addOperation(prepareUpdateOne("webvideodb", "subject", subjectUpdate, filter));
 }

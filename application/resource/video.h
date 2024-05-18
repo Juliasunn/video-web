@@ -18,6 +18,7 @@ using namespace boost::json;
 struct Video
 {
     boost::uuids::uuid uuid;
+    boost::uuids::uuid channelUuid;
     std::string header;
     std::string description;
     std::string previewImgUrl;

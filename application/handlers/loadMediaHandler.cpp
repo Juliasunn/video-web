@@ -73,19 +73,19 @@ std::unique_ptr<BaseHttpRequestHandler> MediaRequestHandler::clone() {
 
 void MediaRequestHandler::process_request(std::shared_ptr<http_session> session) {
 
-    auto mediaUrl = m_path_props.path;
+    auto relativeFsUrl = m_path_props.path_vars.at(0);
 
     http::response<http::string_body> res;
     res.version(m_request.version());
     res.keep_alive(m_request.keep_alive());
 
-    std::cout << "[DEBUG]: Request for resource URL: " << mediaUrl << std::endl;
+    std::cout << "[DEBUG]: Request for resource URL: " << relativeFsUrl << std::endl;
 
-    if (!m_diskStorage->exists(mediaUrl)) {
+    if (!m_diskStorage->exists(relativeFsUrl)) {
         std::cout << "File not found." << std::endl;
         res.result(http::status::not_found);
     }
-    else if (setPayload(res, mediaUrl)) {
+    else if (setPayload(res, relativeFsUrl)) {
         res.set(http::field::content_type, m_mediaType+"/"+m_mediaFormat);
         res.set(http::field::accept_ranges, m_rangesName);        
     }

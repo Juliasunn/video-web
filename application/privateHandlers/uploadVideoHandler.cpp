@@ -10,6 +10,7 @@
 #include "DocumentStorage/documentStorage.h"
 #include "mediaProcessor.h"
 #include "resource/video.h"
+#include "resource/utils.h"
 
 using namespace ns_video;
 using namespace multipart;
@@ -33,7 +34,13 @@ std::unique_ptr<ns_server::BaseHttpRequestHandler> UploadVideoHandler::clone(){
 void UploadVideoHandler::handle_form_complete() {
     std::cout << "[DEBUG] Form complete with " << m_form.size() << " elements." << std::endl;
 
+    if (!m_claims.count("uuid")) {
+        throw std::runtime_error("Missing uuid claim.");        
+    }
+
     Video videoObj = FormVideoBuilder().build(m_form);
+    /* Set channel uuid*/
+    extract(m_claims, videoObj.channelUuid, "uuid");
 
     disk_storage::Url previewImgUrl = m_previewCreator->process(videoObj.videoUrl, m_mpegStorage);
     videoObj.previewImgUrl = previewImgUrl;
@@ -59,4 +66,6 @@ void UploadVideoHandler::handle_file(const char *data,
     }
 }
 
-
+void UploadVideoHandler::setClaims(const Claims &claims) {
+    m_claims = claims;
+}

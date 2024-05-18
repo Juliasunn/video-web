@@ -7,12 +7,12 @@
 
 #include "mediaProcessor.h"
 
-class UploadVideoHandler : public formdata_handler  {
+class EditProfileHandler : public formdata_handler  {
 public:
     std::unique_ptr<ns_server::BaseHttpRequestHandler> clone() override;
 
-    UploadVideoHandler(std::shared_ptr<VideoProcessor> processor, DiskStoragePtr mpegStorage);   
-    virtual ~UploadVideoHandler() = default;
+    EditProfileHandler(DiskStoragePtr avatarStorage);   
+    virtual ~EditProfileHandler() = default;
     void setClaims(const Claims &claims);
 protected:
 
@@ -22,8 +22,6 @@ protected:
 
     virtual void handle_form_complete() override;  
 private:
-    std::shared_ptr<VideoProcessor> m_previewCreator;
-    DiskStoragePtr m_mpegStorage;
-
+    DiskStoragePtr m_avatarStorage;
     Claims m_claims;
 };

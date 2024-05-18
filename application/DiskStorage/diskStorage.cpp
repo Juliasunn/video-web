@@ -22,6 +22,14 @@ std::filesystem::path generateUniqueFilename() {
       std::filesystem::path filename = boost::uuids::to_string(unique_filename_gen());
       return filename;
 }
+
+disk_storage::Url getAbsoluteUrl(const disk_storage::Url &baseUrl, const disk_storage::Url &sourceUrl) {
+    if (sourceUrl.at(0) == '/') {
+      return sourceUrl;
+    }
+    return baseUrl + '/' + sourceUrl;   
+}
+
 }
 
 /*
@@ -81,10 +89,11 @@ Url DiskStorage::getUrl(const std::filesystem::path &absolutePath) const {
 
 /* Private */
 std::filesystem::path DiskStorage::getFilePath(const Url &url) const {
-    if (!(url.find(m_baseUrl) == 0)) {
+    auto absoluteUrl = getAbsoluteUrl(m_baseUrl, url);
+    if (!(absoluteUrl.find(m_baseUrl) == 0)) {
         throw InvalidUrlException(url);
     } 
-    std::filesystem::path filename = url.substr(m_baseUrl.size());
+    std::filesystem::path filename = absoluteUrl.substr(m_baseUrl.size());
     auto absolutePath = m_location / filename.filename();
     std::cout << "[DEBUG] get file url:" << url << " absolute path: " <<  absolutePath << "; "<< m_location << filename << std::endl;
     return absolutePath;

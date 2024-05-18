@@ -34,6 +34,7 @@ class FormSubjectBuilder {
 public:
     Subject build(multipart::FormData &form);
     Subject build(multipart::FormData &form, const boost::uuids::uuid &uuid);
+    boost::json::object buildUpdate(multipart::FormData &form, const Subject &updatingSubject);
 };
 
 }

@@ -44,6 +44,9 @@ std::unique_ptr<BaseHttpRequestHandler> PageHandler::clone() {
 
 void PageHandler::process_request(std::shared_ptr<http_session> session ) {
     std::cout << "Html root directory path: " << m_rootDirectory << std::endl;
+    if (m_path_props.path_vars.empty()) {
+        throw std::runtime_error("No request path variable, specifying page.");
+    }
 
     auto requestedPage = m_path_props.path_vars.at(0);
 
