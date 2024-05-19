@@ -73,28 +73,18 @@ class PublicVideoCard extends BasicVideoCard {
   #infoRow;
   #watchBtn;
   
-  constructor(videoJson, width) {
+  constructor(videoJson, channelJson, width) {
         super(videoJson, width)
         console.log("finished parent");
         
         this.#infoRow = document.createElement('div');
         this.#infoRow.className = "d-flex justify-content-around";
         
-        var channelObj = new BaseChannel({}, "30px", "30px");
+        var channelObj = new BaseChannel(channelJson, "30px", "30px");
         var channel = channelObj.getHtml();
         
-      //  var avatar = document.createElement('img');
-      //  avatar.setAttribute("height","30px");
-      //  avatar.setAttribute("width","30px");
-      //  avatar.src = "http://127.0.0.1:8082" + "/avatar/basic.jpg";
-        
         var watches = createWatches("15 тыс.");
-        
-      //  var channel = document.createElement('p');
-      //  channel.className="text-muted";
-      //  channel.innerHTML = "Vicky Potts";
-        
-        //this.#infoRow.appendChild(avatar);
+       
         this.#infoRow.appendChild(channel);
         this.#infoRow.appendChild(watches);
         
@@ -107,15 +97,6 @@ class PublicVideoCard extends BasicVideoCard {
         
         var resourceUuid = videoJson.uuid;
         console.log("resource uuid = ",resourceUuid);
-        
-     //   this.#watchBtn.addEventListener("click",function(){
-//
- //       	localStorage.setItem('resourceUuid', videoJson.uuid);
- //       	console.log("Set resourceUuid variable to: ", localStorage.getItem('resourceUuid'));
- //       	window.open("http://127.0.0.1:8082" + "/player" );
-        	//console.log("Open page uri: ", STATIC_URL + PLAYER_PATH);
-     	
-//	});
 	
 	super.appendToCardBody( this.#infoRow );
 	super.appendToCardBody( this.#watchBtn );            

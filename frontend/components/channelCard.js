@@ -4,18 +4,19 @@ class BaseChannel {
   #element;
 
   constructor( channelJson, w, h ) {
+      console.log("Channel element constructor:", channelJson);
       this.#element = document.createElement('div');
       this.#element.className="d-flex mb-2"
   
       var avatar = document.createElement('img');
       avatar.setAttribute("height",w);
       avatar.setAttribute("width", h);
-      avatar.src = "http://127.0.0.1:8082" + "/avatar/basic.jpg";
+      avatar.src = "http://127.0.0.1:8082" + channelJson.avatarImgUrl;
       
       
       var channel = document.createElement('p');
       channel.className="text-muted  my-1";
-      channel.innerHTML = "Vicky Potts";
+      channel.innerHTML = channelJson.name
       
      this.#element.appendChild(avatar);
      this.#element.appendChild(channel); 

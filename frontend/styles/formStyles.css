@@ -1,0 +1,20 @@
+input[type=submit]
+{
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        float: right
+}
+
+input[type=submit]:hover
+{
+    color: white
+}            
+    
+form
+{
+    background-color: white;
+    padding: 25px;
+    margin: 15px;
+    border-radius: 4px;
+}

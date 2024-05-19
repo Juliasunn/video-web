@@ -15,7 +15,7 @@
         <div class="card">
           <div class="rounded-top text-white d-flex flex-row" style="background-color: #000; height:200px;">
             <div class="ms-4 mt-5 d-flex flex-column" style="width: 150px;">
-              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-profiles/avatar-1.webp"
+              <img id="avatarImg" src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-profiles/avatar-1.webp"
                 alt="Generic placeholder image" class="img-fluid img-thumbnail mt-4 mb-2"
                 style="width: 150px; z-index: 1">
               <button type="button" class="btn btn-outline-dark" data-mdb-ripple-color="dark"
@@ -61,11 +61,31 @@
     </div>
   </div>
 </section>
+<script> 
+window.onload = function() {
+    console.log("onload");
+    fetchProfile();
+};
 
-<script>
+const fetchProfile = async () => {
+    console.log("[fetchProfile]");
+    try {
+    	const response = await fetch("http://127.0.0.1:8081/api/profile");
+    	//contentArr = [];
+    	if(response.status >=200 && response.status < 300) {
+            const profileJson = await response.json();
+            console.log("Profile: ", profileJson);
+           // contentArr = myJson;
+           // displayContent();
+            return;
+        }
+    } catch (e) { }
+    console.log("Failed to fetch profile.");
+    //userContent.innerHTML = "<h5>No data found.</h5>"
+}
+
 
 </script>
-
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

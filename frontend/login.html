@@ -64,40 +64,77 @@
         color: orange;         
     }       
         
-    </style>
-    
+    </style>  
 </head>
+
+<body>  
+<div class="row d-flex justify-content-center align-items-center h-100 w-100">
+
+<form  id="myForm" action="http://127.0.0.1:8081/api/login" method="POST" enctype="multipart/form-data">
+  <div class="form-group mb-3">
+<h3 class="mb-1 mt-4 text-uppercase text-center">LOGIN TO ACCOUNT</h3>
+  </div> 
+  
+  <div class="form-group mt-3" id="container">
+    <label for="inputLogin">Enter your account data</label>
+    <input  type="text" class="form-control" style="display:none" id="inputPhone" name="inputPhone" aria-describedby="phoneHelp" placeholder="+7">
+    <input  type="text"" class="form-control" style="display:none" id="inputMail" name="inputMail" aria-describedby="emailHelp" placeholder="Enter email">
+    <input  type="text" class="form-control" style="display:none" id="inputLogin" name="inputLogin" aria-describedby="emailHelp" placeholder="Enter login">
+
+<div class="row d-flex justify-content-center align-self-center">
+<button class="custom-link-button m-3" id="emailBtn" onclick="displayMail(this)"> Sign in with mail</button>
+
+<button class="custom-link-button m-3 " id="phoneBtn" onclick="displayPhone(this)">Sign in with phone</button>
+
+<button class="custom-link-button m-3 " id="loginBtn"  onclick="displayLogin(this)">Sign in with login</button>
+</div>     
+  </div>  
+  
+
+  <div class="form-group mb-3">
+    <label for="inputPassword">Password</label>
+    <input  type="text" class="form-control" id="inputPassword" name="inputPassword" placeholder="Password">
+  </div>
+  
+
+<div class="form-group form-check mb-3">
+<p class="text-muted">Don't have account? <a href="http://127.0.0.1:8082/registration" target="_self"
+class="fw-bold text-body"><u>Create account</u></a></p>
+</div>
+
+  <input type="submit" id="submitBtn" class="btn btn-warning btn-lg ms-2 float-right" value="Log in" > </input>
+
+</form>
+</div>
 
 <!-- 
  jQuery is a library, that was installed and then it's file jquery.js was copied to this directory
  https://skillbox.ru/media/code/biblioteka-jquery-chto-eto-takoe-i-kak-eye-podklyuchit/
   -->
-<script src="jquery.js"></script>
+<script src="/libs/jquery.min.js"></script>
 <script>
 
 
 
-    window.onload = function(){
-        if (localStorage.getItem("shownInputId")) {
-            var showInputId = localStorage.getItem("shownInputId");
-            console.log("show from localStorage: ", showInputId );
-            document.getElementById(showInputId).style.display = "block";
+window.onload = function(){
+    if (localStorage.getItem("shownInputId")) {
+        var showInputId = localStorage.getItem("shownInputId");
+        console.log("show from localStorage: ", showInputId );
+        document.getElementById(showInputId).style.display = "block";
             
-            var hideBtnId = localStorage.getItem("hideBtn"); 
-            document.getElementById(hideBtnId).style.display = "none";
-        }
-        else {
-            console.log("show inputLogin");
-            document.getElementById('inputLogin').style.display = "block";
-            document.getElementById('loginBtn').style.display = "none";
-        }
+        var hideBtnId = localStorage.getItem("hideBtn"); 
+        document.getElementById(hideBtnId).style.display = "none";
+    }
+    else {
+        console.log("show inputLogin");
+        document.getElementById('inputLogin').style.display = "block";
+        document.getElementById('loginBtn').style.display = "none";
+    }
 }
 
 function displayLogin(btn) {
     localStorage.setItem("shownInputId", "inputLogin");
-    localStorage.setItem("hideBtn", btn.id);
-
-	
+    localStorage.setItem("hideBtn", btn.id);	
 }  
 
 function displayMail(btn) {
@@ -113,66 +150,43 @@ function displayPhone(btn) {
     localStorage.setItem("shownInputId", "inputPhone");
     localStorage.setItem("hideBtn", btn.id);
 	
-} 
-        
-</script>
- 
-<body>   
+}
 
+// this is the id of the form
+$("#myForm").submit(function(e) {
 
+    e.preventDefault(); // avoid to execute the actual submit of the form.
 
-<div class="row d-flex justify-content-center align-items-center h-100 w-100">
+    var form = $(this);
 
- 
-  
-<form  action="http://127.0.0.1:8081/login" method="POST" >
-  <div class="form-group mb-3">
-<h3 class="mb-1 mt-4 text-uppercase text-center">LOGIN TO ACCOUNT</h3>
-  </div> 
-  
-  <div class="form-group mt-3" id="container">
-    <label for="inputLogin">Enter your account data</label>
-    <input type="phone" class="form-control" style="display:none" id="inputPhone" aria-describedby="phoneHelp" placeholder="+7">
-     <input type="email" class="form-control" style="display:none" id="inputMail" aria-describedby="emailHelp" placeholder="Enter email">
-    <input type="login" class="form-control" style="display:none" id="inputLogin" aria-describedby="emailHelp" placeholder="Enter login">
+    // Create an FormData object 
+    var sendData = new FormData( $('#myForm')[0]);
     
-     
-<div class="row d-flex justify-content-center align-self-center">
-<button class="custom-link-button m-3" id="emailBtn" onclick="displayMail(this)"> Sign in with mail</button>
+    var actionUrl = form.attr('action');
+    
+    $.ajax({
+        type: "POST",
+        url: "http://127.0.0.1:8082/api/login",
+        enctype: 'multipart/form-data',
+        processData: false,  // Important!
+        contentType: false,
+        cache: false,
+        data: sendData,
+        success: function(data)
+        {
+           console.log('FORM SUBMITTED! ', data);
+           window.open(window.location.href,'_self');
+           //window.open('http://127.0.0.1:8082/profile.html','_self');
+        }
+    });
+    
+}); 
 
-<button class="custom-link-button m-3 " id="phoneBtn" onclick="displayPhone(this)">Sign in with phone</button>
-
-<button class="custom-link-button m-3 " id="loginBtn"  onclick="displayLogin(this)">Sign in with login</button>
-</div>     
-  </div>  
-  
-
-
-
-  
-  
-  <div class="form-group mb-3">
-    <label for="inputPassword">Password</label>
-    <input type="password" class="form-control" id="inputPassword" placeholder="Password">
-  </div>
-  
-
-<div class="form-group form-check mb-3">
-<p class="text-muted">Don't have account? <a href="http://127.0.0.1:8082/registration" target="_self"
-class="fw-bold text-body"><u>Create account</u></a></p>
-</div>
-
-  <input type="submit" id="submitBtn" class="btn btn-warning btn-lg ms-2 float-right" value="Log in"  
-     onclick="window.open('http://127.0.0.1:8082/profile','_self'); console.log(window.location.href)"> </button>
-
-</form>
-</div>
-
-
+       
+</script>
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
   </body>

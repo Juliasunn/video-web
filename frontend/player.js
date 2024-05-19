@@ -18,7 +18,7 @@ const fetchVideo = async () => {
     if (!resourceUuid) {
     	    return;
     }	
-    const response = await fetch("http://127.0.0.1:8081" +"/video/watch" + "?v=" + resourceUuid); // "http://127.0.0.1:8081/video/b5cc0596-a647-4db2-b635-3a5aae5ac655"
+    const response = await fetch("http://127.0.0.1:8082/api/video/watch?v=" + resourceUuid); // "http://127.0.0.1:8081/video/b5cc0596-a647-4db2-b635-3a5aae5ac655"
 
     if (response.status >=200 && response.status < 300) {
         video = await response.json();
@@ -26,6 +26,7 @@ const fetchVideo = async () => {
         console.log(response.status, response.statusText);
         return;
     }
+    fetchChannel(video.channelUuid);
     loadPageElements();
 }
       
@@ -42,54 +43,37 @@ function loadPageElements() {
     descriptionElement.innerHTML = video.description;
         
     playerElement.pause();
-    playerSrc.setAttribute("src", "http://127.0.0.1:8081" + video.videoUrl);
+    playerSrc.setAttribute("src", "http://127.0.0.1:8082/api/media" + video.videoUrl);
     playerElement.load();
     playerElement.play();  
 }
 
-function loadChannelInfo() {
+const fetchChannel = async (channelUuid) => {
+    console.log("fetchChannel called ", channelUuid);
+    var channel = {};
+    try {	
+       const response = await fetch("http://127.0.0.1:8082/api/channel/" + channelUuid); // "http://127.0.0.1:8081/video/b5cc0596-a647-4db2-b635-3a5aae5ac655"
+
+       if (response.status >=200 && response.status < 300) {
+           channel = await response.json();
+       } else {
+           console.log(response.status, response.statusText);
+           return;
+       }
+    } catch (e) { console.log("Error: ", e) }
+    console.log("FETCHED CHANNEL:", channel)
+    loadChannelInfo(channel)
+}
+
+function loadChannelInfo(channel) {
     const mediaColumn = document.getElementById("mediaColumn");
     
-    const ChannelInfo = new DescrptionChannel({});
+    const ChannelInfo = new DescrptionChannel(channel);
     var channelInfoHtml = ChannelInfo.getHtml();
     mediaColumn.appendChild(channelInfoHtml);  
 }
-
-const fetchVideos = async () => {
-    console.log("fetchAll called");
-    try {
-    	const response = await fetch("http://127.0.0.1:8081/video/feed");
-    	contentArr = [];
-    	if(response.status >=200 && response.status < 300) {
-            const myJson = await response.json();
-            contentArr = myJson;
-            displayContent();
-            return;
-        }
-    } catch (e) { }
-    content.innerHTML = "<h5>No data found.</h5>"
-}
-
-
-function displayContent() {
-    content.innerHTML = "";
-
-     if(contentArr.length == 0) {
-         content.innerHTML = "<h5>No data found.</h5>"
-         return;
-     }
-    contentArr.forEach(videoJson => {
-        console.log("-Append card-");
-        var cardObj = new PublicVideoCard(videoJson, "100%");
-        console.log("-");
-        var col = cardObj.getCard();
-        console.log("--");
-        content.appendChild(col);
-    });
-}
       
 window.addEventListener('load', () => {
+    fetchVideoFeed(document.getElementById("content"), "100%");
     fetchVideo();
-    loadChannelInfo();
-    fetchVideos();
 });

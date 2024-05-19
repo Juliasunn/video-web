@@ -19,7 +19,7 @@ var newsDataArr = [];
 // apis 
 const STATIC_URL = "http://127.0.0.1:8082";
 const SERVER_URL = "http://127.0.0.1:8081";
-const ALL_URL = "http://127.0.0.1:8081/video/feed";
+const ALL_URL = "http://127.0.0.1:8082/api/video/feed";
 
 const PLAYER_PATH = "/player";
 const PREVIEW_PATH = "/preview";
@@ -40,12 +40,12 @@ generalBtn.addEventListener("click",function(){
 
 uploadBtn.addEventListener("click",function(){
     console.log("display upload page.");
-    pageFrame.src = "http://127.0.0.1:8082/upload";
+    pageFrame.src = "http://127.0.0.1:8082/private/upload";
 });
 
 accountBtn.addEventListener("click",function(){
  	console.log("displayRegister called");
- 	pageFrame.src = "http://127.0.0.1:8082/registration";
+ 	pageFrame.src = "http://127.0.0.1:8082/private/editprofile";
 });
 
 const fetchAll = async () => {
