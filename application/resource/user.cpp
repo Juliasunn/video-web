@@ -10,6 +10,7 @@
 #include "common/formUtils.h"
 
 using namespace ns_user;
+using namespace form;
 
 User ns_user::tag_invoke(value_to_tag<User>, const value &jv) {
     User useroObj;
@@ -35,10 +36,13 @@ User FormUserBuilder::build(multipart::FormData &form) {
 }
 
 User FormUserBuilder::build(multipart::FormData &form, const boost::uuids::uuid &uuid) {
-    auto name = form["inputLogin"].text.value();
+
+    auto name = getTextField(form, "inputLogin");
     std::cout << name << std::endl;
-    auto about = form["inputAbout"].text.value();
+ 
+    auto about = getTextField(form, "inputAbout");
     std::cout << about << std::endl;
+
     auto avatarFileUrl = form["inputFile"].storeFilePath;
 
     if (!avatarFileUrl) {

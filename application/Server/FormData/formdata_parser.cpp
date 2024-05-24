@@ -8,6 +8,7 @@
 #include <sstream>
 #include <algorithm>
 
+#include "FormData/exceptions.h"
 
 using namespace multipart;
 
@@ -27,7 +28,7 @@ size_t find_body_len(char *data, ssize_t from, ssize_t to) {
             }
             break;
         } else {
-            throw std::runtime_error("Cant find body end: unknown symbol");
+            throw formdata_parse_exception("Cant find body end: unknown symbol");
         }
     }
     return p - from + 1;
@@ -98,7 +99,7 @@ size_t formdata_parser::find_possible_boundary_pos(char *data, size_t from, size
 
 void formdata_parser::parse_boundary(char *data, size_t  from, size_t to) const {
     if (find_possible_boundary_from_eol(data, from, to) != to)  {
-        throw std::runtime_error("Invalid boundary symbol");
+        throw formdata_parse_exception("Invalid formdata boundary symbol.");
     }  
 }
 
@@ -130,7 +131,7 @@ void formdata_parser::parse_header(char *data, size_t  parse_from, size_t parse_
         value = line.substr(type_token.size());
     }
     else {
-        throw std::runtime_error("Uncknown token in line: " + std::string(line));
+        formdata_parse_exception("Uncknown token in line: " + std::string(line));
     }
     if (!on_field_impl_) throw std::runtime_error("on_field_impl_ must be provided");
     on_field_impl_(field, value, formElement_);

@@ -33,6 +33,7 @@ add_library(Server STATIC
    Cookie/cookie.cpp
    Cookie/cookie.h
 
+   http/http_exceptions.h
    http/http_handlers.h
    http/http_server_multithread.h
    http/http_server_multithread.cpp 

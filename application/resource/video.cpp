@@ -7,8 +7,10 @@
 
 #include <DocumentStorage/documentStorage.h>
 #include "utils.h"
+#include "common/formUtils.h"
 
 using namespace ns_video;
+using namespace form;
 
 Video ns_video::tag_invoke(value_to_tag<Video>, const value &jv) {
     Video videoObj;
@@ -40,10 +42,11 @@ static std::string removeExtension(const std::string &fileName){
 Video FormVideoBuilder::build(multipart::FormData &form) {
     auto videoFormEl = form["inputFile"];
     if ( !(videoFormEl.fileName && videoFormEl.storeFilePath) )  {
-            throw std::runtime_error("Incomplete file form element.");
+            throw form_process_exception("Incomplete form - 'inputFile' must be provided.");
     }
     auto header = removeExtension(videoFormEl.fileName.value());//remove extension;
     auto mpegUrl = videoFormEl.storeFilePath.value();
-    auto description = form["description"].text.value();
+    
+    auto description = getTextField(form, "description");
     return Video{generateUuid(), {} , header, description, {}, mpegUrl};
 }

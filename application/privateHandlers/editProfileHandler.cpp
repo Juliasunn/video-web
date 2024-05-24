@@ -11,8 +11,11 @@
 #include "resource/utils.h"
 #include "resource/user.h"
 #include "resource/subject.h"
-#include <common/formUtils.h>
+#include "common/formUtils.h"
+#include "Server/http/http_exceptions.h"
+#include "common/formUtils.h"
 
+using namespace form;
 using namespace ns_subject;
 using namespace ns_user;
 
@@ -50,15 +53,15 @@ void EditProfileHandler::handle_form_complete() {
     std::cout << "[DEBUG] Form complete with " << m_form.size() << " elements." << std::endl;
 
     if (!m_claims.count("uuid")) {
-        throw std::runtime_error("Missing uuid claim.");        
+        throw unauthorized_exception("Missing uuid claim.");     
     }
 
     boost::json::object filter{ {"uuid", m_claims["uuid"]} } ;
     auto dbUser = MongoStorage::instance().getUser(filter);
     auto dbSubject = MongoStorage::instance().getSubject(filter);
 
-    if ( !dbUser || !dbSubject) {   
-        throw std::runtime_error("Profile not found.");
+    if ( !dbUser || !dbSubject) {
+        throw resouce_not_found_exception("Profile not found.");
     }
 
     auto user =  boost::json::value_to<User>( dbUser.value() );
@@ -69,7 +72,7 @@ void EditProfileHandler::handle_form_complete() {
 
     if (subjectUpdate.contains("password")) {
         if (isEmpty(m_form["currentPassword"].text) ||  m_form["currentPassword"].text.value() != subject.password) {
-            throw std::runtime_error("Failed to change password: password confirmation failed.");
+            throw unauthorized_exception("Password confirmation failed."); 
         }        
     }
 

@@ -5,6 +5,8 @@
 #include <vector>
 #include <boost/utility/string_view.hpp>
 
+#include "Cookie/exceptions.h"
+
 namespace cookieParams {
 
 inline const std::string PATH_PARAM = "path";

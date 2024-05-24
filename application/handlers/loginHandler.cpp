@@ -16,9 +16,9 @@
 #include "DocumentStorage/documentStorage.h"
 #include "AuthorizationService/authorizationProvider.h"
 #include <Cookie/cookie.h>
-//#include <Cookie/utils.h>
-#include <common/formUtils.h>
+#include "common/formUtils.h"
 
+using namespace form;
 using namespace ns_server;
 using namespace multipart;
 
@@ -29,15 +29,22 @@ std::unique_ptr<BaseHttpRequestHandler> LoginHandler::clone() {
 
 http::response<http::empty_body> LoginHandler::form_response() const {
     http::response<http::empty_body> res;
-    Cookie requestCookie({"token", IdentityProvider::instance()->getIdentity(m_authData)});
-    requestCookie["Path"] = "/";
-    res.set(http::field::set_cookie, requestCookie.serialize());
+
+    try {
+        Cookie requestCookie({"token", IdentityProvider::instance()->getIdentity(m_authData)});
+        requestCookie["Path"] = "/";
+        res.set(http::field::set_cookie, requestCookie.serialize());
+        res.result(http::status::ok);  
+    } catch (const std::exception &e) {
+      res.result(http::status::unauthorized);
+    }
   // Set cookie: " << requestCookie.serialize() << std::endl;
  
     res.version(m_request.version());
     res.keep_alive(m_request.keep_alive());
-    res.result(http::status::ok);
     res.set("Access-Control-Allow-Origin", "*");
+
+    
     std::cout << "[DEBUG] Authorization response: " << res << std::endl; 
     return res;  
 } 

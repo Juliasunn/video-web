@@ -10,8 +10,9 @@
 #include "DocumentStorage/documentStorage.h"
 #include "resource/user.h"
 #include "resource/subject.h"
+#include "common/formUtils.h"
 
-//using namespace ns_user;
+using namespace form;
 using namespace ns_server;
 using namespace multipart;
 

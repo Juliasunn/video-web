@@ -14,9 +14,12 @@ class BaseChannel {
       avatar.src = "http://127.0.0.1:8082" + channelJson.avatarImgUrl;
       
       
-      var channel = document.createElement('p');
-      channel.className="text-muted  my-1";
+    //  var channel = document.createElement('p');
+      var channel = document.createElement('link');
+     // channel.className="text-muted  my-1";
+      channel.href = "http://127.0.0.1:8082/private/profile"
       channel.innerHTML = channelJson.name
+      console.log("channel = ", channel)
       
      this.#element.appendChild(avatar);
      this.#element.appendChild(channel); 

@@ -3,49 +3,32 @@
 #include <string>
 #include <exception>
 
+#include "Server/http/http_exceptions.h"
+
 namespace authorization_error {
 
-class InvalidAuthorizationDataException : public std::exception {
-public:
-    const char* what() const noexcept override {
-        return m_what.c_str();
-    }
-    InvalidAuthorizationDataException(const std::string &what) noexcept: m_what(what) {}
-protected:
-
-    const std::string m_what;
-};
-
-class MissingRequiredFieldException : public InvalidAuthorizationDataException {
+class MissingRequiredFieldException : public unauthorized_exception {
 public:
     MissingRequiredFieldException(const std::string &field ) noexcept : 
-        InvalidAuthorizationDataException("Missing required authorization field: " + field) {}
+        unauthorized_exception("Missing required authorization field: " + field) {}
 };
 
-
-class IncompleteAuthorizationDataException : public InvalidAuthorizationDataException {
+class IncompleteAuthorizationDataException : public unauthorized_exception {
 public:
     IncompleteAuthorizationDataException() noexcept : 
-        InvalidAuthorizationDataException("Not enough data provided for authorization.") {}
+        unauthorized_exception("Not enough data provided for authorization.") {}
 };
 
-
-class IncorrectAuthorizationDataException : public InvalidAuthorizationDataException {
+class IncorrectAuthorizationDataException : public unauthorized_exception {
 public:
     IncorrectAuthorizationDataException() noexcept: 
-        InvalidAuthorizationDataException("Incorrect authorization data.") {}
+        unauthorized_exception("Incorrect authorization data.") {}
 };
 
-class InternalAuthorizationException : public std::exception {
+class InternalAuthorizationException : public unauthorized_exception {
 public:
     InternalAuthorizationException(const std::string &info ) noexcept : 
-        m_what("Internal authorization error: " + info) {}
-
-    const char* what() const noexcept override {
-        return m_what.c_str();
-    }
-protected:
-    const std::string m_what;
+        unauthorized_exception("Internal authorization error: " + info) {}
 };
 
 }

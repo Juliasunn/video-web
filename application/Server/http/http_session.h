@@ -6,6 +6,7 @@
 
 #include "base_session.h"
 #include "http_handlers.h"
+#include "http/http_exceptions.h"
 
 class http_session : public base_session
 {

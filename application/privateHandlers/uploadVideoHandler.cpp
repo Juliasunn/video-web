@@ -11,7 +11,9 @@
 #include "mediaProcessor.h"
 #include "resource/video.h"
 #include "resource/utils.h"
+#include "common/formUtils.h"
 
+using namespace form;
 using namespace ns_video;
 using namespace multipart;
 
@@ -35,7 +37,7 @@ void UploadVideoHandler::handle_form_complete() {
     std::cout << "[DEBUG] Form complete with " << m_form.size() << " elements." << std::endl;
 
     if (!m_claims.count("uuid")) {
-        throw std::runtime_error("Missing uuid claim.");        
+        throw unauthorized_exception("Missing uuid claim.");   
     }
 
     Video videoObj = FormVideoBuilder().build(m_form);
@@ -59,11 +61,8 @@ void UploadVideoHandler::handle_file(const char *data,
         auto srcExtension = std::filesystem::path(form_element.fileName.value()).extension();
         form_element.storeFilePath = m_mpegStorage->createFile(srcExtension);
     }
-    auto fileUrl = form_element.storeFilePath.value();
-    
-    if (!m_mpegStorage->writeToFile(fileUrl, data, len)) {
-        throw std::runtime_error("Cant write to file: "+ fileUrl +".");
-    }
+    auto fileUrl = form_element.storeFilePath.value();  
+    m_mpegStorage->writeToFile(fileUrl, data, len);
 }
 
 void UploadVideoHandler::setClaims(const Claims &claims) {

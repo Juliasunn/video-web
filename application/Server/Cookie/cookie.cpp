@@ -76,7 +76,7 @@ CookieAttr& Cookie::operator[]( const std::string& key ) {
 Cookie CookieParser::parse(const std::string_view strview) {
     auto raw_cookie_attrs = string_utils::split(strview, "; ");
     if (raw_cookie_attrs.empty()) {
-        throw std::runtime_error("Invalid cookie");
+        throw cookie_parse_exception("Invalid cookie");
     }
     Cookie cookie(parseCookie(*raw_cookie_attrs.begin()));
 
@@ -102,7 +102,7 @@ void CookieParser::parseAttr(std::string str, Cookie &cookie) {
         cookie[key_val[0]] = CookieAttr{key_val[0], key_val[1]};
     }
     else {
-        throw std::runtime_error("Invalid cookie param");            
+        throw cookie_parse_exception("Invalid cookie param");            
     }
 }
 
@@ -114,7 +114,7 @@ Cookie CookieParser::parseCookie(std::string str) {
     if (key_val.size() == 2) {
         return Cookie(CookieAttr{key_val[0], key_val[1]});
     }
-    throw std::runtime_error("Invalid cookie value");            
+    throw cookie_parse_exception("Invalid cookie value");            
 }
 
  

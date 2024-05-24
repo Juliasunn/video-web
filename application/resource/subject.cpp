@@ -8,6 +8,7 @@
 #include "common/formUtils.h"
 
 using namespace ns_subject;
+using namespace form;
 
 Subject ns_subject::tag_invoke(value_to_tag<Subject>, const value &jv) {
     Subject sub;
@@ -30,13 +31,16 @@ void ns_subject::tag_invoke(value_from_tag, value &jv, const Subject &sub) {
 }
 
 Subject FormSubjectBuilder::build(multipart::FormData &form, const boost::uuids::uuid &uuid) {
-    auto login = form["inputLogin"].text.value();
+    auto login = getTextField(form, "inputLogin");
     std::cout << login << std::endl;
-    auto phone = form["inputPhone"].text.value();
+
+    auto phone = getTextField(form, "inputPhone");
     std::cout << phone << std::endl;
-    auto mail = form["inputMail"].text.value();
+
+    auto mail = getTextField(form, "inputMail");
     std::cout << mail << std::endl;
-    auto password = form["inputPassword"].text.value();
+
+    auto password = getTextField(form, "inputPassword");
     std::cout << password << std::endl;
 
     return Subject{uuid, login, mail, phone, password};    
