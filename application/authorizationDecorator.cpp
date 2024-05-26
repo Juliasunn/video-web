@@ -55,7 +55,7 @@ void RedirectToLoginStrategy::process_request(std::shared_ptr<http_session> sess
     session->write(std::move(res)); 
 }
 
-BaseAuthorizationDecorator::BaseAuthorizationDecorator(const std::string &checkPermission,
+BaseAuthorizationDecorator::BaseAuthorizationDecorator(Permissions checkPermission,
     std::shared_ptr<BaseNotAuthorizedStrategy> notAuthorizedStrategy) :
     m_checkPermission(checkPermission), m_notAuthorizedStrategy(notAuthorizedStrategy) {}
 

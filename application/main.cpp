@@ -13,6 +13,7 @@
 #include "handlers/registrationHandler.h"
 #include "handlers/notFoundHandler.h"
 #include "handlers/fetchUserHandler.h"
+#include "handlers/authorizationHandler.h"
 
 #include "privateHandlers/uploadVideoHandler.h"
 #include "privateHandlers/profileHandler.h"
@@ -31,6 +32,10 @@ void initEndpoints(std::shared_ptr<http_server_multithread> &server) {
     using namespace ns_server;
     using namespace disk_storage;
 
+   // auto nginxAuthSubrequestHandler = std::make_unique<AuthorizationDecorator<SuccessAuthorizationHandler>>("ManageAccount", 
+   // std::make_shared<ForbiddenResponseStatusStrategy>());
+    server-> add_endpoint_handler("GET", "/auth", std::make_unique<AuthorizationHandler>());
+
     server-> add_endpoint_handler("GET", "_", std::make_unique<UncknownRequestHandler>());
     // Load .mp4
     auto mpegFileStorage = std::make_shared<DiskStorage>( "/mpeg", MPEG_DIR);
@@ -45,7 +50,7 @@ void initEndpoints(std::shared_ptr<http_server_multithread> &server) {
     auto avatarFileStorage = std::make_shared<DiskStorage>( "/avatar", AVATAR_DIR);
 
 
-    auto UploadWithAuth = std::make_unique<AuthorizationDecorator<UploadVideoHandler>>("ManageVideo", 
+    auto UploadWithAuth = std::make_unique<AuthorizationDecorator<UploadVideoHandler>>(Permissions::ManageVideo, 
         std::make_shared<ForbiddenResponseStatusStrategy>(),
         previewCreator, mpegFileStorage);
     server-> add_endpoint_handler("POST", "/api/upload", std::move(UploadWithAuth));
@@ -65,15 +70,15 @@ void initEndpoints(std::shared_ptr<http_server_multithread> &server) {
         std::make_unique<RegistrationHandler>(avatarFileStorage));
 
 
-    auto privatePagesHandler = std::make_unique<AuthorizationDecorator<PageHandler>>("ManageAccount", 
-        std::make_shared<RedirectToLoginStrategy>("/home/julia/videoserver/web/login.html"), "/home/julia/videoserver/web/private");
-    server-> add_endpoint_handler("GET", "/private_", std::move(privatePagesHandler));
+   // auto privatePagesHandler = std::make_unique<AuthorizationDecorator<PageHandler>>(Permissions::ManageAccount, 
+   //     std::make_shared<RedirectToLoginStrategy>("/home/julia/videoserver/web/login.html"), "/home/julia/videoserver/web/private");
+  //  server-> add_endpoint_handler("GET", "/private_", std::move(privatePagesHandler));
     
-    auto profileHandler = std::make_unique<AuthorizationDecorator<ProfileHandler>>("ManageAccount", 
+    auto profileHandler = std::make_unique<AuthorizationDecorator<ProfileHandler>>(Permissions::ManageAccount, 
      std::make_shared<RedirectToLoginStrategy>("/home/julia/videoserver/web/login.html") );
     server-> add_endpoint_handler("GET", "/api/profile", std::move(profileHandler));
 
-     auto editProfileHandler = std::make_unique<AuthorizationDecorator<EditProfileHandler>>("ManageAccount", 
+     auto editProfileHandler = std::make_unique<AuthorizationDecorator<EditProfileHandler>>(Permissions::ManageAccount, 
      std::make_shared<RedirectToLoginStrategy>("/home/julia/videoserver/web/login.html"), avatarFileStorage );
     server-> add_endpoint_handler("POST", "/api/profile", std::move(editProfileHandler));   
     //server-> add_endpoint_handler("GET", "/profile.html", std::make_unique<ns_server::PageHandler>());

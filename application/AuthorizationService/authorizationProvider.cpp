@@ -18,15 +18,28 @@
 #include "authorizationErrors.h"
 
 using namespace authorization_error;
+using namespace boost::json;
+
+Roles tag_invoke(boost::json::value_to_tag<Roles>, const boost::json::value &jv) {
+    /* Can be decoded as int64 or uint64*/
+    if (jv.is_uint64()) {
+        return static_cast<Roles>(jv.as_uint64());
+    } 
+    return static_cast<Roles>(jv.as_int64());
+}
+
+/* for creating json::value from Message object */
+void tag_invoke(boost::json::value_from_tag, boost::json::value &jv, Roles const &role) {  
+    jv.emplace_uint64()= static_cast<std::uint64_t>(role);
+}
 
 IdentityProvider *IdentityProvider::m_instance = nullptr;
-AuthorizationProvider *AuthorizationProvider::m_instance = nullptr;
 
 IdentityProvider * IdentityProvider::instance() {
-        if (!m_instance) {
-            m_instance = new IdentityProvider();
-        }
-        return m_instance;
+    if (!m_instance) {
+        m_instance = new IdentityProvider();
+    }
+    return m_instance;
 }
 
 Identity IdentityProvider::getIdentity(const boost::json::object &authData) const {
@@ -48,8 +61,8 @@ Identity IdentityProvider::getIdentity(const boost::json::object &authData) cons
     auto token = jwt::create()
     .set_type("JWS")
     .set_issuer("auth0")
-    .set_payload_claim("role", jwt::claim(std::string("AuthorizedUser")))
-    .set_payload_claim("uuid", jwt::claim(uuidStr))
+    .set_payload_claim(claims::role, jwt::claim(boost::json::value_from<Roles>(Roles::AuthorizedUser)))
+    .set_payload_claim(claims::sub, jwt::claim(uuidStr))
     .sign(jwt::algorithm::hs256{"secret"});
     return token;
 };
@@ -60,80 +73,52 @@ Claims IdentityProvider::getClaims(Identity identity) const {
     auto verifier = jwt::verify()
     .with_issuer("auth0")
     .allow_algorithm(jwt::algorithm::hs256{"secret"});
-    verifier.verify(decoded_token);
 
-   // boost::json::object claimsObj = decoded_token.to_json().as_object();
+    verifier.verify(decoded_token);
     boost::json::object claimsObj = decoded_token.get_payload_json();
     std::cout << boost::json::serialize(claimsObj) << std::endl;
-    //claimsObj["role"] = decoded_token.get_payload_claim("role");
     return claimsObj;
 } 
 
 Claims IdentityProvider::getClaims() const  {
     std::cout << "[DEBUG] IdentityProvider::getClaims DEFAULT" <<  std::endl;
     boost::json::object claimsObj;
-    claimsObj["role"] = "GlobalGuest";
+    claimsObj[claims::role] = boost::json::value_from<Roles>(Roles::GlobalGuest);
     return claimsObj;        
 }
 
-
-const std::unordered_map<std::string, std::unordered_set<std::string>> RolesToPermissions =
- {
+static const std::unordered_map<Roles, std::unordered_set<Permissions>> RolesToPermissions = {
     {
-        "GlobalGuest",
-         {"PlayVideo", "ListVideos", "PlayStream", "CreateAccount", "Login"}
+        Roles::GlobalGuest,
+        {Permissions::PlayVideo, Permissions::ListVideos, Permissions::PlayStream, Permissions::CreateAccount, Permissions::Login}
     },
     {
-        "AuthorizedUser",
-         {"ManageVideo", "PlayVideo", "ListVideos", "ManageStream", "PlayStream", "ManageAccount"}
+        Roles::AuthorizedUser,
+        {Permissions::PlayVideo, Permissions::ListVideos, Permissions::PlayStream, Permissions::ManageVideo, Permissions::ManageStream, Permissions::ManageAccount}
     }
+};
 
-};
-/*
-const boost::json::array Policies {
-    {
-        "ManageVideo",
-        {"UploadVideoAction", "DeleteVideoAction", "UpdateVideoAction"}
-    },
-    {
-        "ManageStream",
-        {"StartStreamAction", "FinishStramAction"}
-    },
-    {
-        "PlayVideo",
-        {"PlayVideoAction"}
-    },
-    {
-        "PlayStream",
-        {"PlayStreamAction"}
-    },    
-    {
-        "ListVideos",
-        {"ListVideosAction"}
-    },
-    {
-        "Login",
-        {"LoginAction"}
-    },    
-    {
-        "CreateAccount",
-        {"CreateAccountAction"}
-    },        
-};
-*/
-bool AuthorizationProvider::checkPermission(const Claims &subjectClaims, const std::string requiredPermission) {
-    auto roleClaim = subjectClaims.find("role");
+AuthorizationProvider *AuthorizationProvider::m_instance = nullptr;
+
+AuthorizationProvider* AuthorizationProvider::instance() {
+    if (!m_instance) {
+        m_instance = new AuthorizationProvider();
+    }
+    return m_instance;
+}
+
+bool AuthorizationProvider::checkPermission(const Claims &subjectClaims,  Permissions requiredPermission) {
+    auto roleClaim = subjectClaims.find(claims::role);
     if (roleClaim == subjectClaims.end()) {
         //no role claim 
         return false;
     }
-    auto subjectRole = roleClaim->value().as_string().c_str();
+    auto subjectRole = boost::json::value_to<Roles>( roleClaim->value() );
 
     if (!RolesToPermissions.count(subjectRole)) {
         //Uncknown role
         return false;
     }
-
     auto rolePermissioms = RolesToPermissions.at(subjectRole);
     auto hasPermission = rolePermissioms.find(requiredPermission) != rolePermissioms.end();
     std::cout << "[DEBUG] Role: " <<  subjectRole << " permission required: " << 

@@ -60,11 +60,11 @@ public:
     virtual BaseHttpRequestHandler &handler() = 0; 
 
 protected:
-    BaseAuthorizationDecorator(const std::string &checkPermission,
+    BaseAuthorizationDecorator(Permissions checkPermission,
         std::shared_ptr<BaseNotAuthorizedStrategy> notAuthorizedStrategy);
 
 
-    std::string m_checkPermission;
+    Permissions m_checkPermission;
     std::shared_ptr<BaseNotAuthorizedStrategy> m_notAuthorizedStrategy;
 };
 
@@ -74,7 +74,7 @@ class AuthorizationDecorator : public BaseAuthorizationDecorator {
 
 public:
     template <typename ... Args>
-    AuthorizationDecorator(const std::string &checkPermission,
+    AuthorizationDecorator(Permissions checkPermission,
          std::shared_ptr<BaseNotAuthorizedStrategy> notAuthorizedStrategy,
         Args ... args) : BaseAuthorizationDecorator(checkPermission, notAuthorizedStrategy), 
         m_handler(std::make_unique<Handler>(std::forward<Args>(args)...))   {}

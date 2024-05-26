@@ -52,10 +52,10 @@ std::unique_ptr<BaseHttpRequestHandler> ProfileHandler::clone(){
 void ProfileHandler::process_request(std::shared_ptr<http_session> session ) {
     auto response = prepareCommonResponse(m_request);
     //No path variables
-    if (!m_claims.count("uuid")) {
-        throw unauthorized_exception("Missing uuid claim.");       
+    if (!m_claims.count(claims::sub)) {
+        throw unauthorized_exception("Missing subject claim.");       
     }
-    auto uuidSerialized = boost::json::value_to<std::string>(m_claims["uuid"]);
+    auto uuidSerialized = boost::json::value_to<std::string>(m_claims[claims::sub]);
 
     //https://www.youtube.com/api/profile
     fetchUser(uuidSerialized, response);

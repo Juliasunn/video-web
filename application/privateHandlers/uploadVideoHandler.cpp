@@ -36,13 +36,13 @@ std::unique_ptr<ns_server::BaseHttpRequestHandler> UploadVideoHandler::clone(){
 void UploadVideoHandler::handle_form_complete() {
     std::cout << "[DEBUG] Form complete with " << m_form.size() << " elements." << std::endl;
 
-    if (!m_claims.count("uuid")) {
-        throw unauthorized_exception("Missing uuid claim.");   
+    if (!m_claims.count(claims::sub)) {
+        throw unauthorized_exception("Missing subject claim.");   
     }
 
     Video videoObj = FormVideoBuilder().build(m_form);
     /* Set channel uuid*/
-    extract(m_claims, videoObj.channelUuid, "uuid");
+    extract(m_claims, videoObj.channelUuid, claims::sub);
 
     disk_storage::Url previewImgUrl = m_previewCreator->process(videoObj.videoUrl, m_mpegStorage);
     videoObj.previewImgUrl = previewImgUrl;

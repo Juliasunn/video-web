@@ -5,14 +5,9 @@
 
 #include <boost/json.hpp>
 
-
-
-
-// in-memory database
-/*
 enum Roles {
     GlobalGuest,
-    User
+    AuthorizedUser
 };
 
 enum Permissions {
@@ -22,33 +17,17 @@ enum Permissions {
 
     ManageStream, //User
     PlayStream,  //GlobalGuest
-
+    
+    ManageAccount, //User
     CreateAccount, //GlobalGuest
     Login         //GlobalGuest
 };
 
-enum Actions {
-    UploadVideoAction, //-> ManageVideo
-    DeleteVideoAction, //-> ManageVideo
-    UpdateVideoAction, //-> ManageVideo
+namespace claims {
+constexpr const char * const role = "role";
+constexpr const char * const sub = "sub"; //uuid
+} //namespace claims
 
-    StartStreamAction, //-> ManageStream
-    FinishStramAction, //-> ManageStream
-
-    PlayVideoAction,
-    PlayStreamAction,
-
-    ListVideosAction,
-    CreateAccountAction, //GlobalGuest
-    LoginAction         //GlobalGuest    
-
-
-};
-
-enum UserClaims {
-    role
-};
-*/
 using Identity = std::string;
 using Claims = boost::json::object;
 
@@ -56,7 +35,6 @@ class IdentityProvider {
 public:
     static IdentityProvider *instance();
     Identity getIdentity(const boost::json::object &authData) const;
-    //Identity getIdentity(const std::string &login, const std::string &password) const;
     Claims getClaims(Identity identity) const;
     Claims getClaims() const;
 
@@ -65,20 +43,11 @@ private:
     IdentityProvider() = default;
 };
 
-
 class AuthorizationProvider {
 public:
-    static AuthorizationProvider* instance() {
-        if (!m_instance) {
-            m_instance = new AuthorizationProvider();
-        }
-        return m_instance;
-    }
-
-   // bool checkPermission(const Identity &ident, const Context &ctx);
-    bool checkPermission(const Claims &subjectClaims, const std::string requiredPermission);
+    static AuthorizationProvider* instance();
+    bool checkPermission(const Claims &subjectClaims, Permissions requiredPermission);
 private:
     static AuthorizationProvider *m_instance;
-    
     AuthorizationProvider() = default;     
 };

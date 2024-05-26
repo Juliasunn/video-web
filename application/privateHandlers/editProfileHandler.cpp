@@ -52,11 +52,11 @@ std::unique_ptr<ns_server::BaseHttpRequestHandler> EditProfileHandler::clone(){
 void EditProfileHandler::handle_form_complete() {
     std::cout << "[DEBUG] Form complete with " << m_form.size() << " elements." << std::endl;
 
-    if (!m_claims.count("uuid")) {
-        throw unauthorized_exception("Missing uuid claim.");     
+    if (!m_claims.count(claims::sub)) {
+        throw unauthorized_exception("Missing subject claim.");     
     }
 
-    boost::json::object filter{ {"uuid", m_claims["uuid"]} } ;
+    boost::json::object filter{ {"uuid", m_claims[claims::sub]} } ;
     auto dbUser = MongoStorage::instance().getUser(filter);
     auto dbSubject = MongoStorage::instance().getSubject(filter);
 
