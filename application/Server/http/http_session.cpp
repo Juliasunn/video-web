@@ -20,7 +20,7 @@ http_session::http_session(tcp::socket &socket,
     
     for (const auto &[endpoint, handler_ptr] : endpoint_handlers) {
         if (handlers_.count(endpoint)) {
-            std::cout << "!!!Overriting existing endpoint with: " << endpoint.prefix_path << std::endl;
+            std::cout << "[Warning] overriting existing endpoint with: " << endpoint.prefix_path << std::endl;
         }
         handlers_[endpoint] = handler_ptr->clone();
     }
@@ -120,14 +120,23 @@ void http_session::on_read_handler(const boost::system::error_code& ec,
     for ( ; !handlers_.count(req_ep); --req_ep) {
         std::cout << "[Request] - " << req_ep.prefix_path << std::endl;
         if (!req_ep) {
-            throw std::runtime_error("Cant find handler for endpoint");
+            respodWithError(request, http::status::not_found);
+            return;
         }    
     }
     handlers_[req_ep]->request(request);
     handlers_[req_ep]->extra_bytes(request_extra_buff_.data());
     request_extra_buff_.clear();
     handlers_[req_ep]->set_path_props(req_ep);
-    handlers_[req_ep]->process_request(get_shared());
+
+    try {
+        handlers_[req_ep]->process_request(get_shared());
+    } catch (const http_exception &e) {
+        respodWithError(request, e.status());
+        std::cout << e.what() << std::endl;
+    } catch ( ... ) {
+        respodWithError(request, http::status::internal_server_error);
+    }
 }
 
 void http_session::finishPriv() {
@@ -144,4 +153,12 @@ void http_session::finishPriv() {
         //and close it. 
     } catch (...) { }
     socket_stream_.close();        
+}
+
+void http_session::respodWithError(const http::request<http::string_body> &request, http::status error){
+    http::response<http::empty_body> response;
+    response.result(error);
+    response.version(request.version());
+    response.keep_alive(request.keep_alive()); 
+    this->write(std::move(response)); 
 }

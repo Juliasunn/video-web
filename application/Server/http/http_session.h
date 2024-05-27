@@ -88,6 +88,8 @@ private:
 
     void finishPriv();
 
+    void respodWithError(const http::request<http::string_body> &request, http::status error);
+
     beast::tcp_stream socket_stream_;
     boost::asio::io_context::strand socket_io_;
     boost::recursive_mutex mutex_;

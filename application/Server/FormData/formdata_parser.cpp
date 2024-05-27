@@ -107,12 +107,12 @@ void formdata_parser::parse_body(char *data, size_t  parse_from, size_t parse_un
     size_t len = parse_until - parse_from;
 
     if (formElement_.fileName) {
-        if (!on_file_impl_) throw std::runtime_error("on_file_impl_ must be provided");
+        if (!on_file_impl_) throw internal_server_exception("on_file_impl_ must be provided");
         on_file_impl_(data + parse_from, len , formElement_);
 
     }
     else {
-        if (!on_text_impl_) throw std::runtime_error("on_text_impl_ must be provided");
+        if (!on_text_impl_) throw internal_server_exception("on_text_impl_ must be provided");
         on_text_impl_(data + parse_from, len, formElement_);
     }
 }
@@ -133,7 +133,7 @@ void formdata_parser::parse_header(char *data, size_t  parse_from, size_t parse_
     else {
         formdata_parse_exception("Uncknown token in line: " + std::string(line));
     }
-    if (!on_field_impl_) throw std::runtime_error("on_field_impl_ must be provided");
+    if (!on_field_impl_) throw internal_server_exception("on_field_impl_ must be provided");
     on_field_impl_(field, value, formElement_);
 }
 
@@ -154,7 +154,7 @@ void formdata_parser::parse_chunk(shared_buffer &chunkBuff, size_t bytes_transfe
     size_t eof = chunkBuff.readable_space();
     
     if ( bytes_remaining_ < bytes_transferred ) {
-        throw std::runtime_error("Parse error: bytes remaining: " + std::to_string(bytes_remaining_) +
+        throw internal_server_exception("Parse error: bytes remaining: " + std::to_string(bytes_remaining_) +
            " < bytes transferred: " + std::to_string(bytes_transferred));
     }
     bytes_remaining_ -= bytes_transferred;
@@ -194,7 +194,7 @@ void formdata_parser::parse_chunk(shared_buffer &chunkBuff, size_t bytes_transfe
             to =  from + body_len; 
             parse_body(data, from, to);
 
-            if (!on_complete_impl_) throw std::runtime_error("on_complete_impl_ must be provided");
+            if (!on_complete_impl_) throw internal_server_exception("on_complete_impl_ must be provided");
             on_complete_impl_(formElement_);
             state_ = state::start_line;
             break;

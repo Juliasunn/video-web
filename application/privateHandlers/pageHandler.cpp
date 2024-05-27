@@ -68,7 +68,7 @@ void PageHandler::process_request(std::shared_ptr<http_session> session ) {
     }
     // Handle an unknown error
     if (ec) {
-        throw std::runtime_error("Uncknown error");
+        throw internal_server_exception("Uncknown file open error.");
     }
     auto const size = body.size();
 

@@ -26,6 +26,7 @@ Endpoint::operator bool() const{
 }
 
 Endpoint &Endpoint::operator -- () {
+    std::cout << "operator --" << std::endl;
     size_t start_replace = prefix_path.find_last_of('/');
     size_t end_replace = prefix_path.find_first_of('_');
     if (end_replace == std::string::npos) end_replace = prefix_path.size();

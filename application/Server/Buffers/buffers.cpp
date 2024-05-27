@@ -1,5 +1,7 @@
 #include "buffers.h"
 
+#include "http/http_exceptions.h"
+
 shared_buffer::shared_buffer(size_t size) : buff(new char[size]), size(size)
 {}
 
@@ -22,7 +24,7 @@ char *shared_buffer::get_available() const {
 
 size_t shared_buffer::available_space() const {
     if (size < in_use) {
-        throw std::runtime_error("Out of shared buffer boundary.");
+        throw internal_server_exception("Out of shared buffer boundary.");
     }
     return size - in_use;
 }
@@ -34,7 +36,7 @@ size_t shared_buffer::readable_space() const {
 size_t shared_buffer::put(const boost::asio::mutable_buffer &src) {
     auto n = src.size();
     if (n > available_space()) {
-        throw std::runtime_error("Out of shared buffer boundary.");
+        throw internal_server_exception("Out of shared buffer boundary.");
     }
     memcpy(get_available(), src.data(), n);
     put(n);
@@ -57,7 +59,7 @@ size_t shared_buffer::prepend(const shared_buffer &src) {
 
 size_t shared_buffer::put(size_t n) {
     if (n > available_space()) {
-        throw std::runtime_error("Out of shared buffer boundary.");
+        throw internal_server_exception("Out of shared buffer boundary.");
     }
     in_use += n;
     return n;
@@ -65,7 +67,7 @@ size_t shared_buffer::put(size_t n) {
 
 size_t shared_buffer::fill(const char *data, size_t n) {
     if (n > size) {
-        throw std::runtime_error("Out of shared buffer boundary.");
+        throw internal_server_exception("Out of shared buffer boundary.");
     }    
     memcpy(buff.get(), data, n); //write all data to prepend from src
     in_use = n; 

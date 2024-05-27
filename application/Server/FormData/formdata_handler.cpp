@@ -14,6 +14,7 @@
 #include <algorithm>
 
 #include "http/http_session.h"
+#include "FormData/exceptions.h"
 
 
 namespace {
@@ -44,12 +45,12 @@ std::string get_boundary(const http::request<BodyType> &req) {
     auto field_value = req.base()[http::field::content_type];
 
     if (field_value.find(multipart_type) == boost::string_view::npos) {
-        throw std::runtime_error("Error, cant find Boundary for not multipart/form-data type");
+        throw formdata_parse_exception("Error, cant find Boundary for not multipart/form-data type");
     }
     auto boundary_key_pos = field_value.find(boundary_key);
 
     if (boundary_key_pos == boost::string_view::npos) {
-        throw std::runtime_error("Error, cant find Boundary for multipart/form-data");
+        throw formdata_parse_exception("Error, cant find Boundary for multipart/form-data");
     }
 
     auto pos = boundary_key_pos + boundary_key.size();
@@ -101,11 +102,10 @@ void formdata_handler::handle_file(const char *data,
         std::ios::binary | std::ios::app);
     
     if (!save_file.is_open()) {
-        throw std::runtime_error("Cant open file: "+ file_path +" !");
+        throw internal_server_exception("Cant open file: "+ file_path +" !");
     }
     save_file.write(data, len);
     save_file.close();
-    //form_element.storeFilePath = file_path;
 }
 
 //обработка текстового поля
@@ -135,7 +135,7 @@ void formdata_handler::handle_field(FormdataFields field,
         std::cout << "[Content-type]: " << values << std::endl;
         break;
     default: 
-        throw std::runtime_error("Unsupported field for multipart/form-data format");
+        throw formdata_parse_exception("Unsupported field for multipart/form-data format");
     }
 }
 
@@ -147,7 +147,7 @@ void formdata_handler::process_request(std::shared_ptr<http_session> session ) {
     auto boundary = get_boundary(m_request);
 
     if (!m_request.base().count(http::field::content_length)) {
-        throw std::runtime_error("Content-length must be known for multipart/form-data parsing");
+        throw formdata_parse_exception("Content-length must be known for multipart/form-data parsing");
     }
     auto content_len = boost::lexical_cast<size_t>
         (m_request.base()[http::field::content_length].to_string());

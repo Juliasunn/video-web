@@ -16,7 +16,7 @@ public:
     const char* what() const noexcept override {
         return m_what.c_str();
     }
-    http::status status() {
+    http::status status() const {
         return m_http_status;
     }
 private:
