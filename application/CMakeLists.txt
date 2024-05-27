@@ -66,7 +66,6 @@ add_executable(HttpLiveStreaming main.cpp
     handlers/loadMediaHandler.h
     handlers/fetchUserHandler.cpp
     handlers/fetchUserHandler.h   
-    handlers/notFoundHandler.h
     handlers/loginHandler.cpp
     handlers/loginHandler.h 
     handlers/registrationHandler.cpp

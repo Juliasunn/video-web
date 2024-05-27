@@ -11,7 +11,6 @@
 #include "handlers/loadMediaHandler.h"
 #include "handlers/loginHandler.h"
 #include "handlers/registrationHandler.h"
-#include "handlers/notFoundHandler.h"
 #include "handlers/fetchUserHandler.h"
 #include "handlers/authorizationHandler.h"
 
@@ -36,7 +35,6 @@ void initEndpoints(std::shared_ptr<http_server_multithread> &server) {
    // std::make_shared<ForbiddenResponseStatusStrategy>());
     server-> add_endpoint_handler("GET", "/auth", std::make_unique<AuthorizationHandler>());
 
-   // server-> add_endpoint_handler("GET", "_", std::make_unique<UncknownRequestHandler>());
     // Load .mp4
     auto mpegFileStorage = std::make_shared<DiskStorage>( "/mpeg", MPEG_DIR);
     server-> add_endpoint_handler("GET", "/api/media/mpeg_", std::make_unique<MediaRequestHandler>(mpegFileStorage));
