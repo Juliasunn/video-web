@@ -51,5 +51,5 @@ void AuthorizationHandler::process_request(std::shared_ptr<http_session> session
     }
 
     session->write(std::move(response));
-    session->finish();          
+    //session->finish();          
 }

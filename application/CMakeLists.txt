@@ -77,8 +77,8 @@ add_executable(HttpLiveStreaming main.cpp
     privateHandlers/uploadVideoHandler.h
     privateHandlers/profileHandler.cpp
     privateHandlers/profileHandler.h
-    privateHandlers/pageHandler.cpp  
-    privateHandlers/pageHandler.h  
+   # privateHandlers/pageHandler.cpp  
+   # privateHandlers/pageHandler.h  
     privateHandlers/editProfileHandler.cpp  
     privateHandlers/editProfileHandler.h 
 

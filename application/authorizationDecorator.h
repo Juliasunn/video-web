@@ -6,7 +6,7 @@
 #include <http/http_handlers.h>
 
 #include <privateHandlers/profileHandler.h>
-#include <privateHandlers/pageHandler.h>
+//#include <privateHandlers/pageHandler.h>
 #include <privateHandlers/uploadVideoHandler.h>
 #include <AuthorizationService/authorizationProvider.h>
 

@@ -58,5 +58,5 @@ void FetchUserHandler::process_request(std::shared_ptr<http_session> session ) {
     }
     std::cout << "Response: " << response << std::endl;
     session->write(std::move(response));
-    session->finish();
+    //session->finish();
 }

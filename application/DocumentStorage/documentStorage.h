@@ -30,7 +30,7 @@ public:
     static MongoStorage &instance();
 
     void addVideo(const boost::json::value &video);
-    std::vector<boost::json::value> getVideo();
+    std::vector<boost::json::value> getVideo(const boost::json::object &filter);
     std::optional<boost::json::value> getVideo(const boost::uuids::uuid &uuid);
 
     std::optional<boost::json::value> getUser(const boost::json::value &uniqueFilter);

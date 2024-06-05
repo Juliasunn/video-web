@@ -13,8 +13,14 @@ using namespace ns_server;
 
 namespace {
 
-void fetchVideoFeed(http::response<http::string_body> &response) {
-    auto videos = MongoStorage::instance().getVideo();
+void fetchVideoFeed(QueryParams &queryParams, http::response<http::string_body> &response) {
+    boost::json::object filter;
+
+    if (queryParams.count("ch")) { //channel
+        filter["channelUuid"] = queryParams["ch"];
+    }
+
+    auto videos = MongoStorage::instance().getVideo(filter);
     boost::json::array jsonVideoArray;
 
     for (const auto &video : videos)  {
@@ -61,7 +67,8 @@ void FetchVideosHandler::process_request(std::shared_ptr<http_session> session )
     auto query = m_path_props.path_vars.at(0);
     
     if (query.find("feed")==0) { //https://www.youtube.com/feed
-        fetchVideoFeed(response);
+        auto queryParams = getQueryPrams(m_path_props);
+        fetchVideoFeed(queryParams, response);
 
     } else if (query.find("watch")==0){       //https://www.youtube.com/watch?v=lu12cTlJQ00
          //?var1=value1&var2=value2 
@@ -71,4 +78,5 @@ void FetchVideosHandler::process_request(std::shared_ptr<http_session> session )
         response.result(http::status::bad_request);
     }
     session->write(std::move(response));
+   // session->finish();
 }

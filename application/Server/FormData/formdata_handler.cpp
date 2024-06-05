@@ -187,7 +187,7 @@ void formdata_handler::readHandler(std::shared_ptr<http_session> session,
     } else {
         handle_form_complete();
         session->write(form_response());
-        session->finish();             
+        //session->finish();             
     }
 }
 

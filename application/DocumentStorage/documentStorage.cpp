@@ -71,10 +71,12 @@ void MongoStorage::addVideo(const boost::json::value &video) {
   auto rv = scopeExecute(prepareInsertOne("webvideodb", "video", video), m_pool);
 }
 
-std::vector<boost::json::value> MongoStorage::getVideo() 
+std::vector<boost::json::value> MongoStorage::getVideo(const boost::json::object &filter) 
 {
-  auto operation = [](mongocxx::client &client) mutable  {
-    return client["webvideodb"]["video"].find({});
+  auto doc = bsoncxx::from_json(boost::json::serialize(filter));
+  
+  auto operation = [doc](mongocxx::client &client) mutable  {
+    return client["webvideodb"]["video"].find(std::move(doc));
   };
   auto cursor_all = scopeExecute(ClientOperation{operation }, m_pool);
 

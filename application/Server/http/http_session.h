@@ -76,14 +76,22 @@ private:
     template <typename BodyType>
     inline void on_write_handler(const boost::system::error_code& ec,
         std::size_t bytes_transferred,
-        shared_msg_buffer<false, BodyType> &)
+        shared_msg_buffer<false, BodyType> &msg_holder)
     {
         if (ec) {
             std::cout << "Error writing to socket - " << ec.message() << std::endl;
-            return;
+            //return;
+        } else {
+            std::cout << "Writen: " << bytes_transferred << " bytes."  << std::endl;
         }
-        std::cout << "Writen: " << bytes_transferred << " bytes."  << std::endl;
-        read();
+        auto close_connection = !msg_holder.message().keep_alive();
+        if (close_connection) {
+            std::cout << "[session] Finish - keep_alive is false"<<std::endl;
+            finish();
+        } else {
+            std::cout << "[session] Read - keep_alive is true"<<std::endl;
+            read();
+        }
     }
 
     void finishPriv();
