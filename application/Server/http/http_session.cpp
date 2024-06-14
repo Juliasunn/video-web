@@ -80,8 +80,8 @@ void http_session::read_priv()
 }
 
 void http_session::read_exactly(size_t transfer,
-    shared_buffer read_buff,
-    std::function<void (shared_buffer)> handle)
+    static_buffer_ptr_t read_buff,
+    std::function<void (static_buffer_ptr_t)> handle)
 {
     auto handler =  socket_io_.wrap(boost::bind(&http_session::on_read_exactly_handler,
         get_shared(),
@@ -90,18 +90,18 @@ void http_session::read_exactly(size_t transfer,
         handle));
  
     boost::asio::async_read(socket_stream_.socket(),
-        read_buff.asio_buff(),
+        read_buff->writable_asio_buff(),
         boost::asio::transfer_exactly(transfer), 
         handler);
 }
 
 void http_session::on_read_exactly_handler(const boost::system::error_code &ec, 
     size_t bytes_transferred,
-    shared_buffer read_buff,
-    std::function<void (shared_buffer)> handle)
+    static_buffer_ptr_t read_buff,
+    std::function<void (static_buffer_ptr_t)> handle)
 {
     std::cout << "[DEBUG] session read_exactly: " << std::to_string(bytes_transferred) << " bytes. " << std::endl;
-    read_buff.put(bytes_transferred);
+    read_buff->append(bytes_transferred);
     handle(read_buff);
 }
 

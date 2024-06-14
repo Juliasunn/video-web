@@ -2,83 +2,62 @@
 
 #include "http/http_exceptions.h"
 
-shared_buffer::shared_buffer(size_t size) : buff(new char[size]), size(size)
-{}
-
-shared_buffer::shared_buffer() : shared_buffer(1024) 
-{}
-
-shared_buffer::shared_buffer(std::string &&src) : shared_buffer(src.size())
-{
-    memmove(get_available(), src.data(), src.size());
-    src.clear();
-}
-
-char *shared_buffer::get() const {
-    return buff.get();
-}
-
-char *shared_buffer::get_available() const {
-    return buff.get() + in_use;
-}
-
-size_t shared_buffer::available_space() const {
+size_t base_static_buffer::writable_space() const {
     if (size < in_use) {
         throw internal_server_exception("Out of shared buffer boundary.");
     }
     return size - in_use;
 }
 
-size_t shared_buffer::readable_space() const {
+char *base_static_buffer::get_writable() {
+    return get() + in_use;
+}
+
+size_t base_static_buffer::readable_space() const {
     return in_use;
 }
 
-size_t shared_buffer::put(const boost::asio::mutable_buffer &src) {
+char *base_static_buffer::get_readable() {
+    return get();
+}
+
+size_t base_static_buffer::append(const boost::asio::mutable_buffer &src) {
     auto n = src.size();
-    if (n > available_space()) {
+    if (n > writable_space()) {
         throw internal_server_exception("Out of shared buffer boundary.");
     }
-    memcpy(get_available(), src.data(), n);
-    put(n);
+    memcpy(get_writable(), src.data(), n);
+    append(n);
     return n;
 }
 
-size_t shared_buffer::prepend(const shared_buffer &src) {
-    auto n = src.in_use;
-    if (!n) {
-        return size;
-    }
-    boost::shared_array<char> reallocated_buff(new char[size+n]);
-    memcpy(reallocated_buff.get(), src.get(), n); //write all data to prepend from src
-    memcpy(reallocated_buff.get()+n, buff.get(), in_use); //write all used data from buff
-    buff = reallocated_buff;
-    size += n;
-    in_use +=n;
-    return size;
+size_t base_static_buffer::overwrite(const char *data, size_t n) {
+    if (n > size) {
+        throw internal_server_exception("Out of shared buffer boundary.");
+    }    
+    memcpy(get(), data, n); //write all data to prepend from src
+    in_use = n; 
+    return n;   
 }
 
-size_t shared_buffer::put(size_t n) {
-    if (n > available_space()) {
+size_t base_static_buffer::append(size_t n) {
+    if (n > writable_space()) {
         throw internal_server_exception("Out of shared buffer boundary.");
     }
     in_use += n;
     return n;
 }
 
-size_t shared_buffer::fill(const char *data, size_t n) {
-    if (n > size) {
-        throw internal_server_exception("Out of shared buffer boundary.");
-    }    
-    memcpy(buff.get(), data, n); //write all data to prepend from src
-    in_use = n; 
-    return n;   
-}
-
-void shared_buffer::clear() {
+void base_static_buffer::clear() {
     in_use = 0;
 }
 
-boost::asio::mutable_buffers_1 shared_buffer::asio_buff() const
+boost::asio::mutable_buffers_1 base_static_buffer::writable_asio_buff()
 {   
-    return boost::asio::buffer(get_available(), available_space());
+    return boost::asio::buffer(get_writable(), writable_space());
+}
+
+boost::asio::mutable_buffers_1 base_static_buffer::readable_asio_buff() 
+{   
+    return boost::asio::buffer(get_readable(), readable_space());
 }

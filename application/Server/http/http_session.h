@@ -1,8 +1,10 @@
 #pragma once
 
 #include <boost/beast/http.hpp>
+#include <boost/beast/http/message.hpp>
 #include <boost/bind.hpp>
 #include <boost/asio/io_context_strand.hpp>
+#include <memory>
 
 #include "base_session.h"
 #include "http_handlers.h"
@@ -11,6 +13,7 @@
 class http_session : public base_session
 {
 public:
+    using static_buffer_ptr_t = std::shared_ptr<base_static_buffer>;
 
     http_session(tcp::socket &socket,
         boost::asio::io_context &context,
@@ -27,21 +30,32 @@ public:
     virtual tcp::socket &socket() override;
 
     void read_exactly(std::size_t bytes_transfer, 
-        shared_buffer read_buff,
-        std::function<void (shared_buffer)> handle);
+        static_buffer_ptr_t read_buff,
+        std::function<void (static_buffer_ptr_t)> handle);
 
     template <typename BodyType>
     inline void write(http::response<BodyType> &&response)
     {
         //std::cout << "[session] Write move called" << std::endl;
-        shared_msg_buffer<false, BodyType> msg_holder(response);
+        //shared_msg_buffer<false, BodyType> msg_holder(response);
+        auto msg_holder = std::make_shared<http::response<BodyType>>(std::move(response));
 
         boost::asio::post(socket_io_,
             boost::bind(&http_session::write_priv<BodyType>,
                 get_shared(),
                 msg_holder));
     }
+    template <typename BodyType>
+    inline void write(std::shared_ptr<http::response<BodyType>> &response)
+    {
+        //std::cout << "[session] Write move called" << std::endl;
+       // shared_msg_buffer<false, BodyType> msg_holder(response);
 
+        boost::asio::post(socket_io_,
+            boost::bind(&http_session::write_priv<BodyType>,
+                get_shared(),
+                response));
+    }
 protected:
 
     void read();
@@ -49,7 +63,7 @@ protected:
     void read_priv();
 
     template <typename BodyType>
-    inline void write_priv(shared_msg_buffer<false, BodyType> &msg_holder)
+    inline void write_priv(/*shared_msg_buffer<false, BodyType> &msg_holder*/ std::shared_ptr<http::response<BodyType>> msg_holder)
     {
         auto handler = boost::bind(&http_session::on_write_handler<BodyType>,
             get_shared(),
@@ -57,7 +71,7 @@ protected:
             msg_holder);
 
         http::async_write(socket_stream_,
-            msg_holder.message(),
+            *msg_holder,
             socket_io_.wrap(handler));
     }
 
@@ -70,13 +84,13 @@ private:
 
     void on_read_exactly_handler(const boost::system::error_code &ec, 
         std::size_t bytes_transferred,
-        shared_buffer read_buff,
-        std::function<void (shared_buffer)> handle);
+        static_buffer_ptr_t read_buff,
+        std::function<void (static_buffer_ptr_t)> handle);
 
     template <typename BodyType>
     inline void on_write_handler(const boost::system::error_code& ec,
         std::size_t bytes_transferred,
-        shared_msg_buffer<false, BodyType> &msg_holder)
+        std::shared_ptr<http::response<BodyType>> msg_holder)
     {
         if (ec) {
             std::cout << "Error writing to socket - " << ec.message() << std::endl;
@@ -84,7 +98,7 @@ private:
         } else {
             std::cout << "Writen: " << bytes_transferred << " bytes."  << std::endl;
         }
-        auto close_connection = !msg_holder.message().keep_alive();
+        auto close_connection = !msg_holder->keep_alive();
         if (close_connection) {
             std::cout << "[session] Finish - keep_alive is false"<<std::endl;
             finish();

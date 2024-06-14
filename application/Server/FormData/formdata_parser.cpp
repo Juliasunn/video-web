@@ -146,11 +146,11 @@ std::string formdata_parser::next_to_search() const {
     }   
 }
 
-void formdata_parser::parse_chunk(shared_buffer &chunkBuff, size_t bytes_transferred) {
+void formdata_parser::parse_chunk(base_static_buffer &chunkBuff, size_t bytes_transferred) {
    // NOTE: bytes_transferred <= chunkBuff.readable_space()
    // because chunkBuff can also store unprocessed bytes from previous
    // reads
-    char *data = chunkBuff.get();
+    char *data = chunkBuff.get_readable();
     size_t eof = chunkBuff.readable_space();
     
     if ( bytes_remaining_ < bytes_transferred ) {
@@ -217,7 +217,7 @@ void formdata_parser::parse_chunk(shared_buffer &chunkBuff, size_t bytes_transfe
     }
     std::cout << "[DEBUG] Put to buffer: " << std::to_string(can_parse_to) << " - " << std::to_string(eof) << std::endl; 
     /* Зпоминаем в буфер все что не смогли распарсить до конца */
-    chunkBuff.fill(data + can_parse_to, eof - can_parse_to);
+    chunkBuff.overwrite(data + can_parse_to, eof - can_parse_to);
     std::cout << "[DEBUG] Remaining: "<< std::to_string(bytes_remaining_) << std::endl;
 }
 

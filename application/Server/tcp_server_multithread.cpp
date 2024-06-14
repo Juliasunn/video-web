@@ -1,4 +1,5 @@
 #include "tcp_server_multithread.h"
+#include <boost/asio/strand.hpp>
 
 using tcp = boost::asio::ip::tcp;
 
@@ -60,10 +61,10 @@ void tcp_server_multithread::add_endpoint_handler(const std::string &method,
 void tcp_server_multithread::accept()
 {
     std::cout << "[Server] accept id:" << boost::this_thread::get_id() << std::endl;
-    tcp::socket session_socket(context);
+    tcp::socket session_socket(boost::asio::make_strand(context));
 
     std::shared_ptr<base_session> newSession = std::make_shared<tcp_session> 
-                                                (session_socket, context, endpoint_handlers);
+                                                (session_socket, endpoint_handlers);
  
     boost::asio::post(acceptor_strand, boost::bind(&tcp_server_multithread::accept_priv, shared_from_this(), newSession));
 }

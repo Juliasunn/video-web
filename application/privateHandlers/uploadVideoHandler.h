@@ -6,6 +6,7 @@
 #include <AuthorizationService/authorizationProvider.h>
 
 #include "mediaProcessor.h"
+#include "Pool/pooledBuffers.h"
 
 class UploadVideoHandler : public formdata_handler  {
 public:
@@ -20,7 +21,17 @@ protected:
     size_t len,
     multipart::FormDataElement &form_element) const override;
 
-    virtual void handle_form_complete() override;  
+    virtual void handle_form_complete() override;
+
+
+    std::shared_ptr<base_static_buffer> read_buff() override {
+    if (!read_buff_) {
+        static constexpr const size_t Mb = 1024*2024;
+       // read_buff_ = std::make_shared<static_buffer>(1024*1024); //1Kb
+       read_buff_ = std::shared_ptr<PooledReadBuffer<Mb>>(new PooledReadBuffer<Mb>); //1Kb
+    }
+    return read_buff_;
+}  
 private:
     std::shared_ptr<VideoProcessor> m_previewCreator;
     DiskStoragePtr m_mpegStorage;

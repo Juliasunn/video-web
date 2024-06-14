@@ -68,15 +68,15 @@ MongoStorage::MongoStorage() : m_pool(mongocxx::uri("mongodb://localhost:27017")
 }
 
 void MongoStorage::addVideo(const boost::json::value &video) {
-  auto rv = scopeExecute(prepareInsertOne("webvideodb", "video", video), m_pool);
+  auto rv = scopeExecute(prepareInsertOne(m_dbname, "video", video), m_pool);
 }
 
 std::vector<boost::json::value> MongoStorage::getVideo(const boost::json::object &filter) 
 {
   auto doc = bsoncxx::from_json(boost::json::serialize(filter));
   
-  auto operation = [doc](mongocxx::client &client) mutable  {
-    return client["webvideodb"]["video"].find(std::move(doc));
+  auto operation = [doc, &db=m_dbname](mongocxx::client &client) mutable  {
+    return client[db]["video"].find(std::move(doc));
   };
   auto cursor_all = scopeExecute(ClientOperation{operation }, m_pool);
 
@@ -94,8 +94,8 @@ std::optional<boost::json::value> MongoStorage::getVideo(const boost::uuids::uui
 {
   auto doc = make_document(kvp("uuid", boost::uuids::to_string(uuid)));
 
-  auto operation = [doc](mongocxx::client &client) mutable  {
-    return client["webvideodb"]["video"].find_one(std::move(doc));
+  auto operation = [doc, &db=m_dbname](mongocxx::client &client) mutable  {
+    return client[db]["video"].find_one(std::move(doc));
   };
   auto filtered = scopeExecute(ClientOperation{operation}, m_pool);
   if (!filtered) {
@@ -107,7 +107,7 @@ std::optional<boost::json::value> MongoStorage::getVideo(const boost::uuids::uui
 
 void MongoStorage::addUser(const boost::json::value &user) {
   //If the collection you request does not exist, MongoDB creates it when you first store data.
-  auto rv = scopeExecute(prepareInsertOne("webvideodb", "user", user), m_pool);
+  auto rv = scopeExecute(prepareInsertOne(m_dbname, "user", user), m_pool);
 }
 
 std::optional<boost::json::value> MongoStorage::getUser(const boost::json::value &uniqueFilter) 
@@ -115,8 +115,8 @@ std::optional<boost::json::value> MongoStorage::getUser(const boost::json::value
   std::cout << "[MongoStorage::getUser]" << uniqueFilter << std::endl;
 
   auto doc = bsoncxx::from_json(boost::json::serialize(uniqueFilter));
-  auto operation = [doc](mongocxx::client &client) mutable  {
-    return client["webvideodb"]["user"].find_one(std::move(doc));
+  auto operation = [doc, &db=m_dbname](mongocxx::client &client) mutable  {
+    return client[db]["user"].find_one(std::move(doc));
   };
   auto filtered = scopeExecute(ClientOperation{operation}, m_pool);
   if (!filtered) {
@@ -131,8 +131,8 @@ std::optional<boost::json::value> MongoStorage::getSubject(const boost::json::va
   std::cout << "[Get subject] " << boost::json::serialize(providedData) << std::endl;
   auto doc = bsoncxx::from_json(boost::json::serialize(providedData));
 
-  auto operation = [doc](mongocxx::client &client) mutable  {
-    return client["webvideodb"]["subject"].find_one(std::move(doc));
+  auto operation = [doc, &db=m_dbname](mongocxx::client &client) mutable  {
+    return client[db]["subject"].find_one(std::move(doc));
   };
   auto filtered = scopeExecute(ClientOperation{ operation }, m_pool);
 
@@ -145,7 +145,7 @@ std::optional<boost::json::value> MongoStorage::getSubject(const boost::json::va
 }
 
 void MongoStorage::addSubject(const boost::json::value &subjectClaims) {
-  auto rv = scopeExecute(prepareInsertOne("webvideodb", "subject", subjectClaims), m_pool);
+  auto rv = scopeExecute(prepareInsertOne(m_dbname, "subject", subjectClaims), m_pool);
 }
 
 void MongoStorage::deleteAll() { 
@@ -158,25 +158,25 @@ void MongoStorage::deleteAll() {
 TransactionHandlePtr MongoStorage::prepareTransaction() { return std::make_unique<TransactionHandle>(m_pool); }
 
 void MongoStorage::prepareAddVideo(const boost::json::value &video, TransactionHandle &transaction) const {
-  transaction.addOperation(prepareInsertOne("webvideodb", "video", video));
+  transaction.addOperation(prepareInsertOne(m_dbname, "video", video));
 }
 
 void MongoStorage::prepareAddUser(const boost::json::value &user, TransactionHandle &transaction) const {
-  transaction.addOperation(prepareInsertOne("webvideodb", "user", user));
+  transaction.addOperation(prepareInsertOne(m_dbname, "user", user));
 }
 
 void MongoStorage::prepareAddSubject(const boost::json::value &fullAuthData, TransactionHandle &transaction) const {
-  transaction.addOperation(prepareInsertOne("webvideodb", "subject", fullAuthData));
+  transaction.addOperation(prepareInsertOne(m_dbname, "subject", fullAuthData));
 }
 
 void MongoStorage::prepareUpdateUser(const boost::json::object &userUpdate, 
     const boost::json::object &filter, TransactionHandle &transaction) const 
 {
-  transaction.addOperation(prepareUpdateOne("webvideodb", "user", userUpdate, filter));
+  transaction.addOperation(prepareUpdateOne(m_dbname, "user", userUpdate, filter));
 }
 
 void MongoStorage::prepareUpdateSubject(const boost::json::object &subjectUpdate,
      const boost::json::object &filter, TransactionHandle &transaction) const
 {
-  transaction.addOperation(prepareUpdateOne("webvideodb", "subject", subjectUpdate, filter));
+  transaction.addOperation(prepareUpdateOne(m_dbname, "subject", subjectUpdate, filter));
 }

@@ -36,14 +36,12 @@ void tcp_session::finish()
 
 void tcp_session::read()
 {
-    boost::asio::post(socket_io_, boost::bind(&tcp_session::read_priv, get_shared()));    
+    read_priv();   
 }
 
 void tcp_session::write(std::string &response)
 {
-    boost::asio::post(socket_io_, boost::bind(&tcp_session::write_priv,
-                                             get_shared(),
-                                             response));
+    write_priv(response);
 }
 
 
@@ -55,23 +53,22 @@ bool tcp_session::is_alive() const
 void tcp_session::write_priv(std::string &message)
 {
     //WARNING: changed write_buff creation from copy to move semantic
-    shared_buffer write_buff(std::move(message));
+    m_buff->overwrite(message.data(), message.size());
     auto handler = boost::bind(&tcp_session::on_write_handler, get_shared(),
-                               _1, _2, write_buff);
+                               _1, _2, m_buff);
     boost::asio::async_write(socket_,
-                              write_buff.asio_buff(),
+                              m_buff->readable_asio_buff(),
                               handler);
 }
 
 void tcp_session::read_priv()
 {
-    shared_buffer read_buff;
     auto handler = boost::bind(&tcp_session::on_read_handler, get_shared(),
-                               _1, _2, read_buff);
+                               _1, _2, m_buff);
     auto completeCondition = boost::bind(&tcp_session::isReadComplete, get_shared(),
-                               _1, _2, read_buff);
+                               _1, _2, m_buff);
     boost::asio::async_read(socket_,
-                           read_buff.asio_buff(),
+                           m_buff->writable_asio_buff(),
                            completeCondition,
                            handler);
 }
@@ -80,7 +77,7 @@ void tcp_session::read_priv()
 
 void tcp_session::on_read_handler(const boost::system::error_code& ec,
                          std::size_t bytes_transferred,
-                         shared_buffer buff) {
+                         static_buffer_ptr_t buff) {
     if (ec) {
         std::cout << "Error reading from socket " << ec.message() << std::endl;
         return;
@@ -88,7 +85,7 @@ void tcp_session::on_read_handler(const boost::system::error_code& ec,
 
     std::cout << "Read from socket " << std::to_string(bytes_transferred) << " bytes.";
 
-    std::stringstream stream(buff.get());
+    std::stringstream stream(buff->get_readable());
 
     ns_server::Endpoint reqEndpoint;
     stream >> reqEndpoint;
@@ -113,7 +110,7 @@ void tcp_session::on_read_handler(const boost::system::error_code& ec,
 
 void tcp_session::on_write_handler(const boost::system::error_code &ec,
                                std::size_t bytes_transferred,
-                              const shared_buffer buff)
+                              static_buffer_ptr_t buff)
 {
     if (ec) {
         std::cout << "Error reading from socket " << ec.message();
@@ -124,7 +121,7 @@ void tcp_session::on_write_handler(const boost::system::error_code &ec,
 }
 
 size_t tcp_session::isReadComplete(const boost::system::error_code &ec, std::size_t bytes_transferred,
-                                    shared_buffer readBuff)
+                                    static_buffer_ptr_t readBuff)
 {
     const std::string ending = "\r\n";
     
@@ -133,10 +130,10 @@ size_t tcp_session::isReadComplete(const boost::system::error_code &ec, std::siz
     if (bytes_transferred < ending.size()) {
         return 1;
     }
-    if (bytes_transferred >= readBuff.size) {
+    if (bytes_transferred >= readBuff->writable_space()) {
         return 0;
     }
-    std::string_view request(readBuff.get());
+    std::string_view request(readBuff->get_readable());
 
     auto lastReaded =  request.substr(bytes_transferred-ending.size(), ending.size());
   //  std::cout << /*"'"<<lastReaded<< "'" << lastReaded.size()<< */(int)(lastReaded[0]) << (int)(lastReaded[1])<< std::endl;

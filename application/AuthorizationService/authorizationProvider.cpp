@@ -50,6 +50,7 @@ Identity IdentityProvider::getIdentity(const boost::json::object &authData) cons
         throw IncompleteAuthorizationDataException();        
     }
     auto dbSubject = MongoStorage::instance().getSubject(authData);
+    std::cout << "Authorization data: " << authData << std::endl;
     if (!dbSubject) {
         throw IncorrectAuthorizationDataException();
     }

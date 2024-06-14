@@ -139,8 +139,15 @@ void formdata_handler::handle_field(FormdataFields field,
     }
 }
 
+std::shared_ptr<base_static_buffer> formdata_handler::read_buff() {
+    if (!read_buff_) {
+        read_buff_ = std::make_shared<static_buffer>(); //1Kb
+    }
+    return read_buff_;
+}
+
 void formdata_handler::extra_bytes(const boost::asio::mutable_buffer &extraBytes) {
-    read_buff_.put(extraBytes);
+    read_buff()->append(extraBytes);
 }
 
 void formdata_handler::process_request(std::shared_ptr<http_session> session ) {
@@ -159,27 +166,27 @@ void formdata_handler::process_request(std::shared_ptr<http_session> session ) {
         .on_text(boost::bind(&formdata_handler::handle_text, this, _1, _2, _3))
         .on_complete(boost::bind(&formdata_handler::handle_element_complete, this, _1));
 
-    parser_->parse_chunk(read_buff_, read_buff_.readable_space());
+    parser_->parse_chunk(*read_buff(), read_buff()->readable_space());
           
     transfer_bytes_ = std::min(
         parser_->bytes_remaining(),
-        read_buff_.available_space()
+        read_buff()->writable_space()
     );
     session->read_exactly(transfer_bytes_/* сколько */, 
-        read_buff_/* куда */, 
+        read_buff()/* куда */, 
         boost::bind(&formdata_handler::readHandler, this, session, _1));
 }
 
 void formdata_handler::readHandler(std::shared_ptr<http_session> session,
-    shared_buffer read_buff)
+    std::shared_ptr<base_static_buffer> read_buff)
 {
-    parser_->parse_chunk(read_buff, transfer_bytes_);
+    parser_->parse_chunk(*read_buff, transfer_bytes_);
 
     if (parser_->bytes_remaining()) {
         
         transfer_bytes_ = std::min(
             parser_->bytes_remaining(),
-            read_buff.available_space()
+            read_buff->writable_space()
         );
         session->read_exactly(transfer_bytes_/* сколько */, 
             read_buff/* куда */,

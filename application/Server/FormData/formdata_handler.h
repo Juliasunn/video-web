@@ -1,6 +1,7 @@
 #pragma once
 #include <boost/beast/http.hpp>
 
+#include <memory>
 #include <string_view>
 #include <variant>
 #include <set>
@@ -26,7 +27,7 @@ public:
 
     formdata_handler(const std::string &dest, 
         std::function<void (multipart::FormData &)>  on_handle_callback) : 
-        read_buff_(multipart::chunck_capacity), m_dest(dest), on_handle_callback_(on_handle_callback) {}
+         m_dest(dest), on_handle_callback_(on_handle_callback) {}
     
     virtual ~formdata_handler() = default; 
 
@@ -35,7 +36,7 @@ public:
     virtual void process_request(std::shared_ptr<http_session> session ) override;
 
 protected:
-    formdata_handler() : read_buff_(multipart::chunck_capacity) {};
+    formdata_handler() = default;
 
     virtual void handle_field(multipart::FormdataFields field,
     std::string_view values,
@@ -55,18 +56,16 @@ protected:
 
     virtual http::response<http::empty_body> form_response() const;     
 
-private:
-
-    void readHandler( std::shared_ptr<http_session> session, shared_buffer readBuff);
-
 protected:
+   //buffer is allocated when needed
+    virtual std::shared_ptr<base_static_buffer> read_buff();
    
     multipart::FormData m_form;
-
-private:
-    std::shared_ptr<formdata_parser> parser_;
-    shared_buffer read_buff_;
-    size_t transfer_bytes_;
+    std::shared_ptr<base_static_buffer> read_buff_;
     std::string m_dest;
+private:
+    void readHandler( std::shared_ptr<http_session> session, std::shared_ptr<base_static_buffer> readBuff);
+    std::shared_ptr<formdata_parser> parser_;
+    size_t transfer_bytes_;
     std::function<void (multipart::FormData &)> on_handle_callback_;    
 };

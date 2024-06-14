@@ -10,48 +10,54 @@
 namespace beast = boost::beast;         // from <boost/beast.hpp>
 namespace http = beast::http;           // from <boost/beast/http.hpp>
 
-struct shared_buffer
+/* Represents buffer of constant size to io operatons */
+class base_static_buffer
 {
-    /*  The smart pointer shared_array is used like shared_ptr. 
-    Since shared_array calls delete[] in the destructor, this smart pointer can be used for arrays. */
-    boost::shared_array<char> buff;
     int size;
-    int in_use = 0;
+    int in_use;
+protected:
+    virtual char *get()  = 0;
+public: 
+    base_static_buffer(size_t size_) : size(size_), in_use(0) {};
+    virtual ~base_static_buffer() = default;
 
     void clear();
+   /* Return pointer to beginning of writable space (use write functions instead)*/
+    virtual char *get_writable();
 
-    explicit shared_buffer(size_t size);
+    /* Return number of bytes that can be written to buffer*/
+    virtual size_t writable_space() const;
 
-    shared_buffer();
+    /* Return number of bytes that can be read from buffer */
+    virtual size_t readable_space() const;
 
-    explicit shared_buffer(std::string &&src);
+    /* Return pointer to beginning of readable space */
+    virtual char *get_readable();
 
-    char *get() const;
-    char *get_available() const;
+   /* Append data to beginning of writable space*/
+    virtual size_t append(const boost::asio::mutable_buffer &src);
 
-    size_t readable_space() const;
+    /* Rewrite buffer content with data*/
+    virtual size_t overwrite(const char *data, size_t n);
 
-    size_t available_space() const;
+    /* Mark +n bytes as written */
+    virtual size_t append(size_t n);
 
-    size_t put(const boost::asio::mutable_buffer &src);
-    size_t fill(const char *data, size_t n);
+    /* return buffer to write data in */
+    virtual boost::asio::mutable_buffers_1 writable_asio_buff();
 
-    size_t prepend(const shared_buffer &src);
-    size_t put(size_t n);
-
-    boost::asio::mutable_buffers_1 asio_buff() const;
+    /* return buffer to read data from */
+    virtual boost::asio::mutable_buffers_1 readable_asio_buff();
 };
 
-template <bool isRequest, typename MsgBodyType>
-struct shared_msg_buffer
-{ 
-    std::shared_ptr<http::message<isRequest, MsgBodyType>> m_msgPtr;
-
-    shared_msg_buffer(http::message<isRequest, MsgBodyType> &msg ) {
-        m_msgPtr = std::make_shared<http::message<isRequest, MsgBodyType>>(std::move(msg));
-    }
-    http::message<isRequest, MsgBodyType> &message(){
-        return *(m_msgPtr.get());
-    }
+class static_buffer : public base_static_buffer
+{
+    static constexpr size_t default_size = 1024;
+    char *buff;
+public:
+    static_buffer() : buff(new char[default_size]), base_static_buffer(default_size){}
+    static_buffer(size_t size_) : buff(new char[size_]), base_static_buffer(size_) {}
+    ~static_buffer() override {delete [] buff;}
+protected:
+    char *get() override { return buff; }
 };
-
