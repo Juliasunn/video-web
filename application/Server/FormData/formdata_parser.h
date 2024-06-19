@@ -51,7 +51,7 @@ public:
 
     formdata_parser &on_complete(CompleteHandler impl);
 
-    void parse_chunk(base_static_buffer &chunkBuff, size_t bytes_transferred);
+    void parse_chunk(base_io_buffer &chunkBuff, size_t bytes_transferred);
 
     unsigned long bytes_remaining() const;
 

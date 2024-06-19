@@ -22,17 +22,17 @@ public:
 typedef std::unordered_map<Endpoint, std::shared_ptr<BaseRequestHandler>> request_handlers;
 }
 
-struct base_static_buffer;
+struct base_io_buffer;
 
 class tcp_session : public base_session
 {
 public:
-    using static_buffer_ptr_t = std::shared_ptr<base_static_buffer>;
+    //using StaticBufferPtr = base_io_buffer *;
 
     tcp_session(tcp::socket &socket,
     const ns_server::request_handlers &endpoint_handlers = {})
         : socket_(std::move(socket)),
-          endpoint_handlers_(endpoint_handlers), m_buff(std::make_shared<static_buffer>()) {}
+          endpoint_handlers_(endpoint_handlers) {}
 
     virtual ~tcp_session() override;
 
@@ -59,18 +59,16 @@ private:
     std::shared_ptr<tcp_session> get_shared();
 
     size_t isReadComplete(const boost::system::error_code& ec,
-                             std::size_t bytes_transferred,
-                             static_buffer_ptr_t readBuff);
+                             std::size_t bytes_transferred);
     void on_read_handler(const boost::system::error_code& ec,
-                             std::size_t bytes_transferred,
-                             static_buffer_ptr_t buff);
+                             std::size_t bytes_transferred);
     void on_write_handler(const boost::system::error_code& ec,
-                          std::size_t bytes_transferred,
-                          const static_buffer_ptr_t buff); 
+                          std::size_t bytes_transferred); 
     ns_server::request_handlers endpoint_handlers_;
 
     tcp::socket socket_;
     /* buffer for read/write on socket */
-    static_buffer_ptr_t m_buff;                            
+    static_buffer<1024> m_buff;
+    //StaticBufferPtr m_buff;                            
 };
 

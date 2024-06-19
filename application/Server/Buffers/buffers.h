@@ -10,16 +10,16 @@
 namespace beast = boost::beast;         // from <boost/beast.hpp>
 namespace http = beast::http;           // from <boost/beast/http.hpp>
 
-/* Represents buffer of constant size to io operatons */
-class base_static_buffer
+/* Represents buffer for io operatons */
+class base_io_buffer
 {
     int size;
     int in_use;
 protected:
     virtual char *get()  = 0;
 public: 
-    base_static_buffer(size_t size_) : size(size_), in_use(0) {};
-    virtual ~base_static_buffer() = default;
+    base_io_buffer(size_t size_) : size(size_), in_use(0) {};
+    virtual ~base_io_buffer() = default;
 
     void clear();
    /* Return pointer to beginning of writable space (use write functions instead)*/
@@ -50,14 +50,21 @@ public:
     virtual boost::asio::mutable_buffers_1 readable_asio_buff();
 };
 
-class static_buffer : public base_static_buffer
+template <size_t allocate_size, typename Allocator= std::allocator<char>>
+class static_buffer : public base_io_buffer
 {
-    static constexpr size_t default_size = 1024;
+    static inline Allocator m_alloc;
     char *buff;
 public:
-    static_buffer() : buff(new char[default_size]), base_static_buffer(default_size){}
-    static_buffer(size_t size_) : buff(new char[size_]), base_static_buffer(size_) {}
-    ~static_buffer() override {delete [] buff;}
+    static_buffer() : buff(nullptr), base_io_buffer( allocate_size){}
+
+    ~static_buffer() override {
+        if (buff) { m_alloc.deallocate(buff, allocate_size); }
+    }
 protected:
-    char *get() override { return buff; }
+/*  Lazy allocation */
+    char *get() override {
+        if (!buff) { buff = reinterpret_cast<char *>(m_alloc.allocate(allocate_size));}
+        return buff;
+     }
 };

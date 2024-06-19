@@ -6,6 +6,7 @@
 
 #include <endpoint.h>
 #include <FormData/formdata_handler.h>
+#include "Pool/pooledBuffers.h"
 
 namespace ns_server {
   //Each handler belongs to single session
@@ -22,12 +23,16 @@ protected:
 
     void handle_form_complete() override;
 
-    http::response<http::empty_body> form_response() const override;  
+    http::response<http::empty_body> form_response() const override; 
+
+    base_io_buffer &read_buff() override {return m_buff;} 
   
 private:
 
     void setCookie(http::response<http::string_body> &res);
     boost::json::object m_authData;
+    PooledStaticBuffer<1024> m_buff;
+
 };
 
 }

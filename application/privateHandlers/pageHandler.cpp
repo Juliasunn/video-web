@@ -83,8 +83,7 @@ void PageHandler::process_request(std::shared_ptr<http_session> session ) {
     res.content_length(size);
     res.keep_alive(false); 
 
-    session->write(std::move(res));
-   // session->finish();                              
+    session->write(std::move(res));                           
 }        
 
 

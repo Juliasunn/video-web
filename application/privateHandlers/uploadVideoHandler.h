@@ -23,18 +23,10 @@ protected:
 
     virtual void handle_form_complete() override;
 
-
-    std::shared_ptr<base_static_buffer> read_buff() override {
-    if (!read_buff_) {
-        static constexpr const size_t Mb = 1024*2024;
-       // read_buff_ = std::make_shared<static_buffer>(1024*1024); //1Kb
-       read_buff_ = std::shared_ptr<PooledReadBuffer<Mb>>(new PooledReadBuffer<Mb>); //1Kb
-    }
-    return read_buff_;
-}  
+    base_io_buffer &read_buff() override {return m_buff;}  
 private:
+    PooledStaticBuffer<1024*1024> m_buff;
     std::shared_ptr<VideoProcessor> m_previewCreator;
     DiskStoragePtr m_mpegStorage;
-
     Claims m_claims;
 };

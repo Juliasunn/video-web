@@ -18,13 +18,10 @@ using FormData = std::unordered_map<FormElementName, FormDataElement>;
 }; // multipart
 
 
+
 class formdata_handler : public ns_server::BaseHttpRequestHandler 
 {
 public:
-    virtual std::unique_ptr<BaseHttpRequestHandler> clone() override {
-        return std::make_unique<formdata_handler>( m_dest, on_handle_callback_);
-    } 
-
     formdata_handler(const std::string &dest, 
         std::function<void (multipart::FormData &)>  on_handle_callback) : 
          m_dest(dest), on_handle_callback_(on_handle_callback) {}
@@ -58,13 +55,12 @@ protected:
 
 protected:
    //buffer is allocated when needed
-    virtual std::shared_ptr<base_static_buffer> read_buff();
-   
+    virtual base_io_buffer &read_buff() = 0;
     multipart::FormData m_form;
-    std::shared_ptr<base_static_buffer> read_buff_;
     std::string m_dest;
 private:
-    void readHandler( std::shared_ptr<http_session> session, std::shared_ptr<base_static_buffer> readBuff);
+    void readHandler( std::shared_ptr<http_session> session, base_io_buffer *readBuff);
+
     std::shared_ptr<formdata_parser> parser_;
     size_t transfer_bytes_;
     std::function<void (multipart::FormData &)> on_handle_callback_;    

@@ -13,7 +13,7 @@
 class http_session : public base_session
 {
 public:
-    using static_buffer_ptr_t = std::shared_ptr<base_static_buffer>;
+    using StaticBufferPtr = base_io_buffer *;
 
     http_session(tcp::socket &socket,
         boost::asio::io_context &context,
@@ -30,8 +30,8 @@ public:
     virtual tcp::socket &socket() override;
 
     void read_exactly(std::size_t bytes_transfer, 
-        static_buffer_ptr_t read_buff,
-        std::function<void (static_buffer_ptr_t)> handle);
+        StaticBufferPtr read_buff,
+        std::function<void (StaticBufferPtr)> handle);
 
     template <typename BodyType>
     inline void write(http::response<BodyType> &&response)
@@ -45,6 +45,22 @@ public:
                 get_shared(),
                 msg_holder));
     }
+
+    /* !!response object must overlive write operation */
+    //Not thread-safe yet
+    template <typename BodyType>
+    inline void write(http::response<BodyType> &response)
+    {
+        auto handler = boost::bind(&http_session::on_write_handler_impl,
+            get_shared(),
+             _1, _2,
+            !response.keep_alive());
+
+        http::async_write(socket_stream_,
+            response,
+            socket_io_.wrap(handler));
+    }
+    
     template <typename BodyType>
     inline void write(std::shared_ptr<http::response<BodyType>> &response)
     {
@@ -56,6 +72,8 @@ public:
                 get_shared(),
                 response));
     }
+
+
 protected:
 
     void read();
@@ -84,13 +102,20 @@ private:
 
     void on_read_exactly_handler(const boost::system::error_code &ec, 
         std::size_t bytes_transferred,
-        static_buffer_ptr_t read_buff,
-        std::function<void (static_buffer_ptr_t)> handle);
+        StaticBufferPtr read_buff,
+        std::function<void (StaticBufferPtr)> handle);
 
     template <typename BodyType>
     inline void on_write_handler(const boost::system::error_code& ec,
         std::size_t bytes_transferred,
         std::shared_ptr<http::response<BodyType>> msg_holder)
+    {
+        on_write_handler_impl(ec, bytes_transferred, !msg_holder->keep_alive());
+    }
+
+    inline void on_write_handler_impl(const boost::system::error_code& ec,
+        std::size_t bytes_transferred,
+        bool close_connection)
     {
         if (ec) {
             std::cout << "Error writing to socket - " << ec.message() << std::endl;
@@ -98,7 +123,6 @@ private:
         } else {
             std::cout << "Writen: " << bytes_transferred << " bytes."  << std::endl;
         }
-        auto close_connection = !msg_holder->keep_alive();
         if (close_connection) {
             std::cout << "[session] Finish - keep_alive is false"<<std::endl;
             finish();

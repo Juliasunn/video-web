@@ -146,7 +146,7 @@ std::string formdata_parser::next_to_search() const {
     }   
 }
 
-void formdata_parser::parse_chunk(base_static_buffer &chunkBuff, size_t bytes_transferred) {
+void formdata_parser::parse_chunk(base_io_buffer &chunkBuff, size_t bytes_transferred) {
    // NOTE: bytes_transferred <= chunkBuff.readable_space()
    // because chunkBuff can also store unprocessed bytes from previous
    // reads

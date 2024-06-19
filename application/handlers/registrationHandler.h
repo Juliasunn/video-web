@@ -5,6 +5,7 @@
 #include <FormData/formdata_handler.h>
 
 #include "DiskStorage/diskStorage.h"
+#include "Pool/pooledBuffers.h"
 
 class RegistrationHandler : public formdata_handler {
 public:
@@ -22,8 +23,10 @@ protected:
     void handle_form_complete() override; 
 
     http::response<http::empty_body> form_response() const override;
+    base_io_buffer &read_buff() override {return m_buff;} 
 private:
     DiskStoragePtr m_avatarStorage;
+    PooledStaticBuffer<1024> m_buff;
 };
 
 
