@@ -33,6 +33,11 @@ public:
     internal_server_exception("Faile already exists: " + filename) {}
 };
 
+class FileDeleteException : public internal_server_exception {
+public:
+    FileDeleteException(const std::string &filename ) noexcept :
+    internal_server_exception("Can't delete file: " + filename) {}
+};
 
 }
 

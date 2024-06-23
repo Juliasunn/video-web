@@ -16,7 +16,6 @@
 using namespace ns_server;
 
 namespace {
-const size_t chunkSize = 100000;
 const std::string m_mediaType = "video";
 const std::string m_mediaFormat = "mp4";
 const std::string m_rangesName = "bytes";

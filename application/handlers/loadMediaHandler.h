@@ -21,7 +21,7 @@
 namespace ns_server {
   //Each handler belongs to single session
 class MediaRequestHandler : public BaseHttpRequestHandler {
-
+    static constexpr const size_t chunkSize = 100000;
 public:
     MediaRequestHandler(DiskStoragePtr documentStorage);
     virtual ~MediaRequestHandler() override;
@@ -30,7 +30,7 @@ public:
 private:
     bool setPayload( const disk_storage::Url &fileUrl);
 
-    http::response<PooledBufferBody<100000>> m_response;
+    http::response<PooledBufferBody<chunkSize>> m_response;
     DiskStoragePtr m_diskStorage; 
 };
 

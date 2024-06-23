@@ -1,5 +1,6 @@
 #include "documentStorage.h"
 
+#include <boost/json/object.hpp>
 #include <mongocxx/client.hpp>
 #include <bsoncxx/builder/stream/document.hpp>
 
@@ -34,9 +35,17 @@ auto scopeExecute(ClientOperation &&operation, mongocxx::pool &pool) {
 }
 
 auto prepareInsertOne(const std::string &db, const std::string &collection, const boost::json::value &rawData) {
-  auto doc = bsoncxx::from_json(boost::json::serialize(rawData));
-  auto operation = [db, collection, doc](mongocxx::client &client) mutable  {
+  auto &&rdoc = bsoncxx::from_json(boost::json::serialize(rawData));
+  auto operation = [db, collection, doc = rdoc](mongocxx::client &client) mutable  {
     return client[db][collection].insert_one(std::move(doc));
+  };
+  return ClientOperation{ operation };    
+}
+
+auto prepareDeleteOne(const std::string &db, const std::string &collection, const boost::json::object &uniqueFilter) {
+  auto &&rdoc = bsoncxx::from_json(boost::json::serialize(uniqueFilter));
+  auto operation = [db, collection, doc = rdoc](mongocxx::client &client) mutable  {
+    return client[db][collection].delete_one(std::move(doc));
   };
   return ClientOperation{ operation };    
 }
@@ -45,11 +54,11 @@ auto prepareUpdateOne(const std::string &db, const std::string &collection, cons
    const boost::json::object &filter ) 
 {
   auto updateDoc = bsoncxx::from_json(boost::json::serialize(update));
-  auto updateExpression = bsoncxx::builder::stream::document{} << "$set" << updateDoc << bsoncxx::builder::stream::finalize;
-  std::cout << bsoncxx::to_json(updateExpression) << std::endl;
-  auto filterDoc = bsoncxx::from_json(boost::json::serialize(filter));
+  auto &&rupdateExpression = bsoncxx::builder::stream::document{} << "$set" << updateDoc << bsoncxx::builder::stream::finalize;
+  std::cout << bsoncxx::to_json(rupdateExpression) << std::endl;
+  auto &&rfilterDoc = bsoncxx::from_json(boost::json::serialize(filter));
 
-  auto operation = [db, collection, filterDoc, updateExpression](mongocxx::client &client) mutable  {
+  auto operation = [db, collection, filterDoc = rfilterDoc, updateExpression = rupdateExpression](mongocxx::client &client) mutable  {
     return client[db][collection].update_one(std::move(filterDoc), std::move(updateExpression));
   };
   return ClientOperation{ operation };    
@@ -67,8 +76,8 @@ MongoStorage::MongoStorage() : m_pool(mongocxx::uri("mongodb://localhost:27017")
   std::cout << "[MongoStorage] constructor!" << std::endl;
 }
 
-void MongoStorage::addVideo(const boost::json::value &video) {
-  auto rv = scopeExecute(prepareInsertOne(m_dbname, "video", video), m_pool);
+bool MongoStorage::addVideo(const boost::json::value &video) {
+  return scopeExecute(prepareInsertOne(m_dbname, "video", video), m_pool).has_value();
 }
 
 std::vector<boost::json::value> MongoStorage::getVideo(const boost::json::object &filter) 
@@ -105,9 +114,17 @@ std::optional<boost::json::value> MongoStorage::getVideo(const boost::uuids::uui
   return boost::json::parse(jsonStr);
 }
 
-void MongoStorage::addUser(const boost::json::value &user) {
+bool MongoStorage::deleteVideo(const boost::uuids::uuid &uuid) {
+  auto uuidFilter = boost::json::object{{"uuid", boost::lexical_cast<std::string>(uuid)}};
+
+  auto rv = scopeExecute(prepareDeleteOne(m_dbname, "video", uuidFilter), m_pool);
+  return rv.has_value();
+}
+
+bool MongoStorage::addUser(const boost::json::value &user) {
   //If the collection you request does not exist, MongoDB creates it when you first store data.
   auto rv = scopeExecute(prepareInsertOne(m_dbname, "user", user), m_pool);
+  return rv.has_value();
 }
 
 std::optional<boost::json::value> MongoStorage::getUser(const boost::json::value &uniqueFilter) 

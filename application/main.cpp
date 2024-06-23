@@ -15,6 +15,7 @@
 #include "handlers/authorizationHandler.h"
 
 #include "privateHandlers/uploadVideoHandler.h"
+#include "privateHandlers/deleteVideoHandler.h"
 #include "privateHandlers/profileHandler.h"
 //#include "privateHandlers/pageHandler.h"
 #include "privateHandlers/editProfileHandler.h"
@@ -48,6 +49,11 @@ void initEndpoints(std::shared_ptr<http_server_multithread> &server) {
         std::make_shared<ForbiddenResponseStatusStrategy>(),
         previewCreator, mpegFileStorage);
     server-> add_endpoint_handler("POST", "/api/upload", std::move(UploadWithAuth));
+
+
+    auto &&DeleteWithAuth = std::make_unique<AuthorizationDecorator<DeleteVideoHandler>>(Permissions::ManageVideo, 
+        std::make_shared<ForbiddenResponseStatusStrategy>(), mpegFileStorage, previewFileStorage);
+    server-> add_endpoint_handler("DELETE", "/api/video_", std::move(DeleteWithAuth));
 
     
     // Load video content (json) endpoint

@@ -79,10 +79,12 @@ public:
 
     size_t fileSize(const Url &url) const; 
 
+    void deleteFile(const Url &url);
+
 private:
     std::filesystem::path m_location;
     //URL that serves the files stored at this location. Defaults to the value of your MEDIA_URL setting.
-    Url m_baseUrl;
+    const Url m_baseUrl;
 
     std::unordered_map<std::string, PathMutex> m_pathLocks;
     PathsMapMutex m_pathMapLock;

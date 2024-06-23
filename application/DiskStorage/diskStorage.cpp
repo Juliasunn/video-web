@@ -173,4 +173,21 @@ size_t DiskStorage::fileSize(const Url &url) const {
   throw FileNotFoundException(absolutePath);
 }
 
+void DiskStorage::deleteFile(const Url &url) {
+  std::cout << "Delete file url: " << url << std::endl;
+  //May throw invalid url exception
+  auto absolutePath = getFilePath(url);
+  auto scopedLock = asqureWriteLock(absolutePath);
+  
+  if (!std::filesystem::exists(absolutePath)) {
+      throw FileNotFoundException(absolutePath);
+  }
+  
+  if (std::remove(absolutePath.c_str())) {
+    //Non-zero code means error occured
+    throw FileDeleteException(absolutePath);
+  }
+
+}
+
 }
