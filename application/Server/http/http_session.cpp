@@ -14,10 +14,13 @@ using namespace ns_server;
 http_session::http_session(tcp::socket &socket,
     boost::asio::io_context &context,
     const HttpRequestHandlers &endpoint_handlers) :
-    socket_stream_(std::move(socket)), socket_io_(context) 
+    /* Uses the same executor as it's underlying socket:  ... return this->socket.get_executor();
+     Executor will be used to invoke completion
+    handlers which do not have an explicit associated executor.
+    */
+    socket_stream_(std::move(socket))
 {
 
-    
     for (const auto &[endpoint, handler_ptr] : endpoint_handlers) {
         if (handlers_.count(endpoint)) {
             std::cout << "[Warning] overriting existing endpoint with: " << endpoint.prefix_path << std::endl;
@@ -33,7 +36,7 @@ std::shared_ptr<http_session> http_session::get_shared()
 
 http_session::~http_session()
 {
-   finishPriv();
+   finish();
    std::cout << "[tcp_session] destructor called id: " << boost::this_thread::get_id() << std::endl;
 }
 
@@ -45,15 +48,27 @@ void http_session::start()
 /* Real finish should be called after read/writes operations posted before this call */
 void http_session::finish()
 {
-    socket_io_.post(boost::bind(&http_session::finishPriv,
-        get_shared()));    
+    std::cout << "[Session] Finish priv called."<< std::endl;
+    try {
+        socket().shutdown(tcp::socket::shutdown_send);
+        //Cancel all asynchronous operations associated with the socket
+        //and close it. 
+    } catch (...) { 
+        std::cout << "[Session] Error shutdow socket."<< std::endl;
+    }   
 }
 
 void http_session::read()
 {
-    boost::asio::post(socket_io_,
-        boost::bind(&http_session::read_priv,
-            get_shared()));    
+    request_parser_ = std::make_shared<http::request_parser<http::string_body>>();
+    request_parser_->skip(true);
+
+    http::async_read_header(socket_stream_,
+        request_extra_buff_,
+        *request_parser_,
+        boost::bind(&http_session::on_read_handler,
+        get_shared(),
+         _1, _2));   
 }
 
 bool http_session::is_alive() const
@@ -65,29 +80,15 @@ tcp::socket &http_session::socket() {
     return socket_stream_.socket();
 }
 
-void http_session::read_priv()
-{
-    request_parser_ = std::make_shared<http::request_parser<http::string_body>>();
-    request_parser_->skip(true);
-    auto handler =  socket_io_.wrap(boost::bind(&http_session::on_read_handler,
-        get_shared(),
-         _1, _2)); 
-
-    http::async_read_header(socket_stream_,
-        request_extra_buff_,
-        *request_parser_,
-        handler);
-}
-
 void http_session::read_exactly(size_t transfer,
     StaticBufferPtr read_buff,
     std::function<void (StaticBufferPtr)> handle)
 {
-    auto handler =  socket_io_.wrap(boost::bind(&http_session::on_read_exactly_handler,
+    auto handler =  boost::bind(&http_session::on_read_exactly_handler,
         get_shared(),
         _1, _2,
         read_buff,
-        handle));
+        handle);
  
     boost::asio::async_read(socket_stream_.socket(),
         read_buff->writable_asio_buff(),
@@ -137,22 +138,6 @@ void http_session::on_read_handler(const boost::system::error_code& ec,
     } catch ( ... ) {
         respodWithError(request, http::status::internal_server_error);
     }
-}
-
-void http_session::finishPriv() {
-    std::cout << "[Session] Finish priv called."<< std::endl;
-    boost::lock_guard<boost::recursive_mutex> locker(mutex_);
-    
-    /* only one thread should close socket */
-    if (!socket().is_open()) {
-        return;
-    }
-    try {
-        socket().shutdown(tcp::socket::shutdown_send);
-        //Cancel all asynchronous operations associated with the socket
-        //and close it. 
-    } catch (...) { }
-    socket_stream_.close();        
 }
 
 void http_session::respodWithError(const http::request<http::string_body> &request, http::status error){

@@ -83,8 +83,28 @@ int main(int, char**) {
     for (const auto &video : videos) {
       std::cout << video << std::endl;
     }
-    auto server = http_server_multithread::getInstance();
+    auto server = http_server_multithread::instance();
     initEndpoints(server);
+    boost::thread_group workers;
+ //    thread constructor expexts  && (rvalue reference) type of arguments, use std::ref wrapper to pass lvalue to
+ //   thread function 
+  //  Note: variables passed with std::ref wrapper into thread constructor need to outlive thread execution !
+
+  //   Replaced with staight call of context.run() function on each created thread
+  //  so all threads can execute handlers 
+
+
+    for (int i = 0; i < boost::thread::hardware_concurrency(); i++)  {
+        workers.create_thread(
+                    [&server]() {
+                        server->run();
+                    }
+                    );
+    }
+    
+    workers.join_all();
+
+
     server->run();
 }
 

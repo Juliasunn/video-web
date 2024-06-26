@@ -82,21 +82,21 @@ bool MongoStorage::addVideo(const boost::json::value &video) {
 
 std::vector<boost::json::value> MongoStorage::getVideo(const boost::json::object &filter) 
 {
-  auto doc = bsoncxx::from_json(boost::json::serialize(filter));
+  auto filterDoc = bsoncxx::from_json(boost::json::serialize(filter));
   
-  auto operation = [doc, &db=m_dbname](mongocxx::client &client) mutable  {
-    return client[db]["video"].find(std::move(doc));
-  };
-  auto cursor_all = scopeExecute(ClientOperation{operation }, m_pool);
+  auto operation = [filterDoc, &db=m_dbname](mongocxx::client &client) mutable  {
+    std::vector<boost::json::value> res;
 
-  std::vector<boost::json::value> res;
-  for (auto doc : cursor_all) {
-    std::string jsonStr = bsoncxx::to_json(doc);
-    res.push_back(boost::json::parse(jsonStr));
-    // Do something with doc
-    //assert(doc["_id"].type() == bsoncxx::type::k_oid);
-  }
-  return res;
+    /* It turned out that cursor inside calls operations on thread-shared objects, so
+    we should iterate throw it inside the scope */
+    auto cursor_all = client[db]["video"].find(std::move(filterDoc));
+    for (auto &doc : cursor_all) {
+        std::string jsonStr = bsoncxx::to_json(doc);
+        res.emplace_back(boost::json::parse(jsonStr));
+    }
+    return res;
+  };
+  return scopeExecute(ClientOperation{operation }, m_pool);
 }
 
 std::optional<boost::json::value> MongoStorage::getVideo(const boost::uuids::uuid &uuid) 

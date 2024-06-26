@@ -9,6 +9,12 @@ const editIcon = `
   <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
 </svg>`
 
+
+const trashIcon =`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+  <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+  <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+</svg>`
+
 function createWatches(watchesCount) {
     var iconShow = document.createRange().createContextualFragment(watchesIcon)
     var watches = document.createElement('p');
@@ -20,8 +26,8 @@ function createWatches(watchesCount) {
 
 function createVideoImg(imgSrc) {
     var image = document.createElement('img');
-    image.setAttribute("height","matchparent");
     image.setAttribute("width","100%");
+    image.setAttribute("height", "matchparent");
     image.src = imgSrc;
     console.log("image src = ",imgSrc);
     return image;   
@@ -39,14 +45,19 @@ class BasicVideoCard {
         this.#col.style="width: "+width;
         
         this.#card = document.createElement('div');
-        this.#card.className = "p-2";
+        this.#card.className = "p-2 card justify-content-between";
+        this.#card.style = "height: 100%";
         
         this.#cardBody = document.createElement('div');
         
         var preview = createVideoImg("http://127.0.0.1:8082" + videoJson.previewImgUrl);
         
-        var videoHeader = document.createElement('p');
-        videoHeader.className = "card-title";
+
+        var videoHeader = document.createElement('a');
+        videoHeader.className="fw-bolder text-dark";
+        videoHeader.style = "font-weight:bold"
+        videoHeader.rel="stylesheet"
+        videoHeader.href = "http://127.0.0.1:8082" + "/player"+"?v="+videoJson.uuid
         videoHeader.innerHTML = videoJson.header;
         
         this.#cardBody.appendChild(videoHeader);
@@ -71,8 +82,7 @@ class BasicVideoCard {
 
 class PublicVideoCard extends BasicVideoCard {
   #infoRow;
-  #watchBtn;
-  
+
   constructor(videoJson, channelJson, width) {
         super(videoJson, width)
         console.log("finished parent");
@@ -88,18 +98,17 @@ class PublicVideoCard extends BasicVideoCard {
         this.#infoRow.appendChild(channel);
         this.#infoRow.appendChild(watches);
         
-        this.#watchBtn = document.createElement('a');
-        this.#watchBtn.href = "http://127.0.0.1:8082" + "/player"+"?v="+videoJson.uuid;
-        console.log("href = ", this.#watchBtn.href);
-        this.#watchBtn.target = "_self";
-        this.#watchBtn.className="btn btn-dark text-light";
-        this.#watchBtn.innerHTML="Watch";
+      //  this.#watchBtn = document.createElement('a');
+     //   this.#watchBtn.href = "http://127.0.0.1:8082" + "/player"+"?v="+videoJson.uuid;
+       // console.log("href = ", this.#watchBtn.href);
+      //  this.#watchBtn.target = "_self";
+      //  this.#watchBtn.className="btn btn-dark text-light";
+       // this.#watchBtn.innerHTML="Watch";
         
         var resourceUuid = videoJson.uuid;
         console.log("resource uuid = ",resourceUuid);
 	
-	super.appendToCardBody( this.#infoRow );
-	super.appendToCardBody( this.#watchBtn );            
+	super.appendToCardBody( this.#infoRow );         
   }
   
   getCard() {
@@ -126,20 +135,34 @@ class UsersVideoCard extends BasicVideoCard  {
     this.#infoRow.appendChild(watches);
         
     var iconEdit = document.createRange().createContextualFragment(editIcon);
+    
+    var deleteBtn = document.createElement('button');
+    deleteBtn.addEventListener('click', async _ => {
+    	try {     
+        	const response = await fetch("http://127.0.0.1:8082/api/video/"+ videoJson.uuid, {
+        	method: 'delete'
+        	});
+        	console.log('Video deleted!', response);
+    	} catch(err) {
+        	console.error(`Error while delete video: ${err}`);
+    	}
+   });
+   deleteBtn.className="btn btn-danger text-light m-1";
+   deleteBtn.innerHTML=trashIcon;
 
 
     this.#controlRow = document.createElement('div');
-    this.#controlRow.className="d-flex justify-content-around";
-    this.#controlRow.appendChild(iconEdit);
+    this.#controlRow.className="d-flex justify-content-between";
+    this.#controlRow.appendChild(deleteBtn);
     
-    var link = document.createElement('a');
-    link.className="stretched-link"
-    link.href="#"
-    link.appendChild(iconEdit);
-    super.appendToCard( link )
+   // var link = document.createElement('a');
+   // link.className="stretched-link"
+   // link.href="#"
+   // link.appendChild(iconEdit);
+   // super.appendToCard( link )
     
-    super.appendToCardBody( this.#infoRow );
-    super.appendToCardBody( this.#controlRow ); 
+    super.appendToCard( this.#infoRow );
+    super.appendToCard( this.#controlRow ); 
  }
     
   getCard() {

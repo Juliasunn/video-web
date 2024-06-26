@@ -10,21 +10,21 @@
 
 <section class="h-100 gradient-custom-2">
   <div class="container py-5 h-100">
-    <div class="row d-flex justify-content-center align-items-center h-100">
-      <div class="col col-lg-9 col-xl-7">
+    <div class="row d-flex justify-content-left align-items-center h-100">
+      <div class="col">
         <div class="card">
           <div class="rounded-top text-white d-flex flex-row" style="background-color: #000; height:200px;">
             <div class="ms-4 mt-5 d-flex flex-column" style="width: 150px;">
-              <img id="avatarImg" src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-profiles/avatar-1.webp"
+              <img id="avatar"
                 alt="Generic placeholder image" class="img-fluid img-thumbnail mt-4 mb-2"
                 style="width: 150px; z-index: 1">
               <button type="button" class="btn btn-outline-dark" data-mdb-ripple-color="dark"
                 style="z-index: 1;">
-                Edit profile
+                Subscribe
               </button>
             </div>
             <div class="ms-3" style="margin-top: 130px;">
-              <h5>Andy Horwitz</h5>
+              <h5 id="name">Andy Horwitz</h5>
               <p>New York</p>
             </div>
           </div>
@@ -48,9 +48,7 @@
             <div class="mb-5">
               <p class="lead fw-normal mb-1">About</p>
               <div class="p-4" style="background-color: #f8f9fa;">
-                <p class="font-italic mb-1">Web Developer</p>
-                <p class="font-italic mb-1">Lives in New York</p>
-                <p class="font-italic mb-0">Photographer</p>
+                <p id="about" class="font-italic mb-1">Web Developer</p>
               </div>
             </div>
 
@@ -61,34 +59,54 @@
     </div>
   </div>
 </section>
+
+ <div class="row me-2 ms-2 align-self-stretch w-100 gradient-custom-2" id="channelContent"></div>
+ 
+<script src="/libs/jquery.min.js"></script>
+<script src="/utils.js"></script>
+<script src="/components/channelCard.js"></script>
+<script src="/components/videoCard.js"></script>
+<script src="/scripts/loadVideoFeed.js"></script>
 <script> 
-window.onload = function() {
+window.onload = async function() {
     console.log("onload");
-    fetchProfile();
+    var parsedUrl = queryString(document.location.href);
+    var channelUuid =  parsedUrl["u"];
+    loadChannel(channelUuid);
+    const channelVideo = await fetchVideoFeed("?ch="+channelUuid);
+    displayContent(document.getElementById("channelContent"), "20%", channelVideo)
+    //fetchVideoFeed(document.getElementById("channelContent"), "20%", "?ch="+channelUuid);
 };
 
-const fetchProfile = async () => {
+const loadChannel = async (channelUuid) => {
     console.log("[fetchProfile]");
     try {
-    	const response = await fetch("http://127.0.0.1:8081/api/profile");
-    	//contentArr = [];
-    	if(response.status >=200 && response.status < 300) {
-            const profileJson = await response.json();
-            console.log("Profile: ", profileJson);
-           // contentArr = myJson;
-           // displayContent();
+    	const fetchChannel = await fetch("http://127.0.0.1:8082/api/channel/"+channelUuid);
+    	if(fetchChannel.status >=200 && fetchChannel.status < 300) {
+            const channelJson = await fetchChannel.json();
+            console.log("Channel: ", channelJson);
+            displayChannel(channelJson);
             return;
         }
     } catch (e) { }
     console.log("Failed to fetch profile.");
-    //userContent.innerHTML = "<h5>No data found.</h5>"
+}
+
+function displayChannel(channelJson) {
+console.log("channelJson = ", channelJson, "name = ", channelJson.name)
+     const name = document.getElementById("name");
+     const about = document.getElementById("about");
+     const avatar = document.getElementById("avatar");
+     
+     name.innerHTML = channelJson.name;   	
+     about.innerHTML = channelJson.about;
+     avatar.src = channelJson.avatarImgUrl;
 }
 
 
 </script>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 </body>

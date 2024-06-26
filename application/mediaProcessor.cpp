@@ -42,8 +42,12 @@ void extractFrame(const disk_storage::Url &mpegUrl, DiskStoragePtr mpegStorage, 
     auto setected_frame = cap.get(CAP_PROP_FRAME_COUNT) / 2;
     std::cout << "Frame for preview index: " << setected_frame << std::endl;
     cap.set(CAP_PROP_POS_FRAMES, setected_frame);
-    cap >> frame;
+
+    Mat rawFrame;
+    cap >> rawFrame;
+    resize(rawFrame, frame, Size(500, 300));
   }
+
   catch( cv::Exception& e ){
     std::cerr << e.msg << std::endl;
     exit(1);

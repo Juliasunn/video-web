@@ -22,6 +22,15 @@ $("#myForm").submit(function(e) {
     
 });
 
-window.onload = function() {
-    fetchVideoFeed(document.getElementById("userContent"), "20%");
+window.onload = async function() {
+    const tokenCookie = getCookie("token");
+    if (tokenCookie) {
+        console.log("Token = ", tokenCookie);
+        const claims = parseJwt(tokenCookie);
+        const channelUuid = claims.sub;
+        //fetchVideoFeed(document.getElementById("userContent"), "20%", "?ch="+channelUuid);
+        const channelVideo = await fetchVideoFeed("?ch="+channelUuid);
+        console.log("Channel video = ", channelVideo)
+        displayUsersContent(document.getElementById("userContent"), "20%", channelVideo)
+    }
 };

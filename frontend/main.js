@@ -1,5 +1,6 @@
 
-window.onload = function() {
-    fetchVideoFeed(document.getElementById("content"), "20%");
+window.onload = async function() {
+    const allVideo = await fetchVideoFeed();
+    displayContent(document.getElementById("content"), "20%", allVideo)
 };
 

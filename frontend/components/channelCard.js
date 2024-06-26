@@ -14,10 +14,11 @@ class BaseChannel {
       avatar.src = "http://127.0.0.1:8082" + channelJson.avatarImgUrl;
       
       
-    //  var channel = document.createElement('p');
-      var channel = document.createElement('link');
-     // channel.className="text-muted  my-1";
-      channel.href = "http://127.0.0.1:8082/private/profile"
+      var channel = document.createElement('p');
+      var channel = document.createElement('a');
+      channel.className="text-muted  my-1";
+      channel.rel="stylesheet"
+      channel.href = "http://127.0.0.1:8082/channel?u="+channelJson.uuid
       channel.innerHTML = channelJson.name
       console.log("channel = ", channel)
       

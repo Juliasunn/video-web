@@ -43,7 +43,7 @@ function loadPageElements() {
     descriptionElement.innerHTML = video.description;
         
     playerElement.pause();
-    playerSrc.setAttribute("src", "http://127.0.0.1:8082/api/media" + video.videoUrl);
+    playerSrc.setAttribute("src", "http://127.0.0.1:8081/api/media" + video.videoUrl);
     playerElement.load();
     playerElement.play();  
 }
@@ -73,7 +73,9 @@ function loadChannelInfo(channel) {
     mediaColumn.appendChild(channelInfoHtml);  
 }
       
-window.addEventListener('load', () => {
-    fetchVideoFeed(document.getElementById("content"), "100%");
+window.addEventListener('load', async () => {
+    const allVideo = await fetchVideoFeed();
+    displayContent(document.getElementById("content"), "100%", allVideo)
+   // fetchVideoFeed(document.getElementById("content"), "100%");
     fetchVideo();
 });

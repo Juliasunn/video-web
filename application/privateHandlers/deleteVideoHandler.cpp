@@ -9,6 +9,7 @@
 #include <endpoint.h>
 
 #include "DocumentStorage/documentStorage.h"
+#include "http/http_exceptions.h"
 #include "resource/utils.h"
 #include "resource/video.h"
 #include "DiskStorage/error.h"
@@ -69,6 +70,10 @@ void DeleteVideoHandler::process_request(std::shared_ptr<http_session> session )
     boost::uuids::uuid allowChannelUuid;
     extract(m_claims, allowChannelUuid, claims::sub);
     auto response = prepareCommonResponse();
+
+    if (m_path_props.path_vars.size() != 1) {
+        throw bad_request_exception("Invalid endpoint path params");
+    }
     auto &videoUuid = m_path_props.path_vars.at(0);
 
     auto video = fetchVideo(videoUuid);

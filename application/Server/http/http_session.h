@@ -33,18 +33,6 @@ public:
         StaticBufferPtr read_buff,
         std::function<void (StaticBufferPtr)> handle);
 
-    template <typename BodyType>
-    inline void write(http::response<BodyType> &&response)
-    {
-        //std::cout << "[session] Write move called" << std::endl;
-        //shared_msg_buffer<false, BodyType> msg_holder(response);
-        auto msg_holder = std::make_shared<http::response<BodyType>>(std::move(response));
-
-        boost::asio::post(socket_io_,
-            boost::bind(&http_session::write_priv<BodyType>,
-                get_shared(),
-                msg_holder));
-    }
 
     /* !!response object must overlive write operation */
     //Not thread-safe yet
@@ -58,30 +46,11 @@ public:
 
         http::async_write(socket_stream_,
             response,
-            socket_io_.wrap(handler));
+            handler);
     }
     
     template <typename BodyType>
-    inline void write(std::shared_ptr<http::response<BodyType>> &response)
-    {
-        //std::cout << "[session] Write move called" << std::endl;
-       // shared_msg_buffer<false, BodyType> msg_holder(response);
-
-        boost::asio::post(socket_io_,
-            boost::bind(&http_session::write_priv<BodyType>,
-                get_shared(),
-                response));
-    }
-
-
-protected:
-
-    void read();
-
-    void read_priv();
-
-    template <typename BodyType>
-    inline void write_priv(/*shared_msg_buffer<false, BodyType> &msg_holder*/ std::shared_ptr<http::response<BodyType>> msg_holder)
+    inline void write(std::shared_ptr<http::response<BodyType>> &msg_holder)
     {
         auto handler = boost::bind(&http_session::on_write_handler<BodyType>,
             get_shared(),
@@ -90,9 +59,20 @@ protected:
 
         http::async_write(socket_stream_,
             *msg_holder,
-            socket_io_.wrap(handler));
+            handler);
     }
 
+    template <typename BodyType>
+    inline void write(http::response<BodyType> &&response)
+    {
+        auto msg_holder = std::make_shared<http::response<BodyType>>(std::move(response));
+        write(msg_holder);
+    }
+
+protected:
+    void read();
+
+    void read_priv();
 private:
 
     std::shared_ptr<http_session> get_shared();
@@ -131,14 +111,9 @@ private:
             read();
         }
     }
-
-    void finishPriv();
-
     void respodWithError(const http::request<http::string_body> &request, http::status error);
 
     beast::tcp_stream socket_stream_;
-    boost::asio::io_context::strand socket_io_;
-    boost::recursive_mutex mutex_;
     ns_server::HttpRequestHandlers handlers_;
 
     beast::flat_buffer request_extra_buff_;
