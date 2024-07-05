@@ -10,19 +10,21 @@
 #include <endpoint.h>
 
 #include "DocumentStorage/documentStorage.h"
+#include "resource/user.h"
 
 using namespace ns_server;
 
 namespace {
 
 void fetchUser(const std::string &uuidPathVar, http::response<http::string_body> &response) {
-    boost::json::object filter{ {"uuid", uuidPathVar} } ;
+    UserFilter filter;
+    filter.uuid = boost::lexical_cast<boost::uuids::uuid>(uuidPathVar);
     auto user = MongoStorage::instance().getUser(filter);
 
     if (!user) {   
         response.result(http::status::not_found);
     } else {
-        response.body() = boost::json::serialize(user.value());
+        response.body() = boost::json::serialize(boost::json::value_from(user.value()));
         response.set(http::field::content_type, "application/json");
         response.prepare_payload();
         response.result(http::status::ok);

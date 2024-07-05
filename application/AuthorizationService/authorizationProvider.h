@@ -5,6 +5,8 @@
 
 #include <boost/json.hpp>
 
+#include "resource/subject.h"
+
 enum Roles {
     GlobalGuest,
     AuthorizedUser
@@ -34,7 +36,7 @@ using Claims = boost::json::object;
 class IdentityProvider {
 public:
     static IdentityProvider *instance();
-    Identity getIdentity(const boost::json::object &authData) const;
+    Identity getIdentity(const SubjectFilter &authData) const;
     Claims getClaims(Identity identity) const;
     Claims getClaims() const;
 

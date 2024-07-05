@@ -14,6 +14,10 @@
 
 #include <type_traits>
 #include "clientOperation.h"
+#include "convertors/video.h"
+#include "convertors/subject.h"
+#include "convertors/user.h"
+#include "convertors/filters.h"
 
 class MongoStorage {
     mongocxx::instance m_dbInstance;
@@ -29,25 +33,37 @@ class MongoStorage {
 public:
     static MongoStorage &instance();
 
-    bool addVideo(const boost::json::value &video);
-    std::vector<boost::json::value> getVideo(const boost::json::object &filter);
-    std::optional<boost::json::value> getVideo(const boost::uuids::uuid &uuid);
-    bool deleteVideo(const boost::uuids::uuid &uuid);
+    bool addVideo(const Video &video);
 
-    std::optional<boost::json::value> getUser(const boost::json::value &uniqueFilter);
-    bool addUser(const boost::json::value &user);
-    std::optional<boost::json::value> getSubject(const boost::json::value &authData);
-    void addSubject(const boost::json::value &fullAuthData);
+    std::vector<Video> getVideo(const VideoFilter &filter);
+    std::optional<Video> getVideo(const UuidFilter &uuidfilter);
+    bool deleteVideo(const UuidFilter &uuid);
+
+    template<typename Filter>
+    std::optional<User> getUser(const Filter &uniqueFilter) {
+        return getUserImpl(DocumentConvertor<Filter>::toDocument(uniqueFilter));
+    }
+
+    bool addUser(const User &user);
+
+    template<typename Filter>
+    std::optional<Subject> getSubject(const Filter &authFilter){
+        return getSubjectImpl(DocumentConvertor<Filter>::toDocument(authFilter)); 
+    }
+
+    void addSubject(const Subject &subject);
 
     TransactionHandlePtr prepareTransaction();
-    void prepareAddVideo(const boost::json::value &video, TransactionHandle &transaction) const;
-    void prepareAddUser(const boost::json::value &user, TransactionHandle &transaction) const;
-    void prepareAddSubject(const boost::json::value &fullAuthData, TransactionHandle &transaction) const;
+    void prepareAddVideo(const Video &video, TransactionHandle &transaction) const;
+    void prepareAddUser(const User &user, TransactionHandle &transaction) const;
+    void prepareAddSubject(const Subject &fullAuthData, TransactionHandle &transaction) const;
 
-    void prepareUpdateUser(const boost::json::object &userUpdate, const boost::json::object &filter, TransactionHandle &transaction) const;
-    void prepareUpdateSubject(const boost::json::object &subjectUpdate, const boost::json::object &filter, TransactionHandle &transaction) const;
+    void prepareUpdateUser(const UserFilter &userUpdate, const UuidFilter &filter, TransactionHandle &transaction) const;
+    void prepareUpdateSubject(const SubjectFilter &subjectUpdate, const UuidFilter &filter, TransactionHandle &transaction) const;
 
 private:
     void deleteAll();
+    std::optional<User> getUserImpl(const bsoncxx::v_noabi::document::value &&filter);
+    std::optional<Subject> getSubjectImpl(const bsoncxx::v_noabi::document::value &&filter);
     std::mutex m_transactionMutex;
 };

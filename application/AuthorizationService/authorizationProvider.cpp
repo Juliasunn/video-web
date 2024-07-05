@@ -16,6 +16,7 @@
 #include <DocumentStorage/documentStorage.h>
 
 #include "authorizationErrors.h"
+#include "resource/subject.h"
 
 using namespace authorization_error;
 using namespace boost::json;
@@ -42,23 +43,18 @@ IdentityProvider * IdentityProvider::instance() {
     return m_instance;
 }
 
-Identity IdentityProvider::getIdentity(const boost::json::object &authData) const {
-    if (!authData.contains("password")) {
+Identity IdentityProvider::getIdentity(const SubjectFilter &authData) const {
+    if (!authData.password) {
         throw MissingRequiredFieldException("password");
     }
-    if (authData.size() < 2) {
+    if (!authData.login && !authData.mail && !authData.phone) {
         throw IncompleteAuthorizationDataException();        
     }
     auto dbSubject = MongoStorage::instance().getSubject(authData);
-    std::cout << "Authorization data: " << authData << std::endl;
     if (!dbSubject) {
         throw IncorrectAuthorizationDataException();
     }
-    auto subject = dbSubject.value().as_object();
-    if (!subject.count("uuid")) {
-        throw InternalAuthorizationException("Invalid subject (missing UUID).");
-    }
-    auto uuidStr = boost::json::value_to<std::string>( subject["uuid"] );
+    auto uuidStr = boost::lexical_cast<std::string>( dbSubject.value().uuid );
     auto token = jwt::create()
     .set_type("JWS")
     .set_issuer("auth0")

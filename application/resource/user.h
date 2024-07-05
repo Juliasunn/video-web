@@ -23,6 +23,14 @@ struct User
     std::string avatarImgUrl;
 };
 
+struct UserFilter
+{
+    std::optional<boost::uuids::uuid> uuid;
+    std::optional<std::string> name;
+    std::optional<std::string> about;
+    std::optional<std::string> avatarImgUrl;
+};
+
 User tag_invoke(boost::json::value_to_tag<User>, const boost::json::value &jv);
 /* for creating json::value from Message object */
 void tag_invoke(boost::json::value_from_tag, boost::json::value &jv, User const &v);
@@ -32,8 +40,11 @@ class FormUserBuilder {
 public:
     User build(multipart::FormData &form);
     User build(multipart::FormData &form, const boost::uuids::uuid &uuid);
-    boost::json::object buildUpdate(multipart::FormData &form, const User &updatingUser);
+    UserFilter buildUpdate(multipart::FormData &form, const User &updatingUser);
 };
 
 }
+
+using User = ns_user::User;
+using UserFilter = ns_user::UserFilter;
 

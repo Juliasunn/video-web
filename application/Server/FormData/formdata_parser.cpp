@@ -80,9 +80,9 @@ size_t formdata_parser::find_possible_boundary_from_eol(char *data, size_t from,
 
 size_t formdata_parser::find_possible_boundary_pos(char *data, size_t from, size_t to) const {
     size_t p = to - 1;
-    for ( ; p >= from; --p) {
+    for ( ; p > from; --p) {
         if (data[p] == '\n' &&  p-1 >= from && data[p-1] == '\r' ) {
-            p - 1;
+            p -= 1;
             break;
         }
     }

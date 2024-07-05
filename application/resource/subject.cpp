@@ -50,20 +50,20 @@ Subject FormSubjectBuilder::build(multipart::FormData &form) {
     return build(form, generateUuid());
 }
 
-boost::json::object FormSubjectBuilder::buildUpdate(multipart::FormData &form, const Subject &updatingSubject) {
-    boost::json::object update;
+SubjectFilter FormSubjectBuilder::buildUpdate(multipart::FormData &form, const Subject &updatingSubject) {
+    SubjectFilter update;
 
     if (editFormFilter(updatingSubject.login, form["inputLogin"])) {
-        update["login"] = form["inputLogin"].text.value();
+        update.login = form["inputLogin"].text.value();
     }
     if (editFormFilter(updatingSubject.phone, form["inputPhone"])) {
-        update["phone"] = form["inputPhone"].text.value();
+        update.phone = form["inputPhone"].text.value();
     }
     if (editFormFilter(updatingSubject.mail, form["inputMail"])) {
-        update["mail"] = form["inputMail"].text.value();
+        update.mail = form["inputMail"].text.value();
     }
     if (editFormFilter(updatingSubject.password, form["newPassword"])) {
-        update["password"] = form["newPassword"].text.value();
+        update.password = form["newPassword"].text.value();
     }
     return update;    
 }

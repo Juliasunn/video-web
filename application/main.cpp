@@ -79,10 +79,10 @@ void initEndpoints(std::shared_ptr<http_server_multithread> &server) {
 }
 
 int main(int, char**) {
-    auto videos = MongoStorage::instance().getVideo(boost::json::object{});
-    for (const auto &video : videos) {
-      std::cout << video << std::endl;
-    }
+  //  auto videos = MongoStorage::instance().getVideo(boost::json::object{});
+   // for (const auto &video : videos) {
+   //   std::cout << video << std::endl;
+   // }
     auto server = http_server_multithread::instance();
     initEndpoints(server);
     boost::thread_group workers;

@@ -10,6 +10,7 @@
 #include "DocumentStorage/documentStorage.h"
 #include "resource/utils.h"
 #include "resource/user.h"
+#include "resource/filters.h"
 #include "resource/subject.h"
 #include "common/formUtils.h"
 #include "Server/http/http_exceptions.h"
@@ -23,21 +24,21 @@ using namespace multipart;
 
 namespace {
 
-void updateInDb(const boost::json::object &userUpdate, const boost::json::object &subjectUpdate, 
-    const boost::json::object &uuidFilter)
+void updateInDb(const UserFilter &userUpdate, const SubjectFilter &subjectUpdate, 
+    const ns_filters::UuidFilter &uuidFilter)
 {
-    if (!userUpdate.size() && !subjectUpdate.size()) {
-        std::cout << "[WARNING] Nothing to update in user profile." << userUpdate << std::endl;
+   // if (!userUpdate.size() && !subjectUpdate.size()) {
+    //    std::cout << "[WARNING] Nothing to update in user profile." << userUpdate << std::endl;
         // Nothing to update
-        return;
-    }
+     //   return;
+   // }
     auto transaction = MongoStorage::instance().prepareTransaction();
-    if (userUpdate.size()) {
+  //  if (userUpdate.size()) {
         MongoStorage::instance().prepareUpdateUser(userUpdate, uuidFilter, *transaction);
-    }
-    if (subjectUpdate.size()) {
+   // }
+   // if (subjectUpdate.size()) {
         MongoStorage::instance().prepareUpdateSubject(subjectUpdate, uuidFilter, *transaction);
-    }
+   // }
     transaction->executeTransaction();
 }
 
@@ -56,7 +57,8 @@ void EditProfileHandler::handle_form_complete() {
         throw unauthorized_exception("Missing subject claim.");     
     }
 
-    boost::json::object filter{ {"uuid", m_claims[claims::sub]} } ;
+    auto uuid = boost::json::value_to<std::string>(m_claims[claims::sub]);
+    ns_filters::UuidFilter filter{uuid};
     auto dbUser = MongoStorage::instance().getUser(filter);
     auto dbSubject = MongoStorage::instance().getSubject(filter);
 
@@ -64,13 +66,13 @@ void EditProfileHandler::handle_form_complete() {
         throw resouce_not_found_exception("Profile not found.");
     }
 
-    auto user =  boost::json::value_to<User>( dbUser.value() );
-    auto subject =  boost::json::value_to<Subject>( dbSubject.value() );
+    auto user =  dbUser.value();
+    auto subject =  dbSubject.value();
 
     auto userUpdate = FormUserBuilder().buildUpdate( m_form, user);
     auto subjectUpdate = FormSubjectBuilder().buildUpdate( m_form, subject);
 
-    if (subjectUpdate.contains("password")) {
+    if (subjectUpdate.password) {
         if (isEmpty(m_form["currentPassword"].text) ||  m_form["currentPassword"].text.value() != subject.password) {
             throw unauthorized_exception("Password confirmation failed."); 
         }        

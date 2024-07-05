@@ -18,11 +18,11 @@ using namespace multipart;
 
 namespace {
 
-void saveToDb(const ns_user::User &user, const ns_subject::Subject &subject)
+void saveToDb(const User &user, const ns_subject::Subject &subject)
 {
     auto transaction = MongoStorage::instance().prepareTransaction();
-    MongoStorage::instance().prepareAddSubject(boost::json::value_from(subject), *transaction);
-    MongoStorage::instance().prepareAddUser(boost::json::value_from(user), *transaction);
+    MongoStorage::instance().prepareAddSubject(subject, *transaction);
+    MongoStorage::instance().prepareAddUser(user, *transaction);
     transaction->executeTransaction();
 }
 

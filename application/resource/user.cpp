@@ -51,16 +51,16 @@ User FormUserBuilder::build(multipart::FormData &form, const boost::uuids::uuid 
     return User{uuid, name, about, avatarFileUrl.value()};
 }
 
-boost::json::object FormUserBuilder::buildUpdate(multipart::FormData &form, const User &updatingUser) {
-    boost::json::object update;
+UserFilter FormUserBuilder::buildUpdate(multipart::FormData &form, const User &updatingUser) {
+    UserFilter update;
     if (editFormFilter(updatingUser.name, form["inputName"])) {
-        update["name"] = form["inputName"].text.value();
+        update.name = form["inputName"].text.value();
     }
     if (editFormFilter(updatingUser.about, form["inputAbout"])) {
-        update["about"] = form["inputAbout"].text.value();
+        update.about = form["inputAbout"].text.value();
     }
     if (form["inputFile"].storeFilePath) {
-        update["avatarImgUrl"] = form["inputFile"].storeFilePath.value();
+        update.avatarImgUrl = form["inputFile"].storeFilePath.value();
     }
     return update;    
 }

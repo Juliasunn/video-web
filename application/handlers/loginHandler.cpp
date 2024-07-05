@@ -50,7 +50,7 @@ http::response<http::empty_body> LoginHandler::form_response() const {
 } 
 
 void LoginHandler::handle_form_complete() {
-    m_authData = {};
+   // m_authData = {};
     std::cout << "[DEBUG] Form complete with " << m_form.size() << " elements." << std::endl;
 
     auto phoneData = m_form["inputPhone"].text;
@@ -59,19 +59,19 @@ void LoginHandler::handle_form_complete() {
     auto passwordData = m_form["inputPassword"].text;
 
     if (!isEmpty(phoneData)) {
-      m_authData["phone"] = phoneData.value();
+      m_authData.phone = phoneData.value();
       std::cout << "phone: " << phoneData.value() << std::endl;
     }
     if (!isEmpty(mailData)) {
-      m_authData["mail"] = mailData.value();
+      m_authData.mail = mailData.value();
       std::cout << "mail: " << mailData.value() << std::endl;
     }
     if (!isEmpty(loginData)) {
-      m_authData["login"] = loginData.value();
+      m_authData.login = loginData.value();
       std::cout << "login: " << loginData.value() << std::endl;
     }
     if (!isEmpty(passwordData)) {
-      m_authData["password"] = passwordData.value();
+      m_authData.password = passwordData.value();
       std::cout << "password: " << passwordData.value() << std::endl;
     }
 }

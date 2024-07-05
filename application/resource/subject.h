@@ -25,6 +25,15 @@ struct Subject
     std::string password;
 };
 
+struct SubjectFilter
+{
+    std::optional<boost::uuids::uuid> uuid;
+    std::optional<std::string> login;
+    std::optional<std::string> mail;
+    std::optional<std::string> phone;
+    std::optional<std::string> password;
+};
+
 Subject tag_invoke(boost::json::value_to_tag<Subject>, const boost::json::value &jv);
 /* for creating json::value from Message object */
 void tag_invoke(boost::json::value_from_tag, boost::json::value &jv, Subject const &v);
@@ -34,8 +43,11 @@ class FormSubjectBuilder {
 public:
     Subject build(multipart::FormData &form);
     Subject build(multipart::FormData &form, const boost::uuids::uuid &uuid);
-    boost::json::object buildUpdate(multipart::FormData &form, const Subject &updatingSubject);
+    SubjectFilter buildUpdate(multipart::FormData &form, const Subject &updatingSubject);
 };
 
 }
+
+using Subject = ns_subject::Subject;
+using SubjectFilter = ns_subject::SubjectFilter;
 

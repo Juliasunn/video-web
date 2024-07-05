@@ -1,5 +1,6 @@
 #include "video.h"
 
+#include <boost/json/object.hpp>
 #include <filesystem>
 
 #include <boost/json/src.hpp>
@@ -33,6 +34,31 @@ void ns_video::tag_invoke(value_from_tag, value &jv, const Video &videoObj)
            {"description", videoObj.description},
            {"header", videoObj.header}
          };
+}
+
+VideoFilter ns_video::tag_invoke(boost::json::value_to_tag<VideoFilter>, const boost::json::value &jv) {
+    VideoFilter videoFilter;
+    object json_object = jv.as_object();
+    extract(json_object, videoFilter.uuid, "uuid");
+    extract(json_object, videoFilter.channelUuid, "channelUuid");
+    extract(json_object, videoFilter.previewImgUrl, "previewImgUrl");
+    extract(json_object, videoFilter.videoUrl, "videoUrl");
+    extract(json_object, videoFilter.header, "header");
+    extract(json_object, videoFilter.description, "description");
+    return videoFilter;
+}
+
+void ns_video::tag_invoke(value_from_tag, value &jv, VideoFilter const &videoFilter) {
+    object jsonFilter;
+    //optional in right side of expressions
+    emplace(jsonFilter, videoFilter.uuid, "uuid");
+    emplace(jsonFilter, videoFilter.channelUuid, "channelUuid");
+    emplace(jsonFilter, videoFilter.previewImgUrl, "previewImgUrl");
+    emplace(jsonFilter, videoFilter.videoUrl, "videoUrl");
+    emplace(jsonFilter, videoFilter.description, "description");
+    emplace(jsonFilter, videoFilter.header, "header");
+    jv = boost::json::value_from(jsonFilter);
+
 }
 
 static std::string removeExtension(const std::string &fileName){

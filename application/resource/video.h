@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <optional>
 
 #include <boost/json.hpp>
 #include <boost/uuid/uuid.hpp>            // uuid class
@@ -10,6 +11,8 @@
 #include <endpoint.h>
 
 #include "DiskStorage/diskStorage.h"
+
+
 
 namespace ns_video {
 
@@ -25,9 +28,22 @@ struct Video
     std::string videoUrl;
 };
 
+struct VideoFilter {
+    std::optional<boost::uuids::uuid> uuid;
+    std::optional<boost::uuids::uuid> channelUuid;
+    std::optional<std::string> header;
+    std::optional<std::string> description;
+    std::optional<std::string> previewImgUrl;
+    std::optional<std::string> videoUrl;
+};
+
 Video tag_invoke(boost::json::value_to_tag<Video>, const boost::json::value &jv);
 /* for creating json::value from Message object */
 void tag_invoke(boost::json::value_from_tag, boost::json::value &jv, Video const &v);
+
+VideoFilter tag_invoke(boost::json::value_to_tag<VideoFilter>, const boost::json::value &jv);
+/* for creating json::value from Message object */
+void tag_invoke(boost::json::value_from_tag, boost::json::value &jv, VideoFilter const &v);
 
 class FormVideoBuilder {
 public:
@@ -35,3 +51,6 @@ public:
 };
 
 }
+
+using Video = ns_video::Video;
+using VideoFilter = ns_video::VideoFilter;

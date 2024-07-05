@@ -19,8 +19,8 @@ using namespace multipart;
 
 namespace {
 
-void saveToDb(const ns_video::Video &videoObj) {
-  MongoStorage::instance().addVideo(boost::json::value_from(videoObj));
+void saveToDb(const ns_video::Video &video) {
+  MongoStorage::instance().addVideo(video);
 }
 
 }

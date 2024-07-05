@@ -19,10 +19,10 @@ using namespace ns_server;
 namespace {
 
 std::optional<ns_video::Video> fetchVideo(const std::string &uuidStr) {
-    auto uuid = boost::lexical_cast<boost::uuids::uuid>(uuidStr);
-    auto video = MongoStorage::instance().getVideo(uuid);
+    auto uuidFilter = ns_filters::UuidFilter{uuidStr};
+    auto video = MongoStorage::instance().getVideo(uuidFilter);
     if (!video) { return std::nullopt;}
-    return boost::json::value_to<ns_video::Video>(video.value());
+    return video;
 }
 
 http::status deleteVideo(ns_video::Video &video, DiskStoragePtr mpegStorage, DiskStoragePtr previewStorage) {
@@ -32,7 +32,8 @@ http::status deleteVideo(ns_video::Video &video, DiskStoragePtr mpegStorage, Dis
     } catch (disk_storage::FileNotFoundException &e) {
         std::cout << e.what() << std::endl;
     }
-    if (MongoStorage::instance().deleteVideo(video.uuid)) {
+    auto uuidFilter = ns_filters::UuidFilter{boost::lexical_cast<std::string>(video.uuid)};
+    if (MongoStorage::instance().deleteVideo(uuidFilter)) {
         return http::status::ok;
     }
     return http::status::internal_server_error;

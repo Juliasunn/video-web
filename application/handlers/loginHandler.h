@@ -7,6 +7,7 @@
 #include <endpoint.h>
 #include <FormData/formdata_handler.h>
 #include "Pool/pooledBuffers.h"
+#include "resource/subject.h"
 
 namespace ns_server {
   //Each handler belongs to single session
@@ -30,7 +31,7 @@ protected:
 private:
 
     void setCookie(http::response<http::string_body> &res);
-    boost::json::object m_authData;
+    SubjectFilter m_authData;
     PooledStaticBuffer<1024> m_buff;
 
 };

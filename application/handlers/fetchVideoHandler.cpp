@@ -7,6 +7,8 @@
 #include <http/http_session.h>
 #include <endpoint.h>
 
+#include "resource/filters.h"
+#include "resource/video.h"
 #include "DocumentStorage/documentStorage.h"
 
 using namespace ns_server;
@@ -14,13 +16,13 @@ using namespace ns_server;
 namespace {
 
 void fetchVideoFeed(QueryParams &queryParams, http::response<http::string_body> &response) {
-    boost::json::object filter;
+    ns_video::VideoFilter videoFilter;
 
     if (queryParams.count("ch")) { //channel
-        filter["channelUuid"] = queryParams["ch"];
+        videoFilter.channelUuid = boost::lexical_cast<boost::uuids::uuid>(queryParams["ch"]);
     }
+    auto videos = MongoStorage::instance().getVideo(videoFilter);
 
-    auto videos = MongoStorage::instance().getVideo(filter);
     boost::json::array jsonVideoArray;
 
     for (const auto &video : videos)  {
@@ -37,13 +39,13 @@ void fetchVideo(QueryParams &queryParams, http::response<http::string_body> &res
         response.result(http::status::bad_request);
         return;
     }
-    auto uuid = boost::lexical_cast<boost::uuids::uuid>(queryParams["v"]);
-    auto video = MongoStorage::instance().getVideo(uuid);
+    auto uuidFilter = ns_filters::UuidFilter{queryParams["v"]};
+    auto video = MongoStorage::instance().getVideo(uuidFilter);
 
     if (!video) {   
         response.result(http::status::not_found);
     } else {
-        response.body() = boost::json::serialize(video.value());
+        response.body() = boost::json::serialize(boost::json::value_from(video.value()));
         response.set(http::field::content_type, "application/json");
         response.prepare_payload();
         response.result(http::status::ok);
@@ -78,5 +80,4 @@ void FetchVideosHandler::process_request(std::shared_ptr<http_session> session )
         response.result(http::status::bad_request);
     }
     session->write(std::move(response));
-   // session->finish();
 }

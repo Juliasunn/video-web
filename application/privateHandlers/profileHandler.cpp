@@ -14,11 +14,11 @@ using namespace ns_server;
 namespace {
 
 void fetchUser(const std::string &uuid, http::response<http::string_body> &response) {
-    boost::json::object filter{ {"uuid", uuid} } ;
-    auto user = MongoStorage::instance().getUser(filter);
-    auto subject = MongoStorage::instance().getSubject(filter);
+    ns_filters::UuidFilter uuidFilter;
+    auto user = MongoStorage::instance().getUser(uuidFilter);
+    auto subject = MongoStorage::instance().getSubject(uuidFilter);
 
-    if ( !user || !subject ) {   
+    if ( !user || !subject ) {
         response.result(http::status::not_found);
     } else {
         boost::json::object profile( { {"user",  user.value()}, {"subject", subject.value()} });
