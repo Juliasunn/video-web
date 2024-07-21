@@ -46,12 +46,25 @@ include_directories(AuthorizationService/jwt-cpp)
 
 add_executable(HttpLiveStreaming main.cpp
     resource/utils.h
+    resource/timeUtils.h
+    resource/timeUtils.cpp
     resource/video.cpp
     resource/video.h
     resource/user.cpp
     resource/user.h
     resource/subject.cpp
     resource/subject.h
+    resource/stream.cpp
+    resource/stream.h
+
+    form/uploadVideoForm.cpp
+    form/uploadVideoForm.h
+    form/registrationForm.cpp
+    form/registrationForm.h
+    form/loginForm.cpp
+    form/loginForm.h
+    form/editProfileForm.cpp
+    form/editProfileForm.h
 
     mediaProcessor.cpp
     mediaProcessor.h
@@ -72,6 +85,8 @@ add_executable(HttpLiveStreaming main.cpp
     handlers/registrationHandler.h
     handlers/authorizationHandler.cpp
     handlers/authorizationHandler.h
+    handlers/publishStreamHandler.cpp
+    handlers/publishStreamHandler.h
 
     privateHandlers/uploadVideoHandler.cpp
     privateHandlers/uploadVideoHandler.h
@@ -81,6 +96,8 @@ add_executable(HttpLiveStreaming main.cpp
     privateHandlers/deleteVideoHandler.cpp  
     privateHandlers/editProfileHandler.cpp  
     privateHandlers/editProfileHandler.h 
+    privateHandlers/streamHandler.cpp  
+    privateHandlers/streamHandler.h 
 
     DiskStorage/diskStorage.cpp 
     DiskStorage/diskStorage.h

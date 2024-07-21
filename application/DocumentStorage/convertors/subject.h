@@ -24,7 +24,8 @@ namespace doc_keys {
 constexpr const key_view uuid = "uuid";
 constexpr const key_view login = "login";
 constexpr const key_view mail = "mail";
-constexpr const key_view phone = "phone";             
+constexpr const key_view phone = "phone"; 
+constexpr const key_view password = "password";            
 }
 
 struct SubjectFieldsProcessor {
@@ -33,7 +34,8 @@ static void processFields(Document &doc, SubjectOrFilter &subject) {
     FieldProcessor::process(doc, doc_keys::uuid, subject.uuid);
     FieldProcessor::process(doc, doc_keys::login, subject.login);
     FieldProcessor::process(doc, doc_keys::mail, subject.mail);
-    FieldProcessor::process(doc, doc_keys::phone, subject.phone);  
+    FieldProcessor::process(doc, doc_keys::phone, subject.phone);
+    FieldProcessor::process(doc, doc_keys::password, subject.password);  
 }
 };
 

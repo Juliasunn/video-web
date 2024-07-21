@@ -35,14 +35,6 @@ User tag_invoke(boost::json::value_to_tag<User>, const boost::json::value &jv);
 /* for creating json::value from Message object */
 void tag_invoke(boost::json::value_from_tag, boost::json::value &jv, User const &v);
 
-class FormUserBuilder {
-    const disk_storage::Url defaultAvatarUrl = "/avatar/basic.jpg"; 
-public:
-    User build(multipart::FormData &form);
-    User build(multipart::FormData &form, const boost::uuids::uuid &uuid);
-    UserFilter buildUpdate(multipart::FormData &form, const User &updatingUser);
-};
-
 }
 
 using User = ns_user::User;

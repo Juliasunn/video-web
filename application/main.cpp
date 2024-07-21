@@ -13,15 +13,19 @@
 #include "handlers/registrationHandler.h"
 #include "handlers/fetchUserHandler.h"
 #include "handlers/authorizationHandler.h"
+#include "handlers/publishStreamHandler.h"
 
 #include "privateHandlers/uploadVideoHandler.h"
 #include "privateHandlers/deleteVideoHandler.h"
 #include "privateHandlers/profileHandler.h"
 //#include "privateHandlers/pageHandler.h"
 #include "privateHandlers/editProfileHandler.h"
+#include "privateHandlers/streamHandler.h"
 
 #include "DocumentStorage/documentStorage.h"
 #include "authorizationDecorator.h"
+
+#include "resource/timeUtils.h"
 
 #define MPEG_DIR "/home/julia/videoserver/video"
 #define JPG_DIR "/home/julia/videoserver/preview"
@@ -64,7 +68,7 @@ void initEndpoints(std::shared_ptr<http_server_multithread> &server) {
     //https://www.youtube.com/api/channel/lu12cTlJQ00
     server-> add_endpoint_handler("GET", "/api/channel_", std::make_unique<FetchUserHandler>());
     server-> add_endpoint_handler("POST", "/api/login", std::make_unique<LoginHandler>());
-
+    server-> add_endpoint_handler("POST", "/api/stream/publish", std::make_unique<PublishStreamHandler>());
 
     server-> add_endpoint_handler("POST", "/api/registration", 
         std::make_unique<RegistrationHandler>(avatarFileStorage));
@@ -76,9 +80,26 @@ void initEndpoints(std::shared_ptr<http_server_multithread> &server) {
      auto editProfileHandler = std::make_unique<AuthorizationDecorator<EditProfileHandler>>(Permissions::ManageAccount, 
      std::make_shared<RedirectToLoginStrategy>("/home/julia/videoserver/web/login.html"), avatarFileStorage );
     server-> add_endpoint_handler("POST", "/api/profile", std::move(editProfileHandler));   
+
+     auto streamHandler = std::make_unique<AuthorizationDecorator<StreamHandler>>(Permissions::ManageStream, 
+     std::make_shared<RedirectToLoginStrategy>("/home/julia/videoserver/web/login.html") );
+    server-> add_endpoint_handler("GET", "/api/stream_", std::move(streamHandler));  
+
 }
 
 int main(int, char**) {
+   // using namespace std::chrono;
+   // static const time_point<system_clock> pointNow = std::chrono::system_clock::now();
+
+    TimeUTC pointNow = timeNow();
+
+    std::cout << toString(pointNow) << std::endl;
+
+    static const auto jsonPointNow = boost::json::value_from(pointNow);
+    static const auto pointNowConverted = boost::json::value_to<TimeUTC>( jsonPointNow);
+
+    std::cout << static_cast<time_t>(pointNow)<< " VS " << toString(pointNowConverted) << std::endl;
+
   //  auto videos = MongoStorage::instance().getVideo(boost::json::object{});
    // for (const auto &video : videos) {
    //   std::cout << video << std::endl;

@@ -18,6 +18,7 @@
 #include "convertors/subject.h"
 #include "convertors/user.h"
 #include "convertors/filters.h"
+#include "convertors/stream.h"
 
 class MongoStorage {
     mongocxx::instance m_dbInstance;
@@ -63,7 +64,7 @@ public:
 
 private:
     void deleteAll();
-    std::optional<User> getUserImpl(const bsoncxx::v_noabi::document::value &&filter);
-    std::optional<Subject> getSubjectImpl(const bsoncxx::v_noabi::document::value &&filter);
+    std::optional<User> getUserImpl(bsoncxx::v_noabi::document::value &&filter);
+    std::optional<Subject> getSubjectImpl(bsoncxx::v_noabi::document::value &&filter);
     std::mutex m_transactionMutex;
 };

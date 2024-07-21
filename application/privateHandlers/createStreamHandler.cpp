@@ -1,4 +1,4 @@
-#include "editProfileHandler.h"
+#include "createStreamHandler.h"
 
 #include <stdio.h>
 #include <iostream>
@@ -9,8 +9,9 @@
 
 #include "DocumentStorage/documentStorage.h"
 #include "resource/utils.h"
+#include "resource/user.h"
 #include "resource/filters.h"
-#include "form/editProfileForm.h"
+#include "resource/subject.h"
 #include "Server/http/http_exceptions.h"
 #include "form/formUtils.h"
 
@@ -42,13 +43,13 @@ void updateInDb(const UserFilter &userUpdate, const SubjectFilter &subjectUpdate
 
 }
 
-EditProfileHandler::EditProfileHandler(DiskStoragePtr avatarStorage) : m_avatarStorage(avatarStorage) {}
+CreateStreamHandler::CreateStreamHandler(DiskStoragePtr streamPreviewStorage) : m_streamPreviewStorage(streamPreviewStorage) {}
 
-std::unique_ptr<ns_server::BaseHttpRequestHandler> EditProfileHandler::clone(){
-    return std::make_unique<EditProfileHandler>(m_avatarStorage);
+std::unique_ptr<ns_server::BaseHttpRequestHandler> CreateStreamHandler::clone(){
+    return std::make_unique<CreateStreamHandler>(m_streamPreviewStorage);
 }
 
-void EditProfileHandler::handle_form_complete() {
+void CreateStreamHandler::handle_form_complete() {
     std::cout << "[DEBUG] Form complete with " << m_form.size() << " elements." << std::endl;
 
     if (!m_claims.count(claims::sub)) {
@@ -64,36 +65,9 @@ void EditProfileHandler::handle_form_complete() {
         throw resouce_not_found_exception("Profile not found.");
     }
 
-    auto user =  dbUser.value();
-    auto subject =  dbSubject.value();
-
-    EditProfileForm editForm(m_form);
-    auto userUpdate = editForm.createUserUpdate(user);
-    auto subjectUpdate = editForm.createSubjectUpdate(subject);
-
-    if (subjectUpdate.password) {
-        auto providedPassword = editForm.getCurrentPassword();
-        if (!providedPassword ||  providedPassword != subject.password) {
-            throw unauthorized_exception("Password confirmation failed."); 
-        }        
-    }
-
-    updateInDb(userUpdate, subjectUpdate, filter);
+ //   preprocessTextFields(m_form);
 }
 
-//обработка файла
-void EditProfileHandler::handle_file(const char *data,
-    size_t len,
-    FormDataElement &form_element) const { 
-    //Generate unique filename
-    if (!form_element.storeFilePath) {
-        auto srcExtension = std::filesystem::path(form_element.fileName.value()).extension();
-        form_element.storeFilePath = m_avatarStorage->createFile(srcExtension);
-    }
-    auto fileUrl = form_element.storeFilePath.value();
-    m_avatarStorage->writeToFile(fileUrl, data, len);
-}
-
-void EditProfileHandler::setClaims(const Claims &claims) {
+void CreateStreamHandler::setClaims(const Claims &claims) {
     m_claims = claims;
 }

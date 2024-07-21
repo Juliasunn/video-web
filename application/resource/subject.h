@@ -38,14 +38,6 @@ Subject tag_invoke(boost::json::value_to_tag<Subject>, const boost::json::value 
 /* for creating json::value from Message object */
 void tag_invoke(boost::json::value_from_tag, boost::json::value &jv, Subject const &v);
 
-
-class FormSubjectBuilder {
-public:
-    Subject build(multipart::FormData &form);
-    Subject build(multipart::FormData &form, const boost::uuids::uuid &uuid);
-    SubjectFilter buildUpdate(multipart::FormData &form, const Subject &updatingSubject);
-};
-
 }
 
 using Subject = ns_subject::Subject;

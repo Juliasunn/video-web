@@ -101,6 +101,10 @@ void http_session::on_read_exactly_handler(const boost::system::error_code &ec,
     StaticBufferPtr read_buff,
     std::function<void (StaticBufferPtr)> handle)
 {
+    if (ec) {
+        std::cout << "Error reading from socket " << ec.message() << std::endl;
+        return;
+    } 
     std::cout << "[DEBUG] session read_exactly: " << std::to_string(bytes_transferred) << " bytes. " << std::endl;
     read_buff->append(bytes_transferred);
     handle(read_buff);

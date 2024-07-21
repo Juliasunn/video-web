@@ -124,7 +124,7 @@ bool MongoStorage::addUser(const User &user) {
   return rv.has_value();
 }
 
-std::optional<User> MongoStorage::getUserImpl(const bsoncxx::v_noabi::document::value &&filter) 
+std::optional<User> MongoStorage::getUserImpl(bsoncxx::v_noabi::document::value &&filter) 
 {
   auto operation = [doc = filter, &db=m_dbname](mongocxx::client &client) mutable  {
     return client[db]["user"].find_one(std::move(doc));
@@ -136,9 +136,10 @@ std::optional<User> MongoStorage::getUserImpl(const bsoncxx::v_noabi::document::
   return DocumentConvertor<User>::fromDocument(filtered.value());
 }
 
-std::optional<Subject> MongoStorage::getSubjectImpl(const bsoncxx::v_noabi::document::value &&filter)
+std::optional<Subject> MongoStorage::getSubjectImpl(bsoncxx::v_noabi::document::value &&filter)
 {
-  auto operation = [doc = filter, &db=m_dbname](mongocxx::client &client) mutable  {
+
+  auto operation = [doc = std::move(filter), &db=m_dbname](mongocxx::client &client) mutable  { 
     return client[db]["subject"].find_one(std::move(doc));
   };
   auto filtered = scopeExecute(ClientOperation{ operation }, m_pool);

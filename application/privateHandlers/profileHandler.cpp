@@ -14,7 +14,7 @@ using namespace ns_server;
 namespace {
 
 void fetchUser(const std::string &uuid, http::response<http::string_body> &response) {
-    ns_filters::UuidFilter uuidFilter;
+    ns_filters::UuidFilter uuidFilter{uuid};
     auto user = MongoStorage::instance().getUser(uuidFilter);
     auto subject = MongoStorage::instance().getSubject(uuidFilter);
 

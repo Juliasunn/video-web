@@ -8,9 +8,7 @@
 #include <boost/uuid/uuid_io.hpp>
 
 #include "DocumentStorage/documentStorage.h"
-#include "resource/user.h"
-#include "resource/subject.h"
-#include "common/formUtils.h"
+#include "form/registrationForm.h"
 
 using namespace form;
 using namespace ns_server;
@@ -33,8 +31,9 @@ RegistrationHandler::RegistrationHandler(DiskStoragePtr avatarStorage) : m_avata
 void RegistrationHandler::handle_form_complete() {
     std::cout << "[DEBUG] Form complete with " << m_form.size() << " elements." << std::endl;
 
-    auto user = ns_user::FormUserBuilder().build(m_form);
-    auto subject = ns_subject::FormSubjectBuilder().build(m_form, user.uuid);
+    RegistrationForm registrationForm(m_form);
+    auto subject = registrationForm.createSubject();
+    auto user = registrationForm.createUser(subject.uuid);
 
     std::cout << "[DEBUG]: UUID = " << user.uuid << std::endl;
 

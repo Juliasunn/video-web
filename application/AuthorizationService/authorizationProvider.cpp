@@ -45,15 +45,19 @@ IdentityProvider * IdentityProvider::instance() {
 
 Identity IdentityProvider::getIdentity(const SubjectFilter &authData) const {
     if (!authData.password) {
+        std::cout << "1";
         throw MissingRequiredFieldException("password");
     }
     if (!authData.login && !authData.mail && !authData.phone) {
+        std::cout << "2";
         throw IncompleteAuthorizationDataException();        
     }
     auto dbSubject = MongoStorage::instance().getSubject(authData);
     if (!dbSubject) {
+        std::cout << "3";
         throw IncorrectAuthorizationDataException();
     }
+    std::cout << "4";
     auto uuidStr = boost::lexical_cast<std::string>( dbSubject.value().uuid );
     auto token = jwt::create()
     .set_type("JWS")

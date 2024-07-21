@@ -45,11 +45,6 @@ VideoFilter tag_invoke(boost::json::value_to_tag<VideoFilter>, const boost::json
 /* for creating json::value from Message object */
 void tag_invoke(boost::json::value_from_tag, boost::json::value &jv, VideoFilter const &v);
 
-class FormVideoBuilder {
-public:
-    Video build(multipart::FormData &form);
-};
-
 }
 
 using Video = ns_video::Video;

@@ -1,10 +1,10 @@
 #pragma once
 #include <boost/json/value_from.hpp>
+#include <iomanip>
 #include <string>
 
 #include <boost/json.hpp>
 #include <boost/uuid/uuid.hpp>            // uuid class
-#include <boost/uuid/uuid_generators.hpp> // generators
 #include <boost/lexical_cast.hpp>
 
 using namespace boost::json;
@@ -62,12 +62,43 @@ inline void emplace<boost::uuids::uuid>(object &obj, const std::optional<boost::
     obj[key] = boost::json::value_from(boost::lexical_cast<std::string>(mbT.value()));
 }
 
+template<class T>
+inline void emplace(object &obj, const T &t, string_view key)
+{
+    obj[key] = boost::json::value_from(t);
+}
+
+template<>
+inline void emplace<boost::uuids::uuid>(object &obj, const boost::uuids::uuid &t, string_view key)
+{
+    obj[key] = boost::json::value_from(boost::lexical_cast<std::string>(t));
+}
+
+namespace json_convertors {
+
+struct Extractor {
+    template <typename Field>
+    static void process(const object &json, Field &field, string_view key) {
+        extract(json, field, key);
+    }
+};
+
+struct Emplacer {
+    template <typename Field>
+    static void process(object &json, const Field &field, string_view key) {
+        emplace(json, field, key);
+    }
+};
+
+} // json_convertors
+//template <typename Entity>
+//struct JsonConvertor {
+ //   Entity 
+//};
+
 /*
 template<>
 void extract( object const& obj, boost::gregorian::date& t, string_view key );
  */
 
-static uuid generateUuid() {
-    static random_generator uuidGenerator;
-    return uuidGenerator();
-}
+

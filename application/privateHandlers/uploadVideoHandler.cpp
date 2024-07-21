@@ -11,7 +11,8 @@
 #include "mediaProcessor.h"
 #include "resource/video.h"
 #include "resource/utils.h"
-#include "common/formUtils.h"
+#include "form/formUtils.h"
+#include "form/uploadVideoForm.h"
 
 using namespace form;
 using namespace ns_video;
@@ -40,7 +41,9 @@ void UploadVideoHandler::handle_form_complete() {
         throw unauthorized_exception("Missing subject claim.");   
     }
 
-    Video videoObj = FormVideoBuilder().build(m_form);
+    UploadVideoForm videoForm(m_form);
+
+    Video videoObj = videoForm.createVideo();
     /* Set channel uuid*/
     extract(m_claims, videoObj.channelUuid, claims::sub);
 
