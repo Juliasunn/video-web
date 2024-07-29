@@ -11,6 +11,8 @@
 #include <boost/lexical_cast.hpp>
 #include <string_view>
 #include "resource/stream.h"
+#include "DocumentStorage/documentStorage.h"
+#include "resource/stream.h"
 
 //using namespace ns_server;
 
@@ -51,8 +53,15 @@ constexpr const std::string_view publishKey = "key";
 
 } // body_keys
 
-bool validatePublishKey(std::string_view streamId, std::string_view publishKey) {
-    return true;
+bool validatePublishKey(std::string_view streamKey, std::string_view publishKey) {
+    StreamFilter streamFilter;
+    streamFilter.uuid = streamKey;
+    streamFilter.publishKey = publishKey;
+
+    auto timeExpression = GreaterComparator<TimeUTC>{timeNow()};
+    streamFilter.expire.emplace<GreaterComparator<TimeUTC>>(timeExpression);
+    auto runningStream = MongoStorage::instance().getStream(streamFilter);
+    return runningStream.has_value();
 }
 
 }

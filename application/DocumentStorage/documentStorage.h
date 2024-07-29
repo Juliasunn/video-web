@@ -54,6 +54,15 @@ public:
 
     void addSubject(const Subject &subject);
 
+    bool addStream(const Stream &stream);
+    
+    bool updateStream(const StreamFilter &streamUpdate, const StreamFilter &streamFilter);
+
+    template<typename Filter>
+    std::optional<Stream> getStream(const Filter &uniqueFilter){
+        return getStreamImpl(DocumentConvertor<Filter>::toDocument(uniqueFilter)); 
+    }
+
     TransactionHandlePtr prepareTransaction();
     void prepareAddVideo(const Video &video, TransactionHandle &transaction) const;
     void prepareAddUser(const User &user, TransactionHandle &transaction) const;
@@ -66,5 +75,6 @@ private:
     void deleteAll();
     std::optional<User> getUserImpl(bsoncxx::v_noabi::document::value &&filter);
     std::optional<Subject> getSubjectImpl(bsoncxx::v_noabi::document::value &&filter);
+    std::optional<Stream> getStreamImpl(bsoncxx::v_noabi::document::value &&filter);
     std::mutex m_transactionMutex;
 };

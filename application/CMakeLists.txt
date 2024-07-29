@@ -56,6 +56,7 @@ add_executable(HttpLiveStreaming main.cpp
     resource/subject.h
     resource/stream.cpp
     resource/stream.h
+    resource/filters.h
 
     form/uploadVideoForm.cpp
     form/uploadVideoForm.h
@@ -65,6 +66,8 @@ add_executable(HttpLiveStreaming main.cpp
     form/loginForm.h
     form/editProfileForm.cpp
     form/editProfileForm.h
+    form/streamForm.cpp
+    form/streamForm.h
 
     mediaProcessor.cpp
     mediaProcessor.h
@@ -75,6 +78,8 @@ add_executable(HttpLiveStreaming main.cpp
 
     handlers/fetchVideoHandler.cpp
     handlers/fetchVideoHandler.h
+    handlers/fetchStreamHandler.cpp
+    handlers/fetchStreamHandler.h
     handlers/loadMediaHandler.cpp  
     handlers/loadMediaHandler.h
     handlers/fetchUserHandler.cpp
@@ -97,7 +102,9 @@ add_executable(HttpLiveStreaming main.cpp
     privateHandlers/editProfileHandler.cpp  
     privateHandlers/editProfileHandler.h 
     privateHandlers/streamHandler.cpp  
-    privateHandlers/streamHandler.h 
+    privateHandlers/streamHandler.h
+    privateHandlers/createStreamHandler.cpp  
+    privateHandlers/createStreamHandler.h 
 
     DiskStorage/diskStorage.cpp 
     DiskStorage/diskStorage.h

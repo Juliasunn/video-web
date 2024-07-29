@@ -8,6 +8,7 @@
 #include "mediaProcessor.h"
 
 #include "handlers/fetchVideoHandler.h"
+#include "handlers/fetchStreamHandler.h"
 #include "handlers/loadMediaHandler.h"
 #include "handlers/loginHandler.h"
 #include "handlers/registrationHandler.h"
@@ -21,6 +22,7 @@
 //#include "privateHandlers/pageHandler.h"
 #include "privateHandlers/editProfileHandler.h"
 #include "privateHandlers/streamHandler.h"
+#include "privateHandlers/createStreamHandler.h"
 
 #include "DocumentStorage/documentStorage.h"
 #include "authorizationDecorator.h"
@@ -66,6 +68,10 @@ void initEndpoints(std::shared_ptr<http_server_multithread> &server) {
     // video/watch?v={}
     server-> add_endpoint_handler("GET", "/api/video_", std::make_unique<FetchVideosHandler>());
     //https://www.youtube.com/api/channel/lu12cTlJQ00
+
+    server-> add_endpoint_handler("GET", "/api/stream/feed_", std::make_unique<FetchStreamHandler>());
+    //https://www.youtube.com/api/stream/feed?ch=lu12cTlJQ00
+
     server-> add_endpoint_handler("GET", "/api/channel_", std::make_unique<FetchUserHandler>());
     server-> add_endpoint_handler("POST", "/api/login", std::make_unique<LoginHandler>());
     server-> add_endpoint_handler("POST", "/api/stream/publish", std::make_unique<PublishStreamHandler>());
@@ -83,7 +89,13 @@ void initEndpoints(std::shared_ptr<http_server_multithread> &server) {
 
      auto streamHandler = std::make_unique<AuthorizationDecorator<StreamHandler>>(Permissions::ManageStream, 
      std::make_shared<RedirectToLoginStrategy>("/home/julia/videoserver/web/login.html") );
-    server-> add_endpoint_handler("GET", "/api/stream_", std::move(streamHandler));  
+    server-> add_endpoint_handler("GET", "/api/stream_", std::move(streamHandler));
+
+    auto manageStreamHandler = std::make_unique<AuthorizationDecorator<CreateStreamHandler>>(Permissions::ManageStream, 
+    std::make_shared<RedirectToLoginStrategy>("/home/julia/videoserver/web/login.html"), previewFileStorage );
+
+    server-> add_endpoint_handler("POST", "/api/stream", manageStreamHandler->clone());
+    server-> add_endpoint_handler("PUT", "/api/stream", manageStreamHandler->clone());
 
 }
 

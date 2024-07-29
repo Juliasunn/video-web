@@ -7,6 +7,9 @@
 #include <bsoncxx/builder/basic/kvp.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <iostream>
+#include <variant>
+
+#include "resource/filters.h"
 
 namespace doc_convertors {
 
@@ -14,7 +17,27 @@ using key_view = bsoncxx::v_noabi::stdx::basic_string_view<char>;
 using namespace boost::uuids;
 
 using namespace bsoncxx::builder::basic;
+using namespace ns_filters;
 
+template <typename T>
+inline long toDocLong(const T &value) {
+    return value;
+}
+
+template<>
+inline long toDocLong<TimeUTC>(const TimeUTC &value) {
+    return static_cast<time_t>(value);
+}
+
+template <typename T>
+inline std::string toDocString(const T &value) {
+    return value;
+}
+
+template<>
+inline std::string toDocString<uuid>(const uuid &value) {
+    return boost::uuids::to_string(value);
+}
 
 template <typename T>
 inline void mbAppend(bsoncxx::builder::basic::document &doc, key_view key, const T &value) {
@@ -22,38 +45,40 @@ inline void mbAppend(bsoncxx::builder::basic::document &doc, key_view key, const
     doc.append(kvp(key, value));
 }
 
+// helper type for the visitor #4
+template<class... Ts>
+struct overloaded : Ts... { using Ts::operator()...; };
+// explicit deduction guide (not needed as of C++20)
+template<class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
+
+template <typename Comparable>
+inline void mbAppend(bsoncxx::builder::basic::document &doc, key_view key, const NumericExpression<Comparable> &expression) {
+   // std::cout << "key: " << key << "value: " << value;
+   std::visit(overloaded{
+    [&](const std::variant<std::monostate> &){},
+    [&](const LessComparator<Comparable> &lt){doc.append(kvp(key, make_document(kvp("$lt", toDocLong(lt.value)))));},
+    [&](const GreaterComparator<Comparable> &gt){doc.append(kvp(key, make_document(kvp("$gt", toDocLong(gt.value)))));},
+    [&](const Comparable &value){doc.append(kvp(key, toDocLong(value)));}
+   }, expression);
+}
+
 template <>
 inline void mbAppend(bsoncxx::builder::basic::document &doc, key_view key, const boost::uuids::uuid &value) {
-    doc.append(kvp(key, boost::uuids::to_string(value)));
+    doc.append(kvp(key, toDocString(value)));
 }
 
 template <>
 inline void mbAppend(bsoncxx::builder::basic::document &doc, key_view key,
      const TimeUTC &mbValue) {
-        doc.append(kvp(key, static_cast<time_t>(mbValue)));
+        doc.append(kvp(key, toDocLong(mbValue)));
 }
 
 
 template <typename T>
 inline void mbAppend(bsoncxx::builder::basic::document &doc, key_view key, const std::optional<T> &mbValue) {
     if (mbValue) {
-       // if (key == "login") {
-        //    doc.append(kvp(key, mbValue.value()+'\r'));
-
-
-       // } else {
-            doc.append(kvp(key, mbValue.value()));
-
-      //  }
-        
-       // std::cout << "key: " << key << " value: " << mbValue.value() << std::endl;
-
-        std::cout << "Document: "<< key;
-  auto pswd = std::string(doc.view()[key].get_string().value);
-  for (auto sym : pswd) {
-    std::cout << std::hex << (int)(sym) << " ";
-  }
-  std::cout << std::endl;
+        doc.append(kvp(key, mbValue.value()));
     }
 }
 
@@ -61,7 +86,7 @@ template <>
 inline void mbAppend(bsoncxx::builder::basic::document &doc, key_view key,
      const std::optional<boost::uuids::uuid> &mbValue) {
     if (mbValue) {
-        doc.append(kvp(key, boost::uuids::to_string(mbValue.value())));
+        doc.append(kvp(key, toDocString(mbValue.value())));
     }
 }
 
@@ -69,7 +94,7 @@ template <>
 inline void mbAppend(bsoncxx::builder::basic::document &doc, key_view key,
      const std::optional<TimeUTC> &mbValue) {
     if (mbValue) {
-        doc.append(kvp(key, static_cast<time_t>(mbValue.value())));
+        doc.append(kvp(key, toDocLong(mbValue.value())));
     }
 }
 

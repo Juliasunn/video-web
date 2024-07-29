@@ -13,12 +13,13 @@
 
 #include "DiskStorage/diskStorage.h"
 #include "resource/timeUtils.h"
+#include "resource/filters.h"
 #include <chrono>
-
 
 namespace ns_stream {
 
 using namespace boost::json;
+using namespace ns_filters;
 
 struct Stream {
     std::string uuid; //use as sttam key
@@ -37,10 +38,12 @@ struct StreamFilter {
     std::optional<std::string> uuid; //use as sttam key
     std::optional<std::string> channelUuid;
     std::optional<std::string> name; //show to user
-    std::string description; //show to user
+    std::optional<std::string> description; //show to user
     std::optional<std::string> previewUrl;
-    std::optional<TimeUTC> start;
-    std::optional<TimeUTC> expire;
+
+    NumericExpression<TimeUTC> start;
+    NumericExpression<TimeUTC> expire;
+
     std::optional<std::string> publishKey;
 };
 
@@ -48,16 +51,10 @@ Stream tag_invoke(boost::json::value_to_tag<Stream>, const boost::json::value &j
 /* for creating json::value from Message object */
 void tag_invoke(boost::json::value_from_tag, boost::json::value &jv, Stream const &v);
 
+
 StreamFilter tag_invoke(boost::json::value_to_tag<StreamFilter>, const boost::json::value &jv);
-/* for creating json::value from Message object */
 void tag_invoke(boost::json::value_from_tag, boost::json::value &jv, StreamFilter const &v);
 
-/*
-class FormStreamBuilder {
-public:
-    Stream build(multipart::FormData &form) ;
-};
-*/
 }
 
 using Stream = ns_stream::Stream;

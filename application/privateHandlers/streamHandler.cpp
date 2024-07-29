@@ -13,6 +13,7 @@
 
 using namespace ns_server;
 using namespace ns_stream;
+using namespace ns_filters;
 namespace {
 
 std::string generateStreamId() {
@@ -29,14 +30,18 @@ std::optional<Stream> fetchCurrentStream(const std::string &channelUuid) {
     StreamFilter streamFilter;
     streamFilter.channelUuid = channelUuid;
 
+    auto timeExpression = GreaterComparator<TimeUTC>{timeNow()};
     /* Not expired yet */
-    streamFilter.expire = timeNow();
+    streamFilter.expire.emplace<GreaterComparator<TimeUTC>>(timeExpression);
+
+    auto runningStream = MongoStorage::instance().getStream(streamFilter);
+    return runningStream;
 
   //  auto stream = MongoStorage::instance().getStreams(streamFilter);
-  Stream stream{generateStreamId(), "channelUuid", "My first stream", 
-  "This is a testual stream created to check the new feature on this platform.", 
-  "", timeNow(), addHours(timeNow(), 2), generateStreamKey()};
-  return stream;
+ // Stream stream{generateStreamId(), "channelUuid", "My first stream", 
+ // "This is a testual stream created to check the new feature on this platform.", 
+ // "", timeNow(), addHours(timeNow(), 2), generateStreamKey()};
+ // return stream;
 }
 
 StreamFilter generateNewStreamIdent() {
@@ -45,7 +50,6 @@ StreamFilter generateNewStreamIdent() {
     streamIdent.publishKey = streamIdent.uuid.value() + "?key=" + generateStreamKey();
     return streamIdent;
 }
-
 
 http::response<http::string_body> prepareCommonResponse(const http::request<http::string_body> &request) {
     http::response<http::string_body> response;
@@ -80,8 +84,12 @@ void StreamHandler::process_request(std::shared_ptr<http_session> session ) {
         if (currentStream) {
             response.body() = boost::json::serialize(boost::json::value_from(currentStream.value()));
         } else {
-            response.body() = boost::json::serialize(boost::json::value_from(generateNewStreamIdent()));
-        } 
+            response.body() = boost::json::serialize(boost::json::value{});
+        }
+        
+        //else {
+        //    response.body() = boost::json::serialize(boost::json::value_from(generateNewStreamIdent()));
+      //  } 
     } else {
         throw resouce_not_found_exception("Uncknown request target: " + target);
     }

@@ -29,10 +29,12 @@ inline std::optional<std::string> getNETextField(const std::string &compValue, c
 }
 
 inline const std::string &getTextField(const multipart::FormData &form, const std::string &fieldName) {
-    if (!form.at(fieldName).text)  {
-        throw form_process_exception("Incomplete form - '" + fieldName + "' must be provided.");
+    auto fieldIt = form.find(fieldName);
+    if (fieldIt == form.end() || !(fieldIt->second.text))
+    {
+          throw form_process_exception("Incomplete form - '" + fieldName + "' must be provided.");
     }
-    return form.at(fieldName).text.value();
+    return fieldIt->second.text.value();
 }
 
 inline void preprocessTextFields(multipart::FormData &form) {

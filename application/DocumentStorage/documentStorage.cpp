@@ -36,7 +36,7 @@ auto scopeExecute(ClientOperation &&operation, mongocxx::pool &pool) {
 }
 
 auto prepareInsertOne(const std::string &db, const std::string &collection, bsoncxx::v_noabi::document::value &&rdoc) {
- // auto &&rdoc = bsoncxx::from_json(boost::json::serialize(rawData));
+  std::cout << "Insert: " << bsoncxx::to_json(rdoc) << std::endl;
   auto operation = [db, collection, doc = rdoc](mongocxx::client &client) mutable  {
     return client[db][collection].insert_one(std::move(doc));
   };
@@ -53,6 +53,7 @@ auto prepareDeleteOne(const std::string &db, const std::string &collection, cons
 auto prepareUpdateOne(const std::string &db, const std::string &collection, const bsoncxx::v_noabi::document::value &&update,
    const bsoncxx::v_noabi::document::value &&uniqueFilter ) 
 {
+  std::cout << "Update Filter: " << bsoncxx::to_json(uniqueFilter) << std::endl;
   auto &&rupdateExpression = bsoncxx::builder::stream::document{} << "$set" << update << bsoncxx::builder::stream::finalize;
   std::cout << bsoncxx::to_json(rupdateExpression) << std::endl;
   auto operation = [db, collection, filterDoc = std::move(uniqueFilter), updateExpression = rupdateExpression](mongocxx::client &client) mutable  {
@@ -124,6 +125,20 @@ bool MongoStorage::addUser(const User &user) {
   return rv.has_value();
 }
 
+bool MongoStorage::addStream(const Stream &stream) {
+  auto rv = scopeExecute(prepareInsertOne(m_dbname,
+       "stream",
+        DocumentConvertor<Stream>::toDocument(stream)), m_pool);
+  return rv.has_value();  
+}
+
+bool MongoStorage::updateStream(const StreamFilter &streamUpdate, const StreamFilter &streamFilter) {
+  auto rv = scopeExecute(prepareUpdateOne(m_dbname, "stream",
+  DocumentConvertor<StreamFilter>::toDocument(streamUpdate),
+  DocumentConvertor<StreamFilter>::toDocument(streamFilter)), m_pool);
+  return rv.has_value(); 
+}
+
 std::optional<User> MongoStorage::getUserImpl(bsoncxx::v_noabi::document::value &&filter) 
 {
   auto operation = [doc = filter, &db=m_dbname](mongocxx::client &client) mutable  {
@@ -148,6 +163,19 @@ std::optional<Subject> MongoStorage::getSubjectImpl(bsoncxx::v_noabi::document::
         return std::nullopt;
   }
   return DocumentConvertor<Subject>::fromDocument(filtered.value());
+}
+
+std::optional<Stream> MongoStorage::getStreamImpl(bsoncxx::v_noabi::document::value &&filter) {
+  std::cout << "[Get stream] " << bsoncxx::to_json(filter) << std::endl;
+  auto operation = [doc = std::move(filter), &db=m_dbname](mongocxx::client &client) mutable  { 
+    return client[db]["stream"].find_one(std::move(doc));
+  };
+  auto filtered = scopeExecute(ClientOperation{ operation }, m_pool);
+
+  if (!filtered) {
+        return std::nullopt;
+  }
+  return DocumentConvertor<Stream>::fromDocument(filtered.value());
 }
 
 void MongoStorage::addSubject(const Subject &subject) {

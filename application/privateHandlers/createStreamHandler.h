@@ -12,7 +12,7 @@ class CreateStreamHandler : public formdata_handler  {
 public:
     std::unique_ptr<ns_server::BaseHttpRequestHandler> clone() override;
 
-    CreateStreamHandler(DiskStoragePtr avatarStorage);   
+    CreateStreamHandler(DiskStoragePtr streamPreviewStorage);   
     virtual ~CreateStreamHandler() = default;
     void setClaims(const Claims &claims);
 protected:

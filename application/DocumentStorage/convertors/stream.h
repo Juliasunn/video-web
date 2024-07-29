@@ -14,14 +14,14 @@ using namespace doc_convertors;
 namespace ns_stream {
 
 namespace doc_keys {
-constexpr const string_view uuid = "uuid"; //use as sttam key
-constexpr const string_view channelUuid = "channelUuid";
-constexpr const string_view  name = "name"; //show to user
-constexpr const string_view  description = "description"; //show to user
-constexpr const string_view  previewUrl = "previewUrl";
-constexpr const string_view  start = "start";
-constexpr const string_view  expire = "expire";
-constexpr const string_view  publishKey = "publishKey"; 
+constexpr const key_view uuid = "uuid"; //use as sttam key
+constexpr const key_view channelUuid = "channelUuid";
+constexpr const key_view  name = "name"; //show to user
+constexpr const key_view  description = "description"; //show to user
+constexpr const key_view  previewUrl = "previewUrl";
+constexpr const key_view  start = "start";
+constexpr const key_view  expire = "expire";
+constexpr const key_view  publishKey = "publishKey"; 
 }
 
 struct StreamFieldsProcessor {

@@ -62,26 +62,3 @@ void ns_stream::tag_invoke(value_from_tag, value &jv, StreamFilter const &stream
     jv = boost::json::value_from(jsonObj);
 
 }
-
-/*
-    std::string uuid; //use as sttam key
-    std::string channelUuid;
-    std::string name; //show to user
-    std::string previewUrl;
-    std::string expire;
-    std::string publishKey;
-
-
-
-Stream FormStreamBuilder::build(multipart::FormData &form) { 
-    //using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s
-    Stream stream;
-    
-    stream.name = getTextField(form, "name");
-    stream.uuid = boost::lexical_cast<std::string>(generateUuid());
-    stream.publishKey = boost::lexical_cast<std::string>(generateUuid());
-    stream.previewUrl  = "default";
-    stream.expire = addHours(timeNow(), 3);
-    return stream;
-}
-*/
