@@ -69,12 +69,10 @@ void initEndpoints(std::shared_ptr<http_server_multithread> &server) {
     server-> add_endpoint_handler("GET", "/api/video_", std::make_unique<FetchVideosHandler>());
     //https://www.youtube.com/api/channel/lu12cTlJQ00
 
-    server-> add_endpoint_handler("GET", "/api/stream/feed_", std::make_unique<FetchStreamHandler>());
     //https://www.youtube.com/api/stream/feed?ch=lu12cTlJQ00
 
     server-> add_endpoint_handler("GET", "/api/channel_", std::make_unique<FetchUserHandler>());
     server-> add_endpoint_handler("POST", "/api/login", std::make_unique<LoginHandler>());
-    server-> add_endpoint_handler("POST", "/api/stream/publish", std::make_unique<PublishStreamHandler>());
 
     server-> add_endpoint_handler("POST", "/api/registration", 
         std::make_unique<RegistrationHandler>(avatarFileStorage));
@@ -87,15 +85,20 @@ void initEndpoints(std::shared_ptr<http_server_multithread> &server) {
      std::make_shared<RedirectToLoginStrategy>("/home/julia/videoserver/web/login.html"), avatarFileStorage );
     server-> add_endpoint_handler("POST", "/api/profile", std::move(editProfileHandler));   
 
+
+    ///api/stream/feed?ch=hTvvdts532rfs  /api/stream/watch?s=hTvvdts532rfs
+    server-> add_endpoint_handler("GET", "/api/stream_", std::make_unique<FetchStreamHandler>());
+
      auto streamHandler = std::make_unique<AuthorizationDecorator<StreamHandler>>(Permissions::ManageStream, 
      std::make_shared<RedirectToLoginStrategy>("/home/julia/videoserver/web/login.html") );
-    server-> add_endpoint_handler("GET", "/api/stream_", std::move(streamHandler));
+    server-> add_endpoint_handler("GET", "/api/stream/my", std::move(streamHandler));
 
     auto manageStreamHandler = std::make_unique<AuthorizationDecorator<CreateStreamHandler>>(Permissions::ManageStream, 
     std::make_shared<RedirectToLoginStrategy>("/home/julia/videoserver/web/login.html"), previewFileStorage );
 
-    server-> add_endpoint_handler("POST", "/api/stream", manageStreamHandler->clone());
-    server-> add_endpoint_handler("PUT", "/api/stream", manageStreamHandler->clone());
+    server-> add_endpoint_handler("POST", "/api/stream/my", manageStreamHandler->clone());
+    server-> add_endpoint_handler("PUT", "/api/stream/my", manageStreamHandler->clone());
+    server-> add_endpoint_handler("POST", "/api/stream/publish", std::make_unique<PublishStreamHandler>());
 
 }
 

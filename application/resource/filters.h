@@ -6,7 +6,13 @@
 #include <variant>
 #include "http/http_exceptions.h"
 #include "resource/timeUtils.h"
-#include "resource/utils.h"
+
+// helper type for the visitor #4
+template<class... Ts>
+struct overloaded : Ts... { using Ts::operator()...; };
+// explicit deduction guide (not needed as of C++20)
+template<class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
 
 namespace ns_filters {
 
@@ -35,6 +41,7 @@ NumericExpression<Comparable> tag_invoke(boost::json::value_to_tag<NumericExpres
     return expression;
 }
 /* for creating json::value from Message object */
+/*
 template<typename Comparable>
 void tag_invoke(boost::json::value_from_tag, boost::json::value &jv, NumericExpression<Comparable> const &expression) {
     using CleanComparable = typename std::remove_reference<Comparable>::type;
@@ -44,6 +51,7 @@ void tag_invoke(boost::json::value_from_tag, boost::json::value &jv, NumericExpr
   //  TimeUTC value(std::get<Comparable>(expression));
    jv = boost::json::value_from(std::get<CleanComparable>(expression));
 }
+*/
 
 struct UuidFilter
 {

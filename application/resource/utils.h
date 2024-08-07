@@ -1,4 +1,5 @@
 #pragma once
+#include "resource/filters.h"
 #include <boost/json/value_from.hpp>
 #include <iomanip>
 #include <string>
@@ -72,6 +73,18 @@ template<>
 inline void emplace<boost::uuids::uuid>(object &obj, const boost::uuids::uuid &t, string_view key)
 {
     obj[key] = boost::json::value_from(boost::lexical_cast<std::string>(t));
+}
+
+template<typename T>
+inline void emplace(object &obj, const ns_filters::NumericExpression<T> &t, string_view key)
+{
+    using CoreT = typename std::remove_reference<T>::type;
+    std::visit(overloaded{
+    [&](const std::variant<std::monostate> &){},
+    [&](const ns_filters::LessComparator<T> &lt){},
+    [&](const ns_filters::GreaterComparator<T> &gt){},
+    [&](const T &value){obj[key] = boost::json::value_from(value);}
+   }, t);
 }
 
 namespace json_convertors {

@@ -71,36 +71,21 @@ std::unique_ptr<BaseHttpRequestHandler> StreamHandler::clone(){
 
 void StreamHandler::process_request(std::shared_ptr<http_session> session ) {
     auto response = prepareCommonResponse(m_request);
-    //No path variables
+    //https://www.youtube.com/api/stream/my
     if (!m_claims.count(claims::sub)) {
         throw unauthorized_exception("Missing subject claim.");       
     }
+    auto channelUuid = boost::json::value_to<std::string>(m_claims[claims::sub]);
+    auto currentStream = fetchCurrentStream(channelUuid);
 
-    const auto &target = m_path_props.path_vars.at(0);
-    if (target == "current") {
-        auto channelUuid = boost::json::value_to<std::string>(m_claims[claims::sub]);
-        auto currentStream = fetchCurrentStream(channelUuid);
-
-        if (currentStream) {
-            response.body() = boost::json::serialize(boost::json::value_from(currentStream.value()));
-        } else {
-            response.body() = boost::json::serialize(boost::json::value{});
-        }
-        
-        //else {
-        //    response.body() = boost::json::serialize(boost::json::value_from(generateNewStreamIdent()));
-      //  } 
+    if (currentStream) {
+        response.body() = boost::json::serialize(boost::json::value_from(currentStream.value()));
     } else {
-        throw resouce_not_found_exception("Uncknown request target: " + target);
+        response.body() = boost::json::serialize(boost::json::value{});
     }
     response.prepare_payload();
     response.result(http::status::ok);
     response.set(http::field::content_type, "application/json");
-
-    //https://www.youtube.com/api/stream/current
-
-    //https://www.youtube.com/api/stream/new
-
     session->write(std::move(response));
 }
 
