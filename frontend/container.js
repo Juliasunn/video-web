@@ -3,6 +3,7 @@ const generalBtn = document.getElementById("genral");
 //const accountBtn = document.getElementById("user");
 
 const uploadBtn = document.getElementById("upload");
+const streamBtn = document.getElementById("stream");
 const accountBtn = document.getElementById("account");
 const searchBtn = document.getElementById("searchBtn");
 
@@ -43,88 +44,14 @@ uploadBtn.addEventListener("click",function(){
     pageFrame.src = "http://127.0.0.1:8082/private/upload";
 });
 
+streamBtn.addEventListener("click",function(){
+    console.log("display stream managment page.");
+    pageFrame.src = "http://127.0.0.1:8082/private/stream";
+});
+
 accountBtn.addEventListener("click",function(){
  	console.log("displayRegister called");
  	pageFrame.src = "http://127.0.0.1:8082/private/editprofile";
 });
 
-const fetchAll = async () => {
-    console.log("fetchAll called");
-    const response = await fetch(ALL_URL);
-    newsDataArr = [];
-    if(response.status >=200 && response.status < 300) {
-        const myJson = await response.json();
-        newsDataArr = myJson;
-    } else {
-        // handle errors
-        console.log(response.status, response.statusText);
-        newsdetails.innerHTML = "<h5>No data found.</h5>"
-        return;
-    }
-    displayNews();
-}
-
-function displayNews() {
-
-    newsdetails.innerHTML = "";
-
-    // if(newsDataArr.length == 0) {
-    //     newsdetails.innerHTML = "<h5>No data found.</h5>"
-    //     return;
-    // }
-
-    newsDataArr.forEach(news => {
-        
-        var col = document.createElement('div');
-        col.className="col-sm-12 col-md-4 col-lg-3 p-2 card";
-
-        var card = document.createElement('div');
-        card.className = "p-2";
-
-        var image = document.createElement('img');
-        image.setAttribute("height","matchparent");
-        image.setAttribute("width","100%");
-        image.src = STATIC_URL + news.previewImgUrl;
-        console.log("image src = ", image.src);
-
-        var cardBody = document.createElement('div');
-        
-        var newsHeading = document.createElement('h5');
-        newsHeading.className = "card-title";
-        newsHeading.innerHTML = news.header;
-
-        var discription = document.createElement('p');
-        discription.className="text-muted";
-        discription.innerHTML = news.description;
-
-        var link = document.createElement('a');
-        link.className="btn btn-dark";
-        //В какое окно загружается документ (по умолчанию в текущее)
-        //link.setAttribute("target", "_blank");
-        //link.href = SERVER_URL + "/video/player";
-        link.innerHTML="Watch";
-        var resourceUuid = news.uuid;
-        console.log("resource uuid = ", news);
-        
-        link.addEventListener("click",function(){
-
-        	localStorage.setItem('resourceUuid', resourceUuid);
-        	console.log("Set resourceUuid variable to: ", localStorage.getItem('resourceUuid'));
-        	window.open(STATIC_URL + PLAYER_PATH);
-        	console.log("Open page uri: ", STATIC_URL + PLAYER_PATH);
-	});
-
-        cardBody.appendChild(newsHeading);
-        cardBody.appendChild(discription);
-        cardBody.appendChild(link);
-
-        card.appendChild(image);
-        card.appendChild(cardBody);
-
-        col.appendChild(card);
-
-        newsdetails.appendChild(col);
-    });
-
-}
 

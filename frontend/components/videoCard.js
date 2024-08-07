@@ -15,6 +15,10 @@ const trashIcon =`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
   <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
 </svg>`
 
+const broadcastIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-broadcast-pin" viewBox="0 0 20 20">
+  <path d="M3.05 3.05a7 7 0 0 0 0 9.9.5.5 0 0 1-.707.707 8 8 0 0 1 0-11.314.5.5 0 0 1 .707.707m2.122 2.122a4 4 0 0 0 0 5.656.5.5 0 1 1-.708.708 5 5 0 0 1 0-7.072.5.5 0 0 1 .708.708m5.656-.708a.5.5 0 0 1 .708 0 5 5 0 0 1 0 7.072.5.5 0 1 1-.708-.708 4 4 0 0 0 0-5.656.5.5 0 0 1 0-.708m2.122-2.12a.5.5 0 0 1 .707 0 8 8 0 0 1 0 11.313.5.5 0 0 1-.707-.707 7 7 0 0 0 0-9.9.5.5 0 0 1 0-.707zM6 8a2 2 0 1 1 2.5 1.937V15.5a.5.5 0 0 1-1 0V9.937A2 2 0 0 1 6 8"/>
+</svg>`
+
 function createWatches(watchesCount) {
     var iconShow = document.createRange().createContextualFragment(watchesIcon)
     var watches = document.createElement('p');
@@ -22,6 +26,15 @@ function createWatches(watchesCount) {
     watches.appendChild(iconShow);
     watches.innerHTML += watchesCount;
     return watches;    
+}
+
+function createBroadcast(text) {
+    var icon = document.createRange().createContextualFragment(broadcastIcon)
+    var iconWithText = document.createElement('p');
+    iconWithText.className="text-truncate text-muted m-0 text-right";
+    iconWithText.appendChild(icon);
+    iconWithText.innerHTML += text;
+    return iconWithText;    
 }
 
 function createVideoImg(imgSrc) {
@@ -169,6 +182,73 @@ class UsersVideoCard extends BasicVideoCard  {
       return super.getCard();
   } 
   
+}
+
+class BasicStreamCard {
+  #col;
+  #card;
+  #cardBody;
+  
+  constructor( streamJson, width ) {
+        this.#col = document.createElement('div');
+        this.#col.className="p-2 card";
+        this.#col.style="width: "+width;
+        
+        this.#card = document.createElement('div');
+        this.#card.className = "p-2 card justify-content-between";
+        this.#card.style = "height: 100%";
+        
+        this.#cardBody = document.createElement('div');
+        
+        var preview = createVideoImg("http://127.0.0.1:8082/img/stream_default2.jpg");
+        
+
+        var streamHeader = document.createElement('a');
+        streamHeader.className="fw-bolder text-dark";
+        streamHeader.style = "font-weight:bold"
+        streamHeader.rel="stylesheet"
+        streamHeader.href = "http://127.0.0.1:8082" + "/player"+"?s="+streamJson.uuid
+        streamHeader.innerHTML = streamJson.name;
+        
+        this.#cardBody.appendChild(streamHeader);
+        this.#card.appendChild(preview);
+        this.#card.appendChild(this.#cardBody);
+
+        this.#col.appendChild(this.#card);                
+  }
+  
+  appendToCardBody( el ) {
+      this.#cardBody.appendChild(el);
+  } 
+  
+  getCard() {
+      return this.#col;
+  } 
+}
+
+class PublicStreamCard extends BasicStreamCard {
+  #infoRow;
+
+  constructor(streamJson, channelJson, width) {
+        super(streamJson, width)
+        console.log("finished parent");
+        
+        this.#infoRow = document.createElement('div');
+        this.#infoRow.className = "d-flex justify-content-around";
+        
+        var channelObj = new BaseChannel(channelJson, "30px", "30px");
+        var channel = channelObj.getHtml();
+        
+        var aboutStream = createBroadcast("Online");
+  
+        this.#infoRow.appendChild(channel);
+        this.#infoRow.appendChild(aboutStream);
+	super.appendToCardBody( this.#infoRow );         
+  }
+  
+  getCard() {
+      return super.getCard();
+  }   
 }
 
 

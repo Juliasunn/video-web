@@ -22,7 +22,7 @@ const fetchVideoFeed = async (queryParamsString = "") => {
     return videoJsonArray;
 }
 
-function displayContent(containerHtml, widthHtml,  videoJsonArray) {
+function displayContent(containerHtml, widthHtml,  videoJsonArray, streamJsonArray = []) {
 
     containerHtml.innerHTML = "";
 
@@ -30,6 +30,26 @@ function displayContent(containerHtml, widthHtml,  videoJsonArray) {
          containerHtml.innerHTML = "<h5>No data found.</h5>"
          return;
      }
+     
+    streamJsonArray.forEach(stream = async (stream) => {
+        var channelJson = {};
+        try {
+            const fetchChannel = await fetch("http://127.0.0.1:8082/api/channel/" + stream.channelUuid);
+        
+            if (fetchChannel.status >=200 && fetchChannel.status < 300) {
+               channelJson = await fetchChannel.json();
+            } else {
+               console.log(fetchChannel.status, fetchChannel.statusText);
+           }
+        } catch (e) {
+         console.log("Error: ", e); 
+        }
+    
+        console.log("-Append card-");
+        var cardObj = new PublicStreamCard(stream, channelJson, widthHtml);
+        var col = cardObj.getCard();
+        containerHtml.appendChild(col);
+    });
 
     videoJsonArray.forEach(video = async (video) => {
         var channelJson = {};

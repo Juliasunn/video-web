@@ -22,6 +22,8 @@ $("#myForm").submit(function(e) {
     
 });
 
+
+
 window.onload = async function() {
     const tokenCookie = getCookie("token");
     if (tokenCookie) {
@@ -33,4 +35,14 @@ window.onload = async function() {
         console.log("Channel video = ", channelVideo)
         displayUsersContent(document.getElementById("userContent"), "20%", channelVideo)
     }
+    var uploadBox = document.getElementById("uploadBox");
+    
+    var videoUploadForm = document.createElement('video-upload-form-component');
+    videoUploadForm.setAttribute('id', "videoUploadForm");
+    uploadBox.appendChild(videoUploadForm);
+    
+   // var streamUploadForm = document.createElement('stream-upload-form-component');
+   // streamUploadForm.setAttribute('id', "streamUploadForm");
+   // uploadBox.appendChild(streamUploadForm);
+    
 };

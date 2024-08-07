@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <!-- Required meta tags -->
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+      <!-- Bootstrap CSS -->
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+      <link rel="stylesheet" href="/styles/formStyles.css">
+      <script src="/components/fileUploadInput.js"></script>    
+      <style>
+         .container {
+         border-radius: 5px;
+         background-color: #f2f2f2;
+         padding: 20px;
+         }
+         .col-25 {
+         float: left;
+         width: 25%;
+         margin-top: 3px;
+         }
+         .col-75 {
+         float: left;
+         width: 75%;
+         margin: 3px;
+         }
+         /* Clear floats after the columns */
+         .row::after {
+         content: "";
+         display: table;
+         clear: both;
+         }
+      </style>
+   </head>
+   <body>
+      <div class="form-group mb-3">
+         <h4 class="m-3">Channel content</h4>
+      </div>
+      
+      
+      
+      <div class="mt-0 row p-2 d-flex justify-content-center align-items-center h-100 w-100">
+         <form id="streamForm">
+
+            <div class="form-group mb-3">
+               <label for="name">Stream name</label>
+               <input type="text" class="form-control" id="name" name="name" placeholder="Name to publish">
+               <small id="emailHelp" class="form-text text-muted">Stream name should catch the audience's eye.</small>
+            </div>
+            
+            <div class="form-group mb-3">
+               <label for="description">Stream description</label>
+               <textarea id="description" class="form-control " name="description" placeholder="Enter your stream description..." style="height:200px"></textarea>
+            </div>
+            
+            <div class="form-group mb-3">
+               <label for="streamTime">Stream duration</label>
+               <input type="text" class="form-control" id="streamTime" name="streamTime" placeholder=" -/- " readonly>
+               <small id="emailHelp" class="form-text text-muted">This stream will be available during this period.</small>
+            </div>
+            
+            <div class="form-group mb-3">
+               <label for="streamUrl">Stream URL</label>
+               <input type="text" class="form-control" id="streamUrl" name="firstname" placeholder=" -/- " readonly>
+               <small id="emailHelp" class="form-text text-muted">This stream will be available via (for 3h since beginning) this link.</small>
+            </div>
+            
+            
+            <div class="form-group mb-3">
+               <label for="streamKey">Stream key</label>
+               <input type="text" class="form-control" id="streamKey" name="streamKey" placeholder=" -/- " readonly>
+               <small id="emailHelp" class="form-text text-muted">Use this key in your OBS settings.</small>
+            </div>         
+            
+            <br>
+            <input id="submitBtn" type="submit" class="btn btn-warning ms-2 float-right" value="Create">
+         </form>
+         
+         <div class="d-flex w-25 m-5">
+            <!-- <div class="col-md-10 col-lg-6 col-xl-7 d-flex align-items-center order-1 order-lg-2"> -->
+            <universal-player-component  width="400px" height="240px" poster="http://127.0.0.1:8082/img/stream_default2.jpg" id="streamPlayer"></universal-player-component>          
+         </div>
+         
+      </div>
+      <!-- Body  -->
+
+      <script src="/libs/jquery.min.js"></script>
+      <script>
+      
+      var streamToShow = null;
+      var streamPlayer = document.getElementById("streamPlayer");
+                     
+                     function showCurrentStream() {
+                         var streamUrlHtml = document.getElementById("streamUrl");
+                         var streamKeyHtml = document.getElementById("streamKey");
+                         var streamNameHtml = document.getElementById("name");
+                         var streamDescriptionHtml = document.getElementById("description");
+                         //var streamPreviewHtml = document.getElementById("previewUploader");
+                         var streamTime = document.getElementById("streamTime");
+                         var submitBtn = document.getElementById("submitBtn");
+                         
+                         streamNameHtml.value = streamToShow.name;
+                         streamNameHtml.setAttribute("readonly", "readonly");
+                         streamDescriptionHtml.value = streamToShow.description;
+                         
+                         streamUrlHtml.value = "http://127.0.0.1:8082/streams/" + streamToShow.uuid;
+                         streamKeyHtml.value = streamToShow.uuid + "?key=" + streamToShow.publishKey;
+                                  
+                         streamDescriptionHtml.setAttribute("readonly", "readonly");
+                         streamTime.value = (streamToShow.start + " - " + streamToShow.expire);
+                         //streamPreviewHtml.style.display = 'none'
+                         streamPlayer.currentStream = streamToShow;
+                         submitBtn.value="Finish"              
+                     }
+                     
+                     
+                     
+                     fetch("http://127.0.0.1:8082/api/stream/my").then((streamResponse) => {
+                          if(streamResponse.status >=200 && streamResponse.status < 300) {      
+                              streamResponse.json().then( (stream) => {
+                                  console.log("Stream: ", stream);
+                                  //'expire' means that stream has been created
+                                  if (stream) {
+                                       streamToShow = stream;
+                                       showCurrentStream();
+                                  
+                                  } else {
+                                      streamToShow = null;
+                                      document.getElementById("submitBtn").value="Start";
+                                  }
+                              });
+                          }
+                     });
+                     
+                     
+// this is the id of the form
+$("#streamForm").submit(function(e) {
+
+    e.preventDefault(); // avoid to execute the actual submit of the form.
+
+    var form = $(this);
+
+    // Create an FormData object 
+    var sendData = new FormData( $('#streamForm')[0]);
+    console.log("Process submit action with ajax jquery library ", sendData);
+    
+    var submitBtn = document.getElementById("submitBtn");
+    var actionType = "POST";
+    if (streamToShow) {
+        console.log("PUT method - fonosh stream, stream: " + streamToShow);
+        actionType = "PUT";
+        sendData.set("streamKey", streamToShow.uuid)
+    }
+    
+    $.ajax({
+        type: actionType,
+        url: "http://127.0.0.1:8082/api/stream/my",
+        enctype: 'multipart/form-data',
+        processData: false,  // Important!
+        contentType: false,
+        cache: false,
+        data: sendData,
+        success: function(data)
+        {
+           console.log('FORM SUBMITTED! ', data);
+           window.open(window.location.href,'_self');
+        }
+    });
+    
+}); 
+      </script>
+      <script src="/utils.js"></script>
+      <script src="/components/channelCard.js"></script>
+      <script src="/components/videoCard.js"></script>
+      
+       <script src="https://cdn.jsdelivr.net/npm/hls.js@0.11.0/dist/hls.min.js"></script>
+      <script src="/components/universalPlayer.js"></script>
+      <script src="/scripts/loadVideoFeed.js"></script>
+      <!-- Optional JavaScript -->
+      <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+      <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+   </body>
+</html>

@@ -73,8 +73,10 @@ window.onload = async function() {
     var parsedUrl = queryString(document.location.href);
     var channelUuid =  parsedUrl["u"];
     loadChannel(channelUuid);
+    
+    const channelStreams = await loadStreams(channelUuid);
     const channelVideo = await fetchVideoFeed("?ch="+channelUuid);
-    displayContent(document.getElementById("channelContent"), "20%", channelVideo)
+    displayContent(document.getElementById("channelContent"), "20%", channelVideo, channelStreams)
     //fetchVideoFeed(document.getElementById("channelContent"), "20%", "?ch="+channelUuid);
 };
 
@@ -90,6 +92,25 @@ const loadChannel = async (channelUuid) => {
         }
     } catch (e) { }
     console.log("Failed to fetch profile.");
+}
+
+const loadStreams = async (channelUuid) => {
+    console.log("[loadStreams]");
+    try {
+    	const fetchStreams = await fetch("http://127.0.0.1:8082/api/stream/feed?ch="+channelUuid);
+    	if(fetchStreams.status >=200 && fetchStreams.status < 300) {
+            const streamJson = await fetchStreams.json();
+            if (!streamJson) {
+                console.log("No stream is running on channel.");
+                return [];
+            }
+            console.log("Stream: ", streamJson);
+            return [streamJson];
+        }
+    } catch (e) { 
+        console.log("Failed to fetch stream ", e);
+    }
+    return [];
 }
 
 function displayChannel(channelJson) {

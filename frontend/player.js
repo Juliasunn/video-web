@@ -3,49 +3,69 @@
 // variables
 const content = document.getElementById("content");
 
-var video;
+//var video;
 var contentArr = [];
 
-const fetchVideo = async () => {
+
+const parseResource = async (response) => {
+    if (response.status >=200 && response.status < 300) {
+        var parsed = await response.json();
+        return parsed;
+    } else {
+        console.log(response.status, response.statusText);
+        return {};
+    }
+}
+
+/* Video or stream */
+const fetchResource = async () => {
+    const universalPlayerElement = document.getElementById("universalPlayer");
     console.log("Fetch player media content called");
     
     // Adapted from examples on the Querystring homepage.
     console.log("This page url is: ", document.location.href);
     var parsedUrl = queryString(document.location.href);
-    var resourceUuid =  parsedUrl["v"];
-    console.log("value of param v: ", resourceUuid); 	
-   // const resourceUuid = localStorage.getItem('resourceUuid');
-    if (!resourceUuid) {
-    	    return;
-    }	
-    const response = await fetch("http://127.0.0.1:8082/api/video/watch?v=" + resourceUuid); // "http://127.0.0.1:8081/video/b5cc0596-a647-4db2-b635-3a5aae5ac655"
+    
+    if (parsedUrl["v"]) {
+        const response = await fetch("http://127.0.0.1:8082/api/video/watch?v=" + parsedUrl["v"]);
+        const video = await parseResource( response );
+        if (!video) {
+            return;
+        }
+        fetchChannel(video.channelUuid);
+        loadPageElements(video.header, video.description, video.videoUrl);
+        universalPlayerElement.currentVideo = video;             
 
-    if (response.status >=200 && response.status < 300) {
-        video = await response.json();
+    } else if (parsedUrl["s"]) {
+        const response = await fetch("http://127.0.0.1:8082/api/stream/watch?s=" + parsedUrl["s"]);
+        const stream = await parseResource( response );
+        if (!stream) {
+            return;
+        }
+        fetchChannel(stream.channelUuid);
+        loadPageElements(stream.name, stream.description, stream.uuid);
+        universalPlayerElement.currentStream = stream;  
     } else {
-        console.log(response.status, response.statusText);
-        return;
+        console.log("Error: Path dont containt stream('s') and video('v') params.")
     }
-    fetchChannel(video.channelUuid);
-    loadPageElements();
 }
       
-function loadPageElements() {
+function loadPageElements(header, description, source) {
     console.log("Load elements called");
     const headerElement = document.getElementById("header");
     const descriptionElement = document.getElementById("description");
         
-    const playerElement = document.getElementById("videoPlayer");
-    const playerSrc = document.getElementById("videoSrc");
+  //  const playerElement = document.getElementById("videoPlayer");
+   // const playerSrc = document.getElementById("videoSrc");
           
       
-    headerElement.innerHTML = video.header;
-    descriptionElement.innerHTML = video.description;
+    headerElement.innerHTML = header;
+    descriptionElement.innerHTML = description;
         
-    playerElement.pause();
-    playerSrc.setAttribute("src", "http://127.0.0.1:8081/api/media" + video.videoUrl);
-    playerElement.load();
-    playerElement.play();  
+  //  playerElement.pause();
+   // playerSrc.setAttribute("src", "http://127.0.0.1:8081/api/media" + source);
+   // playerElement.load();
+   // playerElement.play();  
 }
 
 const fetchChannel = async (channelUuid) => {
@@ -77,5 +97,5 @@ window.addEventListener('load', async () => {
     const allVideo = await fetchVideoFeed();
     displayContent(document.getElementById("content"), "100%", allVideo)
    // fetchVideoFeed(document.getElementById("content"), "100%");
-    fetchVideo();
+    fetchResource();
 });

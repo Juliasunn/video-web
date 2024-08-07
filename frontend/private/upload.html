@@ -36,30 +36,14 @@
       <div class="form-group mb-3">
          <h4 class="m-3">Channel content</h4>
       </div>
-      <div class="mt-0 row p-2 d-flex justify-content-center align-items-center h-100 w-100">
-         <form id="myForm">
-            <div class="form-group mb-3">
-               <label>Select videofile</label>
-               <file-upload-component></file-upload-component>
-            </div>
-            <div class="form-group mb-3">
-               <label for="fname">Video name *</label>
-               <input type="text" class="form-control" id="fname" name="firstname" placeholder="Name to publish">
-               <small id="emailHelp" class="form-text text-muted">Video with no name provided will be published with the same name as uploaded file.</small>
-            </div>
-            <div class="form-group mb-3">
-               <label for="description">Enter description</label>
-               <textarea id="description" class="form-control " name="description" placeholder="Enter your video description..." style="height:200px"></textarea>
-            </div>
-            <br>
-            <input type="submit" class="btn btn-warning ms-2 float-right" value="Submit">
-         </form>
-         <div class="d-flex w-25 m-5">
-            <!-- <div class="col-md-10 col-lg-6 col-xl-7 d-flex align-items-center order-1 order-lg-2"> -->
-            <img src="http://127.0.0.1:8082/img/camera_pic.png"
-               class="img-fluid" alt="Sample image">
-         </div>
+      
+      
+      <div id="uploadBox" class="mt-0 row p-2 d-flex justify-content-center align-items-center h-100 w-100">
+      
+         
       </div>
+      
+      
       <!-- Body  -->
       <div class="overflow-auto w-100 " style="height: 120px">
          <table class="table table-hover table-light w-100">
@@ -93,6 +77,12 @@
       <script src="/components/channelCard.js"></script>
       <script src="/components/videoCard.js"></script>
       <script src="/scripts/loadVideoFeed.js"></script>
+
+     
+      <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+      <script src="/components/streamPlayer.js"></script>
+      <script src="/components/streamUploadForm.js"></script>
+      <script src="/components/videoUploadForm.js"></script>
       <script src="upload.js"></script>
       <!-- Optional JavaScript -->
       <!-- jQuery first, then Popper.js, then Bootstrap JS -->

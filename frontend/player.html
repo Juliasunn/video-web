@@ -18,9 +18,14 @@
 <div class="d-flex justify-content-between">  
 
 <div id="mediaColumn" class="col bg-light p-3 border m-5">
+
+<universal-player-component id="universalPlayer"></universal-player-component>
+
+ <!-- Old
     <video id="videoPlayer" width="75%" controls preload="none" muted="muted">
       <source id="videoSrc" type="video/mp4" />
     </video>
+-->
     
     <h2 id="header" class="card-title " >Loading video header ...</h2>
     
@@ -38,6 +43,8 @@
 <script src="/components/channelCard.js"></script>
 <script src="/components/videoCard.js"></script>
 <script src="/scripts/loadVideoFeed.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="/components/universalPlayer.js"></script>
 <script src="player.js"></script> 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
