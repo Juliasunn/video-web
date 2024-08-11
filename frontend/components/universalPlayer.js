@@ -119,6 +119,7 @@ class UniversalPlayer extends HTMLElement {
   loadStream() {
       console.log("[UniversalPlayer] load stream");
       var video = document.getElementById("videoPlayer");
+      video.setAttribute('autoplay', true)
       //video.setAttribute('poster', "http://127.0.0.1:8082/img/stream_default2.jpg")
       this.setAttribute('poster', "http://127.0.0.1:8082/img/stream_default2.jpg")
       
@@ -130,12 +131,23 @@ class UniversalPlayer extends HTMLElement {
       var mpdVideoSrc = "/dash/"+ this.#currentStream.uuid + ".mpd";    
       
       if (Hls.isSupported()) {
-        console.log("[Media type]: is supported 'hls'");
+         console.log("[Media type]: is supported 'hls'");
         
-        var hls = new Hls();
-        hls.loadSource(serverUrl+hlsVideoSrc);
-        hls.attachMedia(video);
-
+         var hls = new Hls();
+         
+         var sourceUrl = serverUrl+hlsVideoSrc;
+         var sourceReloadRetry = (function (url, event, data) {
+            console.log("Error occured during source loading: ", event, data, url);
+            setTimeout( function retry() { 
+                console.log("Invoke reload source.")
+                hls.loadSource(url);
+         }, 5000);
+        }).bind(null, sourceUrl);
+        
+        
+         hls.loadSource(sourceUrl);
+	 hls.on(Hls.Events.ERROR, sourceReloadRetry);
+         hls.attachMedia(video);
       }
       // hls.js is not supported on platforms that do not have Media Source
       // Extensions (MSE) enabled.
@@ -158,7 +170,7 @@ class UniversalPlayer extends HTMLElement {
       else {
         console.log("[Media type]: dash");
         video.src = serverUrl+mpdVideoSrc;
-      } 
+      }
   } 
   
 }
