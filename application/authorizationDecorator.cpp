@@ -74,8 +74,6 @@ void BaseAuthorizationDecorator::process_request(std::shared_ptr<http_session> s
     if (!m_request.base().count(http::field::cookie)) {
         subjectClaims = IProvider->getClaims();       
     } else {
-      //  auto cookie = m_request.base()[http::field::cookie];
-       // std::cout << "Cookie: "<< cookie  << std::endl;
         Cookie requestCookie(CookieParser::parse(m_request.base()[http::field::cookie])); 
 
         if (requestCookie.name() == "token") {

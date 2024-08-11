@@ -167,7 +167,6 @@ void formdata_parser::parse_chunk(base_io_buffer &chunkBuff, size_t bytes_transf
     for ( ; to != std::string_view::npos; to = chunk.find(search_token, from)) {
         switch (state_) {
         case(state::start_line):
-            //std::cout << "given boundary: " << line << std::endl;
             parse_boundary(data, from, to);
             std::cout << "==========[FORM ELEMENT]==============" << std::endl;
             formElement_ = {};

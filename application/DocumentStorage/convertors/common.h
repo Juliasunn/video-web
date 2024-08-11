@@ -41,13 +41,11 @@ inline std::string toDocString<uuid>(const uuid &value) {
 
 template <typename T>
 inline void mbAppend(bsoncxx::builder::basic::document &doc, key_view key, const T &value) {
-    std::cout << "key: " << key << "value: " << value;
     doc.append(kvp(key, value));
 }
 
 template <typename Comparable>
 inline void mbAppend(bsoncxx::builder::basic::document &doc, key_view key, const NumericExpression<Comparable> &expression) {
-   // std::cout << "key: " << key << "value: " << value;
    std::visit(overloaded{
     [&](const std::variant<std::monostate> &){},
     [&](const LessComparator<Comparable> &lt){doc.append(kvp(key, make_document(kvp("$lt", toDocLong(lt.value)))));},

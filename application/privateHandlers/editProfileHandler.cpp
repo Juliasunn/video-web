@@ -25,18 +25,9 @@ namespace {
 void updateInDb(const UserFilter &userUpdate, const SubjectFilter &subjectUpdate, 
     const ns_filters::UuidFilter &uuidFilter)
 {
-   // if (!userUpdate.size() && !subjectUpdate.size()) {
-    //    std::cout << "[WARNING] Nothing to update in user profile." << userUpdate << std::endl;
-        // Nothing to update
-     //   return;
-   // }
     auto transaction = MongoStorage::instance().prepareTransaction();
-  //  if (userUpdate.size()) {
-        MongoStorage::instance().prepareUpdateUser(userUpdate, uuidFilter, *transaction);
-   // }
-   // if (subjectUpdate.size()) {
-        MongoStorage::instance().prepareUpdateSubject(subjectUpdate, uuidFilter, *transaction);
-   // }
+    MongoStorage::instance().prepareUpdateUser(userUpdate, uuidFilter, *transaction);
+    MongoStorage::instance().prepareUpdateSubject(subjectUpdate, uuidFilter, *transaction);
     transaction->executeTransaction();
 }
 

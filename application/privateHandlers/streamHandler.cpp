@@ -16,16 +16,6 @@ using namespace ns_stream;
 using namespace ns_filters;
 namespace {
 
-std::string generateStreamId() {
-    return "streamId";
-
-}
-
-std::string generateStreamKey() {
-    return "publishKey";
-    
-}
-
 std::optional<Stream> fetchCurrentStream(const std::string &channelUuid) {
     StreamFilter streamFilter;
     streamFilter.channelUuid = channelUuid;
@@ -36,19 +26,6 @@ std::optional<Stream> fetchCurrentStream(const std::string &channelUuid) {
 
     auto runningStream = MongoStorage::instance().getStream(streamFilter);
     return runningStream;
-
-  //  auto stream = MongoStorage::instance().getStreams(streamFilter);
- // Stream stream{generateStreamId(), "channelUuid", "My first stream", 
- // "This is a testual stream created to check the new feature on this platform.", 
- // "", timeNow(), addHours(timeNow(), 2), generateStreamKey()};
- // return stream;
-}
-
-StreamFilter generateNewStreamIdent() {
-    StreamFilter streamIdent;
-    streamIdent.uuid = generateStreamId();
-    streamIdent.publishKey = streamIdent.uuid.value() + "?key=" + generateStreamKey();
-    return streamIdent;
 }
 
 http::response<http::string_body> prepareCommonResponse(const http::request<http::string_body> &request) {

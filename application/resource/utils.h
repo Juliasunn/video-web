@@ -45,6 +45,13 @@ inline void extract<uuid>(const object &obj, std::optional<uuid> &t, string_view
     }
 }
 
+template<typename T>
+inline void extract(const object &obj, ns_filters::NumericExpression<T> &t, string_view key)
+{
+    auto &&value = boost::json::value_to<T>(obj.at( key ));
+    t.template emplace<T>(std::move(value));
+}
+
 template<class T>
 inline void emplace(object &obj, const std::optional<T> &mbT, string_view key)
 {
@@ -104,14 +111,5 @@ struct Emplacer {
 };
 
 } // json_convertors
-//template <typename Entity>
-//struct JsonConvertor {
- //   Entity 
-//};
-
-/*
-template<>
-void extract( object const& obj, boost::gregorian::date& t, string_view key );
- */
 
 

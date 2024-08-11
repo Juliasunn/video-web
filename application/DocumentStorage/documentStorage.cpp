@@ -27,6 +27,11 @@ using namespace bsoncxx::builder::basic;
 
 namespace {
 
+enum PrepareOperationEc {
+  ok,
+  nothingToUpdate,
+};
+
 //prepare operations -> session.start_transaction -> execute operations -> finish transaction
 
 template <typename ClientOperation>
@@ -51,11 +56,16 @@ auto prepareDeleteOne(const std::string &db, const std::string &collection, cons
 }
 
 auto prepareUpdateOne(const std::string &db, const std::string &collection, const bsoncxx::v_noabi::document::value &&update,
-   const bsoncxx::v_noabi::document::value &&uniqueFilter ) 
+   const bsoncxx::v_noabi::document::value &&uniqueFilter, PrepareOperationEc &ec) 
 {
+  ec = ok;
   std::cout << "Update Filter: " << bsoncxx::to_json(uniqueFilter) << std::endl;
   auto &&rupdateExpression = bsoncxx::builder::stream::document{} << "$set" << update << bsoncxx::builder::stream::finalize;
   std::cout << bsoncxx::to_json(rupdateExpression) << std::endl;
+  //If nothing to update
+  if (update.empty()) {
+    ec = nothingToUpdate;
+  }
   auto operation = [db, collection, filterDoc = std::move(uniqueFilter), updateExpression = rupdateExpression](mongocxx::client &client) mutable  {
     return client[db][collection].update_one(std::move(filterDoc), std::move(updateExpression));
   };
@@ -133,9 +143,14 @@ bool MongoStorage::addStream(const Stream &stream) {
 }
 
 bool MongoStorage::updateStream(const StreamFilter &streamUpdate, const StreamFilter &streamFilter) {
-  auto rv = scopeExecute(prepareUpdateOne(m_dbname, "stream",
+  PrepareOperationEc ec;
+  auto &&operation = prepareUpdateOne(m_dbname, "stream",
   DocumentConvertor<StreamFilter>::toDocument(streamUpdate),
-  DocumentConvertor<StreamFilter>::toDocument(streamFilter)), m_pool);
+  DocumentConvertor<StreamFilter>::toDocument(streamFilter), ec);
+  if (ec == nothingToUpdate) {
+      return false;
+  }
+  auto rv = scopeExecute(std::move(operation), m_pool);
   return rv.has_value(); 
 }
 
@@ -209,15 +224,23 @@ void MongoStorage::prepareAddSubject(const Subject &subject, TransactionHandle &
 void MongoStorage::prepareUpdateUser(const UserFilter &userUpdate, 
     const UuidFilter &filter, TransactionHandle &transaction) const 
 {
-  transaction.addOperation(prepareUpdateOne(m_dbname, "user",
+  PrepareOperationEc ec;
+  auto &&operation = prepareUpdateOne(m_dbname, "user",
   DocumentConvertor<UserFilter>::toDocument(userUpdate),
-  DocumentConvertor<UuidFilter>::toDocument(filter)));
+  DocumentConvertor<UuidFilter>::toDocument(filter), ec);
+  if (ec == ok) {
+      transaction.addOperation(std::move(operation));
+  }
 }
 
 void MongoStorage::prepareUpdateSubject(const SubjectFilter &subjectUpdate,
      const UuidFilter &filter, TransactionHandle &transaction) const
 {
-  transaction.addOperation(prepareUpdateOne(m_dbname, "subject", 
+  PrepareOperationEc ec;
+  auto &&operation = prepareUpdateOne(m_dbname, "subject", 
   DocumentConvertor<SubjectFilter>::toDocument(subjectUpdate),
-  DocumentConvertor<UuidFilter>::toDocument(filter)));
+  DocumentConvertor<UuidFilter>::toDocument(filter), ec);
+  if (ec == ok) {
+      transaction.addOperation(std::move(operation));
+  }
 }

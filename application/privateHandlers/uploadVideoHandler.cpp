@@ -50,8 +50,6 @@ void UploadVideoHandler::handle_form_complete() {
     disk_storage::Url previewImgUrl = m_previewCreator->process(videoObj.videoUrl, m_mpegStorage);
     videoObj.previewImgUrl = previewImgUrl;
 
-    std::cout << "[DEBUG]: UUID = " << videoObj.uuid << std::endl;
-
     saveToDb(videoObj); 
 }
 
