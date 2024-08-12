@@ -72,46 +72,15 @@ window.onload = async function() {
     console.log("onload");
     var parsedUrl = queryString(document.location.href);
     var channelUuid =  parsedUrl["u"];
-    loadChannel(channelUuid);
+    const channelJson = fetchChannel(channelUuid).then((channelJson) => {
+        displayChannel(channelJson);
+    });
     
-    const channelStreams = await loadStreams(channelUuid);
+    const channelStreams = await fetchStreamFeed(channelUuid);
     const channelVideo = await fetchVideoFeed("?ch="+channelUuid);
     displayContent(document.getElementById("channelContent"), "20%", channelVideo, channelStreams)
-    //fetchVideoFeed(document.getElementById("channelContent"), "20%", "?ch="+channelUuid);
 };
 
-const loadChannel = async (channelUuid) => {
-    console.log("[fetchProfile]");
-    try {
-    	const fetchChannel = await fetch("http://127.0.0.1:8082/api/channel/"+channelUuid);
-    	if(fetchChannel.status >=200 && fetchChannel.status < 300) {
-            const channelJson = await fetchChannel.json();
-            console.log("Channel: ", channelJson);
-            displayChannel(channelJson);
-            return;
-        }
-    } catch (e) { }
-    console.log("Failed to fetch profile.");
-}
-
-const loadStreams = async (channelUuid) => {
-    console.log("[loadStreams]");
-    try {
-    	const fetchStreams = await fetch("http://127.0.0.1:8082/api/stream/feed?ch="+channelUuid);
-    	if(fetchStreams.status >=200 && fetchStreams.status < 300) {
-            const streamJson = await fetchStreams.json();
-            if (!streamJson) {
-                console.log("No stream is running on channel.");
-                return [];
-            }
-            console.log("Stream: ", streamJson);
-            return [streamJson];
-        }
-    } catch (e) { 
-        console.log("Failed to fetch stream ", e);
-    }
-    return [];
-}
 
 function displayChannel(channelJson) {
 console.log("channelJson = ", channelJson, "name = ", channelJson.name)
