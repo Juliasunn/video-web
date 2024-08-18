@@ -10,6 +10,7 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/lexical_cast.hpp>
 #include <string_view>
+#include "http/http_exceptions.h"
 #include "resource/stream.h"
 #include "DocumentStorage/documentStorage.h"
 #include "resource/stream.h"
@@ -50,6 +51,7 @@ namespace body_keys {
 
 constexpr const std::string_view streamId = "name";
 constexpr const std::string_view publishKey = "key";
+constexpr const std::string_view action = "call";
 
 } // body_keys
 
@@ -90,28 +92,65 @@ void PublishStreamHandler::process_request(std::shared_ptr<http_session> session
     boost::bind(&PublishStreamHandler::onCompleteBody, this, _1, session));
 }
 
+bool onPublishDone(std::map<std::string_view, std::string_view> &publishParams) {
+    StreamFilter finishStream;
+    finishStream.uuid = publishParams[body_keys::streamId];
+ 
+    StreamFilter streamUpdate;
+    streamUpdate.expire = timeNow();
+    if (!MongoStorage::instance().updateStream(streamUpdate, finishStream)) {
+            throw internal_server_exception("Failed to finish stream.");
+    }
+        // TODO: Update stream in DB
+}
+
+bool onPublish(std::map<std::string_view, std::string_view> &publishParams) {
+    StreamFilter finishStream;
+    finishStream.uuid = publishParams[body_keys::streamId];
+ 
+    StreamFilter streamUpdate;
+    streamUpdate.expire = timeNow();
+    if (!MongoStorage::instance().updateStream(streamUpdate, finishStream)) {
+            throw internal_server_exception("Failed to finish stream.");
+    }
+    return true;
+        // TODO: Update stream in DB
+}
+
 void PublishStreamHandler::onCompleteBody(http_session::StaticBufferPtr filledBuffer, std::shared_ptr<http_session> session) {
-    
+    ScopeExit onExit([&filledBuffer]() {
+        filledBuffer->clear();
+    });   
     auto response = prepareCommonResponse();
-    bool allowPublish = false;
     auto body = std::string_view(filledBuffer->get_readable(), filledBuffer->readable_space());
-    std::cout << "[REQUEST BODY]" << body << std::endl;
     auto publishParams = form_urlencoded(body);
 
     for (const auto &[key, value] : publishParams) {
         std::cout << "key = '" << key << "', value = '"<< value << "';" << std::endl;
     }
-        
-    if (publishParams.count(body_keys::streamId) && publishParams.count(body_keys::publishKey)) {
-        allowPublish = validatePublishKey(publishParams[body_keys::streamId], publishParams[body_keys::publishKey]);
+
+    auto action = publishParams.find(body_keys::action);
+    auto streamId = publishParams.find(body_keys::streamId);
+    auto publishKey = publishParams.find(body_keys::publishKey);
+
+    if (action == publishParams.end() || streamId == publishParams.end() || publishKey == publishParams.end() ) {
+        throw bad_request_exception("Invalid stream request.");
     }
-    filledBuffer->clear();
-    if (allowPublish) {
-        std::cout << "[Allow]" << std:: endl;
+    auto allowAction = validatePublishKey(publishParams[body_keys::streamId], publishParams[body_keys::publishKey]);
+    if (!allowAction) {
+         std::cout << "[Reject]" << std:: endl;
+        response.result(http::status::forbidden);
+        session->write(std::move(response));
+        return;
+    }
+    if (action->second == "publish") {
+        response.result(http::status::ok);
+
+    } else if (action->second == "publish_done") {
+        onPublish(publishParams);
         response.result(http::status::ok);
     } else {
-        std::cout << "[Reject]" << std:: endl;
-        response.result(http::status::forbidden);
+        throw bad_request_exception("Uncknown stream call: " + std::string(action->second));
     }
     session->write(std::move(response));
 }

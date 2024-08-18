@@ -119,14 +119,16 @@
                           if(streamResponse.status >=200 && streamResponse.status < 300) {      
                               streamResponse.json().then( (stream) => {
                                   console.log("Stream: ", stream);
-                                  //'expire' means that stream has been created
                                   if (stream) {
                                        streamToShow = stream;
                                        showCurrentStream();
+                                       document.getElementById("submitBtn").style.display = 'none'
+                                       document.getElementById("streamPlayer").style.display = 'true'
                                   
                                   } else {
                                       streamToShow = null;
-                                      document.getElementById("submitBtn").value="Start";
+                                      document.getElementById("submitBtn").style.display = 'true'
+                                      document.getElementById("streamPlayer").style.display = 'none'
                                   }
                               });
                           }
@@ -137,23 +139,13 @@
 $("#streamForm").submit(function(e) {
 
     e.preventDefault(); // avoid to execute the actual submit of the form.
-
     var form = $(this);
-
     // Create an FormData object 
     var sendData = new FormData( $('#streamForm')[0]);
     console.log("Process submit action with ajax jquery library ", sendData);
     
-    var submitBtn = document.getElementById("submitBtn");
-    var actionType = "POST";
-    if (streamToShow) {
-        console.log("PUT method - fonosh stream, stream: " + streamToShow);
-        actionType = "PUT";
-        sendData.set("streamKey", streamToShow.uuid)
-    }
-    
     $.ajax({
-        type: actionType,
+        type: "POST",
         url: "http://127.0.0.1:8082/api/stream/my",
         enctype: 'multipart/form-data',
         processData: false,  // Important!

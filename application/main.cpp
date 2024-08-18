@@ -96,8 +96,7 @@ void initEndpoints(std::shared_ptr<http_server_multithread> &server) {
     auto manageStreamHandler = std::make_unique<AuthorizationDecorator<CreateStreamHandler>>(Permissions::ManageStream, 
     std::make_shared<RedirectToLoginStrategy>("/home/julia/videoserver/web/login.html"), previewFileStorage );
 
-    server-> add_endpoint_handler("POST", "/api/stream/my", manageStreamHandler->clone());
-    server-> add_endpoint_handler("PUT", "/api/stream/my", manageStreamHandler->clone());
+    server-> add_endpoint_handler("POST", "/api/stream/my", std::move(manageStreamHandler));
     server-> add_endpoint_handler("POST", "/api/stream/publish", std::make_unique<PublishStreamHandler>());
 
 }

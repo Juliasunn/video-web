@@ -35,7 +35,6 @@ public:
 
 
     /* !!response object must overlive write operation */
-    //Not thread-safe yet
     template <typename BodyType>
     inline void write(http::response<BodyType> &response)
     {

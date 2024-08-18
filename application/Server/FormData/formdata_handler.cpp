@@ -139,13 +139,6 @@ void formdata_handler::handle_field(FormdataFields field,
     }
 }
 
-//http_session::StaticBufferPtr formdata_handler::read_buff() {
-//    if (!read_buff_) {
-//        read_buff_ = std::make_shared<static_buffer>(); //1Kb
-//    }
-//    return read_buff_;
-//}
-
 void formdata_handler::extra_bytes(const boost::asio::mutable_buffer &extraBytes) {
     read_buff().append(extraBytes);
 }
